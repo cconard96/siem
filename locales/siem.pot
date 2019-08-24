@@ -1,0 +1,561 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-08-24 12:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: setup.php:41
+msgid "SIEM Plugin for GLPI"
+msgstr ""
+
+#: front/menu.php:28
+msgid "Import devices"
+msgstr ""
+
+#: front/menu.php:29
+msgid "Merge existing devices"
+msgstr ""
+
+#: front/menu.php:32
+msgid "Configure plugin"
+msgstr ""
+
+#: front/menu.php:36 inc/menu.class.php:30
+msgid "SIEM plugin"
+msgstr ""
+
+#: front/menu.php:45
+msgid "You do not have access to any SIEM plugin items"
+msgstr ""
+
+#: inc/acknowledgement.class.php:35
+msgid "Acknowledgement"
+msgstr ""
+
+#: inc/acknowledgement.class.php:98
+msgid "Anonymous"
+msgstr ""
+
+#: inc/dbutil.php:42
+#, php-format
+msgid "%1$s - Error while dropping table %2$s - Error is %3$s"
+msgstr ""
+
+#: inc/event.class.php:90
+msgid "Event"
+msgid_plural "Events"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/event.class.php:125
+msgid "Event Management"
+msgstr ""
+
+#: inc/event.class.php:127
+msgid "Hosts"
+msgstr ""
+
+#: inc/event.class.php:228 inc/eventmanagement.class.php:184
+#: inc/service.class.php:83
+msgid "Warning"
+msgstr ""
+
+#: inc/event.class.php:230
+msgid "Exception"
+msgstr ""
+
+#: inc/event.class.php:233
+msgid "Information"
+msgstr ""
+
+#: inc/event.class.php:282
+msgid "New"
+msgstr ""
+
+#: inc/event.class.php:284 inc/eventmanagement.class.php:153
+#: inc/eventmanagement.class.php:187
+msgid "Acknowledged"
+msgstr ""
+
+#: inc/event.class.php:286
+msgid "Remediating"
+msgstr ""
+
+#: inc/event.class.php:288
+msgid "Monitoring"
+msgstr ""
+
+#: inc/event.class.php:290
+msgid "Resolved"
+msgstr ""
+
+#: inc/event.class.php:292
+msgid "Expired"
+msgstr ""
+
+#: inc/event.class.php:294 inc/eventmanagement.class.php:151
+#: inc/eventmanagement.class.php:186 inc/host.class.php:89
+#: inc/service.class.php:86 inc/service.class.php:96
+msgid "Unknown"
+msgstr ""
+
+#: inc/event.class.php:634
+msgid "Tracking type must be a subclass of CommonITILObject"
+msgstr ""
+
+#: inc/event.class.php:644 inc/host.class.php:98
+msgid "Characteristics"
+msgstr ""
+
+#: inc/event.class.php:650 inc/event.class.php:791 inc/event.class.php:848
+#: inc/eventmanagement.class.php:219 inc/host.class.php:261
+#: inc/notificationtargethost.class.php:71 inc/ruleevent.class.php:125
+#: inc/ruleevent.class.php:187 inc/ruleeventfilter.class.php:103
+#: inc/service.class.php:391 inc/servicetemplate.php:39
+msgid "Name"
+msgstr ""
+
+#: inc/event.class.php:658 inc/host.class.php:104
+msgid "ID"
+msgstr ""
+
+#: inc/event.class.php:666 inc/event.class.php:792 inc/event.class.php:849
+#: inc/eventmanagement.class.php:221 inc/ruleevent.class.php:135
+#: inc/ruleevent.class.php:192 inc/ruleeventfilter.class.php:119
+msgid "Significance"
+msgstr ""
+
+#: inc/event.class.php:673
+msgid "Correlation ID"
+msgstr ""
+
+#: inc/event.class.php:680 inc/notificationtargethost.class.php:82
+#: inc/ruleeventfilter.class.php:131 inc/servicetemplate.php:113
+msgid "Logger"
+msgstr ""
+
+#: inc/event.class.php:687 inc/eventmanagement.class.php:223
+#: inc/ruleevent.class.php:130 inc/ruleeventfilter.class.php:114
+msgid "Content"
+msgstr ""
+
+#: inc/event.class.php:694 inc/host.class.php:134
+msgid "Last update"
+msgstr ""
+
+#: inc/event.class.php:702 inc/event.class.php:794 inc/event.class.php:851
+#: inc/notificationtargethost.class.php:74 inc/ruleevent.class.php:141
+#: inc/ruleevent.class.php:197 inc/ruleeventfilter.class.php:125
+#: inc/service.class.php:390
+msgid "Status"
+msgstr ""
+
+#: inc/event.class.php:709 inc/ruleeventfilter.class.php:108
+msgid "Entity"
+msgstr ""
+
+#: inc/event.class.php:717
+msgid "Child entities"
+msgstr ""
+
+#: inc/event.class.php:724 inc/host.class.php:142
+msgid "Creation date"
+msgstr ""
+
+#: inc/event.class.php:771
+msgid "This host is not monitored by any plugin"
+msgstr ""
+
+#: inc/event.class.php:773
+msgid "Enable monitoring"
+msgstr ""
+
+#: inc/event.class.php:778
+msgid "No services on this host are monitored by any plugin"
+msgstr ""
+
+#: inc/event.class.php:780
+msgid "No host availability service set"
+msgstr ""
+
+#: inc/event.class.php:793 inc/event.class.php:850
+#: inc/eventmanagement.class.php:222 inc/eventmanagement.class.php:257
+#: inc/eventmanagement.class.php:269
+msgid "Date"
+msgstr ""
+
+#: inc/event.class.php:893
+msgid "Downtime by entity"
+msgstr ""
+
+#: inc/event.class.php:894
+msgid "Downtime by location"
+msgstr ""
+
+#: inc/event.class.php:895
+msgid "Downtime by host type"
+msgstr ""
+
+#: inc/eventmanagement.class.php:130
+msgid "Monitored Hosts and Services"
+msgstr ""
+
+#: inc/eventmanagement.class.php:146
+msgid "Host Status Summary"
+msgstr ""
+
+#: inc/eventmanagement.class.php:149 inc/host.class.php:85
+msgid "Up"
+msgstr ""
+
+#: inc/eventmanagement.class.php:150 inc/host.class.php:87
+msgid "Down"
+msgstr ""
+
+#: inc/eventmanagement.class.php:152 inc/monitored.class.php:93
+msgid "Unreachable"
+msgstr ""
+
+#: inc/eventmanagement.class.php:154 inc/eventmanagement.class.php:188
+msgid "Scheduled down"
+msgstr ""
+
+#: inc/eventmanagement.class.php:180
+msgid "Service Status Summary"
+msgstr ""
+
+#: inc/eventmanagement.class.php:183 inc/service.class.php:81
+msgid "OK"
+msgstr ""
+
+#: inc/eventmanagement.class.php:185 inc/service.class.php:82
+msgid "Critical"
+msgstr ""
+
+#: inc/eventmanagement.class.php:215
+msgid "Active alerts"
+msgstr ""
+
+#: inc/eventmanagement.class.php:218 inc/eventmanagement.class.php:266
+#: inc/host.class.php:286 inc/service.class.php:61
+msgid "Service"
+msgid_plural "Services"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/eventmanagement.class.php:220 inc/servicetemplate.php:93
+msgid "Stateless"
+msgstr ""
+
+#: inc/eventmanagement.class.php:251
+msgid "Host acknowledgements"
+msgstr ""
+
+#: inc/eventmanagement.class.php:254 inc/host.class.php:44
+msgid "Host"
+msgid_plural "Hosts"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/eventmanagement.class.php:255 inc/eventmanagement.class.php:267
+msgid "User"
+msgstr ""
+
+#: inc/eventmanagement.class.php:256 inc/eventmanagement.class.php:268
+#: inc/servicetemplate.php:43
+msgid "Comment"
+msgstr ""
+
+#: inc/eventmanagement.class.php:258 inc/eventmanagement.class.php:270
+msgid "Sticky"
+msgstr ""
+
+#: inc/eventmanagement.class.php:263
+msgid "Service acknowledgements"
+msgstr ""
+
+#: inc/eventmanagement.class.php:292 inc/eventmanagement.class.php:312
+#: inc/host.class.php:197 inc/host.class.php:270 inc/service.class.php:108
+msgid "Yes"
+msgstr ""
+
+#: inc/eventmanagement.class.php:292 inc/eventmanagement.class.php:312
+#: inc/host.class.php:197 inc/host.class.php:270 inc/service.class.php:108
+msgid "No"
+msgstr ""
+
+#: inc/host.class.php:112 inc/host.class.php:313
+#: inc/notificationtargethost.class.php:72
+msgid "Item type"
+msgstr ""
+
+#: inc/host.class.php:119 inc/host.class.php:317
+msgid "Item ID"
+msgstr ""
+
+#: inc/host.class.php:127 inc/host.class.php:321
+#: inc/notificationtargethost.class.php:73
+msgid "Availability service"
+msgstr ""
+
+#: inc/host.class.php:195 inc/service.class.php:106 inc/service.class.php:392
+msgid "Last status change"
+msgstr ""
+
+#: inc/host.class.php:195 inc/service.class.php:106
+msgid "No change"
+msgstr ""
+
+#: inc/host.class.php:196 inc/service.class.php:107 inc/service.class.php:454
+msgid "Last check"
+msgstr ""
+
+#: inc/host.class.php:196 inc/service.class.php:107
+msgid "Not checked"
+msgstr ""
+
+#: inc/host.class.php:197 inc/service.class.php:108 inc/service.class.php:410
+msgid "Flapping"
+msgstr ""
+
+#: inc/host.class.php:201
+msgid "Host availability not monitored"
+msgstr ""
+
+#: inc/host.class.php:201
+msgid "Set the availability service to monitor the host"
+msgstr ""
+
+#: inc/host.class.php:206 inc/service.class.php:112
+msgid "Check now"
+msgstr ""
+
+#: inc/host.class.php:210 inc/service.class.php:117
+msgid "Schedule downtime"
+msgstr ""
+
+#: inc/host.class.php:214
+#, php-format
+msgid "Add %s"
+msgstr ""
+
+#: inc/host.class.php:220
+#, php-format
+msgid "Acknowledge %s"
+msgstr ""
+
+#: inc/host.class.php:242 inc/host.class.php:256 inc/host.class.php:258
+msgid "Unspecified"
+msgstr ""
+
+#: inc/host.class.php:262 inc/notificationtargethost.class.php:81
+msgid "Check mode"
+msgstr ""
+
+#: inc/host.class.php:265 inc/notificationtargethost.class.php:80
+#: inc/servicetemplate.php:74
+msgid "Check interval"
+msgstr ""
+
+#: inc/host.class.php:266 inc/servicetemplate.php:70
+msgid "Notification interval"
+msgstr ""
+
+#: inc/host.class.php:269
+msgid "Calendar"
+msgstr ""
+
+#: inc/host.class.php:270 inc/notificationtargethost.class.php:79
+msgid "Flap detection"
+msgstr ""
+
+#: inc/host.class.php:273
+msgid "Availability service info"
+msgstr ""
+
+#: inc/host.class.php:325
+msgid "Reachable"
+msgstr ""
+
+#: inc/item_event.class.php:88 inc/itil_event.class.php:92
+msgid "Itil item"
+msgid_plural "Itil items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/notificationtargethost.class.php:37
+msgid "Soft recovery"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:38
+msgid "Hard recovery"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:39
+msgid "Soft problem"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:40
+msgid "Hard problem"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:41
+msgid "Flapping started"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:42
+msgid "Flapping stopped"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:43
+msgid "Flapping disabled"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:75
+msgid "Is flapping"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:76
+msgid "State type"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:77
+msgid "Current checkk"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:78 inc/servicetemplate.php:107
+msgid "Max checks"
+msgstr ""
+
+#: inc/notificationtargethost.class.php:83 inc/servicetemplate.php:120
+msgid "Sensor"
+msgstr ""
+
+#: inc/profile.class.php:35 inc/profile.class.php:77
+msgid "SIEM Plugin"
+msgstr ""
+
+#: inc/profile.class.php:83
+msgctxt "button"
+msgid "Save"
+msgstr ""
+
+#: inc/ruleevent.class.php:40 inc/ruleeventcollection.class.php:53
+msgid "Business rules for events"
+msgstr ""
+
+#: inc/ruleevent.class.php:158 inc/ruleeventfilter.class.php:139
+msgid "Add"
+msgstr ""
+
+#: inc/ruleevent.class.php:165
+msgid "Create ticket"
+msgstr ""
+
+#: inc/ruleevent.class.php:169
+msgid "Create change"
+msgstr ""
+
+#: inc/ruleevent.class.php:173
+msgid "Create problem"
+msgstr ""
+
+#: inc/ruleevent.class.php:177
+msgid "Send email alert to user"
+msgstr ""
+
+#: inc/ruleevent.class.php:182
+msgid "Send email alert to group"
+msgstr ""
+
+#. TRANS: short for : Business rules for ticket (entity parent)
+#: inc/ruleevent.class.php:208 inc/ruleeventfilter.class.php:157
+msgid "Parent business"
+msgstr ""
+
+#: inc/ruleevent.class.php:209
+msgid "Business rules for event (entity parent)"
+msgstr ""
+
+#: inc/ruleeventfilter.class.php:40 inc/ruleeventfiltercollection.php:56
+msgid "Rules for event filtering"
+msgstr ""
+
+#: inc/ruleeventfilter.class.php:145
+msgid "Acceptance"
+msgstr ""
+
+#: inc/ruleeventfilter.class.php:158
+msgid "Rules for event filtering (entity parent)"
+msgstr ""
+
+#: inc/scheduleddowntime.php:38
+msgid "Scheduled Downtime"
+msgid_plural "Scheduled Downtimes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/service.class.php:92 inc/servicetemplate.php:85
+msgid "Active"
+msgstr ""
+
+#: inc/service.class.php:93 inc/servicetemplate.php:86
+msgid "Passive"
+msgstr ""
+
+#: inc/service.class.php:94 inc/servicetemplate.php:87
+msgid "Hybrid"
+msgstr ""
+
+#: inc/service.class.php:393
+msgid "Latest event"
+msgstr ""
+
+#: inc/service.class.php:414
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#: inc/service.class.php:459
+msgid "Suppress informational"
+msgstr ""
+
+#: inc/servicetemplate.php:33
+msgid "Service template"
+msgid_plural "Service templates"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/servicetemplate.php:51
+msgid "Priority"
+msgstr ""
+
+#: inc/servicetemplate.php:66
+msgid "Notification period"
+msgstr ""
+
+#: inc/servicetemplate.php:78 inc/servicetemplate.php:82
+msgid "Enable flapping detection"
+msgstr ""
+
+#: inc/servicetemplate.php:97
+msgid "Flapping lower threshold"
+msgstr ""
+
+#: inc/servicetemplate.php:102
+msgid "Flapping upper threshold"
+msgstr ""

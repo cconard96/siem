@@ -1,0 +1,78 @@
+/*
+ *  -------------------------------------------------------------------------
+ *  SIEM plugin for GLPI
+ *  Copyright (C) 2019 by Curtis Conard
+ *  https://github.com/cconard96/siem
+ *  -------------------------------------------------------------------------
+ *  LICENSE
+ *  This file is part of SIEM plugin for GLPI.
+ *  SIEM plugin for GLPI is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  SIEM plugin for GLPI is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  You should have received a copy of the GNU General Public License
+ *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.siem-dashboard {
+    margin: auto;
+
+    .siem-dashboard-card {
+        margin-right: 0.5rem;
+        background-color: #ffffff;
+        box-shadow: 0px 1px 1px #7f7979;
+        border-radius: 3px;
+
+        h3 {
+            text-align: center;
+        }
+
+        .card-content {
+            width: 100%;
+            > p {
+                font-size: 3em;
+                text-align: center;
+            }
+        }
+    }
+}
+
+.siem-dashboard-toolbar {
+    margin-bottom: 15px !important;
+    padding: 5px !important;
+    overflow: auto;
+
+    .siem-dashboard-options {
+        float: right;
+
+        label {
+            margin-right: 1em;
+        }
+        .select2 {
+            width: 10em !important;
+        }
+        span a {
+            margin-left: 5px;
+        }
+    }
+}
+
+.siem-dashboard .row .card-deck {
+    width: 100%;
+    margin-bottom: 1rem;
+    .card .card-body {
+        padding: unset;
+        padding-top: 0.5rem;
+    }
+    .card.card-counter .card-body {
+        font-size: 2rem;
+    }
+}
+
+.event_filter {
+    margin-bottom: 1em;
+}
