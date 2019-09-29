@@ -22,26 +22,7 @@
 
 include('../../../inc/includes.php');
 Html::header('SIEM Plugin', '', 'management', 'PluginSiemMenu');
-global $CFG_GLPI;
-$links = [];
-if (Session::haveRight(PluginSiemHost::$rightname, READ) || Session::haveRight(PluginSiemService::$rightname, READ)) {
-   $links[] = Html::link(__('Dashboard', 'siem'), PluginSIEMEventManagement::getDashboardURL());
-}
-if (Session::haveRight('config', UPDATE)) {
-   $links[] = Html::link(__('Configure plugin', 'siem'), Config::getFormURL() . "?forcetab=PluginSIEMConfig$1");
-}
-if (count($links)) {
-   echo "<div class='center'><table class='tab_cadre'>";
-   echo "<thead><th>" . __('SIEM plugin', 'siem') . "</th></thead>";
-   echo "<tbody>";
-   foreach ($links as $link) {
-      echo "<tr><td>{$link}</td></tr>";
-   }
-   echo "</tbody></table></div>";
-} else {
-   echo "<div class='center warning' style='width: 40%; margin: auto;'>";
-   echo "<i class='fa fa-exclamation-triangle fa-3x'></i>";
-   echo "<p>" . __('You do not have access to any SIEM plugin items', 'siem') . "</p>";
-   echo "</div>";
-}
+
+PluginSiemEventManagement::showDashboard();
+
 Html::footer();

@@ -17,134 +17,118 @@
  *  You should have received a copy of the GNU General Public License
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
-
 #siem-dashboard {
-   margin: auto;
-
-   .siem-decks {
-      background-color: white;
-   }
-   .card-deck {
-      width: 100%;
-      margin-bottom: 1rem;
-      display: flex;
-
-      .siem-card {
-         .card-header {
-            background-color: #e2e1de;
-            font-weight: bold;
-         }
-      }
-      .card .card-body {
-         padding: unset;
-         padding-top: 0.5rem;
-      }
-
-      .card.card-counter .card-body {
-         font-size: 2rem;
-      }
-   }
-
-   .siem-card {
-      margin-right: 0.5rem;
-      background-color: #ffffff;
-      box-shadow: 0px 1px 1px #7f7979;
-      border-radius: 3px;
-
-      h3 {
-         text-align: center;
-      }
-
-      .card-content {
-         width: 100%;
-
-         > p {
-            font-size: 3em;
-            text-align: center;
-         }
-      }
-   }
+  margin: auto;
+}
+#siem-dashboard .siem-decks {
+  background-color: white;
+}
+#siem-dashboard .card-deck {
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+}
+#siem-dashboard .card-deck .siem-card .card-header {
+  background-color: #e2e1de;
+  font-weight: bold;
+}
+#siem-dashboard .card-deck .card .card-body {
+  padding: unset;
+  padding-top: 0.5rem;
+}
+#siem-dashboard .card-deck .card.card-counter .card-body {
+  font-size: 2rem;
+}
+#siem-dashboard .siem-card {
+  margin-right: 0.5rem;
+  background-color: #ffffff;
+  box-shadow: 0px 1px 1px #7f7979;
+  border-radius: 3px;
+}
+#siem-dashboard .siem-card h3 {
+  text-align: center;
+}
+#siem-dashboard .siem-card .card-content {
+  width: 100%;
+}
+#siem-dashboard .siem-card .card-content > p {
+  font-size: 3em;
+  text-align: center;
 }
 
 .siem-dashboard-toolbar {
-   margin-bottom: 15px !important;
-   padding: 5px !important;
-   overflow: auto;
-
-   .siem-dashboard-options {
-      float: right;
-
-      label {
-         margin-right: 1em;
-      }
-
-      .select2 {
-         width: 10em !important;
-      }
-
-      span a {
-         margin-left: 5px;
-      }
-   }
+  margin-bottom: 15px !important;
+  padding: 5px !important;
+  overflow: auto;
+}
+.siem-dashboard-toolbar .siem-dashboard-options {
+  float: right;
+}
+.siem-dashboard-toolbar .siem-dashboard-options label {
+  margin-right: 1em;
+}
+.siem-dashboard-toolbar .siem-dashboard-options .select2 {
+  width: 10em !important;
+}
+.siem-dashboard-toolbar .siem-dashboard-options span a {
+  margin-left: 5px;
 }
 
 .event_filter {
-   margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 
 #host-info {
-   width: 25%;
-   float: right;
+  width: 25%;
+  float: right;
 }
 
-#host-service-info {
-   fieldset {
-      display: inline;
-      border: none;
-      legend {
-         display: inline;
-         float: left;
-      }
-   }
+#host-service-info fieldset {
+  display: inline;
+  border: none;
+}
+#host-service-info fieldset legend {
+  display: inline;
+  float: left;
 }
 
 /** Bootstrap Compatibility */
 button.btn-primary {
-   background-color: #0694f9;
-   -webkit-border-radius: 10px;
-   -moz-border-radius: 10px;
-   border-radius: 5px;
-   padding: 5px;
-   border: none;
-   color: white;
-   margin-right: 5px;
+  background-color: #0694f9;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 5px;
+  padding: 5px;
+  border: none;
+  color: white;
+  margin-right: 5px;
 }
 
 .text-left {
-   text-align: left;
+  text-align: left;
 }
 
 .text-center {
-   text-align: center;
+  text-align: center;
 }
 
 .card {
-   position: relative;
-   display: flex;
-   flex: 1 0 auto;
-   flex-direction: column;
-   word-wrap: break-word;
-   background-color: white;
-   background-clip: border-box;
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  word-wrap: break-word;
+  background-color: white;
+  background-clip: border-box;
 }
 
 .card-body {
-   flex: 1 1 auto;
-   color: black;
+  flex: 1 1 auto;
+  color: black;
 }
 
 .w-100 {
-   width: 100%;
+  width: 100%;
 }
 
 /**
@@ -172,41 +156,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 .bg-warning {
-   background-color: #ffc107 !important;
+  background-color: #ffc107 !important;
 }
 
 .bg-success {
-   background-color: #28a745 !important;
+  background-color: #28a745 !important;
 }
 
 .bg-info {
-   background-color: #17a2b8 !important;
+  background-color: #17a2b8 !important;
 }
 
 .bg-danger {
-   background-color: #dc3545 !important;
+  background-color: #dc3545 !important;
 }
 
 .alert-success {
-   color: #155724;
-   background-color: #d4edda;
-   border-color: #c3e6cb;
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
 }
 
 .alert-info {
-   color: #0c5460;
-   background-color: #d1ecf1;
-   border-color: #bee5eb;
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
 }
 
 .alert-warning {
-   color: #856404;
-   background-color: #fff3cd;
-   border-color: #ffeeba;
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
 }
 
 .alert-danger {
-   color: #721c24;
-   background-color: #f8d7da;
-   border-color: #f5c6cb;
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
 }
+
+/*# sourceMappingURL=siem.css.map */
