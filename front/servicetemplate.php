@@ -19,11 +19,8 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-$AJAX_INCLUDE = 1;
 include('../../../inc/includes.php');
-header("Content-Type: application/json; charset=UTF-8");
-Html::header_nocache();
-Session::checkLoginUser();
-
-echo json_encode(PluginSiemEventManagement::getDashboardCards(), JSON_FORCE_OBJECT);
+Session::checkRight(PluginSiemServiceTemplate::$rightname, READ);
+Html::header(PluginSiemServiceTemplate::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', 'PluginSiemServiceTemplate');
+Search::show('PluginSiemServiceTemplate');
+Html::footer();

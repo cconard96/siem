@@ -25,7 +25,13 @@ Html::header('SIEM Plugin', '', 'management', 'PluginSiemMenu');
 global $CFG_GLPI;
 $links = [];
 if (Session::haveRight(PluginSiemHost::$rightname, READ) || Session::haveRight(PluginSiemService::$rightname, READ)) {
-   $links[] = Html::link(__('Dashboard', 'siem'), PluginSIEMEventManagement::getDashboardURL());
+   $links[] = Html::link(__('Dashboard', 'siem'), PluginSiemEventManagement::getDashboardURL());
+}
+if (Session::haveRight(PluginSiemService::$rightname, READ)) {
+   $links[] = Html::link(PluginSiemService::getTypeName(2), PluginSiemService::getSearchURL(true));
+}
+if (Session::haveRight(PluginSiemServiceTemplate::$rightname, READ)) {
+   $links[] = Html::link(PluginSiemServiceTemplate::getTypeName(2), PluginSiemServiceTemplate::getSearchURL(true));
 }
 if (Session::haveRight('config', UPDATE)) {
    $links[] = Html::link(__('Configure plugin', 'siem'), Config::getFormURL() . "?forcetab=PluginSIEMConfig$1");

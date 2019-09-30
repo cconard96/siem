@@ -22,14 +22,13 @@
    window.SIEMPlugin = function() {
       var self = this;
       this.ajax_root = CFG_GLPI.root_doc + "/plugins/siem/ajax/";
-      this.dashboard = null;
+      this.dashboard = '#siem-dashboard';
 
-      self.init = function(args) {
-         this.ajax_root = CFG_GLPI.root_doc + "/plugins/siem/ajax/";
-         if (args['dashboard'] !== undefined) {
-            self.dashboard = args['dashboard'];
+      $(document).ready(function() {
+         if ($(self.dashboard).length > 0) {
+            self.refreshDashboard();
          }
-      };
+      });
 
       var buildDashboardDeck = function(cards) {
          $(self.dashboard).empty();
@@ -117,6 +116,34 @@
          }
       }
 
+      this.updateSensorDropdown = function(plugin_dropdown, sensor_dropdown, linked_btn) {
+         var selected_plugin = $(plugin_dropdown).val();
+         $.ajax({
+            type: "GET",
+            url: self.ajax_root + 'getSensors.php',
+            data: {
+               plugins_id: selected_plugin
+            },
+            success: function (sensors) {
+               var sensordropdown_jobj = $(sensor_dropdown);
+               sensordropdown_jobj.empty().select2({
+                  width: 'max-content'
+               });
+               if (Object.keys(sensors).length > 0) {
+                  sensordropdown_jobj.removeAttr('disabled');
+                  $(linked_btn).removeAttr('disabled');
+               } else {
+                  sensordropdown_jobj.attr('disabled', 'disabled');
+                  $(linked_btn).attr('disabled', 'disabled');
+               }
+               $.each(sensors, function(id, name) {
+                  sensordropdown_jobj.append(new Option(name, id, false, false));
+               });
+               sensordropdown_jobj.trigger('change');
+            }
+         });
+      };
+
       function serviceCheckNow(services_id) {
 
       }
@@ -133,4 +160,8 @@
 
       }
    };
+   // Always initialize this JS object to prevent needing inline JS to intialize it.
+   // We will intelligently guess at which functions need to be called based on the elements on the page after it loads.
+   // For example, if a #siem-dashboard element is present, we initialize and refresh the dashboard view.
+    window.pluginSiem = new SIEMPlugin();
 })();

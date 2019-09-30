@@ -24,6 +24,28 @@ $AJAX_INCLUDE = 1;
 include('../../../inc/includes.php');
 header("Content-Type: application/json; charset=UTF-8");
 Html::header_nocache();
-Session::checkLoginUser();
 
-echo json_encode(PluginSiemEventManagement::getDashboardCards(), JSON_FORCE_OBJECT);
+global $PLUGIN_HOOKS;
+
+if (isset($_GET['plugins_id'])) {
+   if ($_GET['plugins_id'] == 0) {
+      // GLPI Core
+      // No internal sensors yet so return empty array
+      echo '{}';
+   } else {
+      $plugin = new Plugin();
+      $plugin->getFromDB($_GET['plugins_id']);
+      $pluginname = $plugin->fields['directory'];
+      if (array_key_exists('siem_sensors', $PLUGIN_HOOKS) &&
+         array_key_exists($pluginname, $PLUGIN_HOOKS['siem_sensors'])) {
+         $sensors = $PLUGIN_HOOKS['siem_sensors'][$pluginname];
+         $values = [];
+         foreach ($sensors as $id => $params) {
+            $values[$id] = $params['name'];
+         }
+         echo json_encode($values, JSON_FORCE_OBJECT);
+      }
+   }
+} else {
+   http_response_code(400);
+}

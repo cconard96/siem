@@ -20,10 +20,11 @@
  */
 
 
-$AJAX_INCLUDE = 1;
-include('../../../inc/includes.php');
-header("Content-Type: application/json; charset=UTF-8");
-Html::header_nocache();
-Session::checkLoginUser();
+class PluginSiemSensorHttp_OK extends PluginSiemSensor
+{
 
-echo json_encode(PluginSiemEventManagement::getDashboardCards(), JSON_FORCE_OBJECT);
+   protected static function poll($service_ids = [])
+   {
+
+   }
+}

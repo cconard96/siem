@@ -20,10 +20,27 @@
  */
 
 
-$AJAX_INCLUDE = 1;
-include('../../../inc/includes.php');
-header("Content-Type: application/json; charset=UTF-8");
-Html::header_nocache();
-Session::checkLoginUser();
+class PluginSiemSensor
+{
 
-echo json_encode(PluginSiemEventManagement::getDashboardCards(), JSON_FORCE_OBJECT);
+   /**
+    * Gets an array of IPs or hostnames in order of preference when contacting the host.
+    * @param int $hosts_id The host ID
+    * @return array Array of IPs or hostnames in order of preference when contacting the host.
+    */
+   public function getPreferredAddresses($hosts_id)
+   {
+      $preferred = [];
+      return $preferred;
+   }
+
+   protected static function poll($services_ids = [])
+   {
+
+   }
+
+   public static final function invokePoll($service_ids = [])
+   {
+
+   }
+}
