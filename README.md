@@ -1,3 +1,4 @@
+# This is still a work in progress! Do not expect it to be functional!
 # SIEM Plugin for GLPI
 [![CodeFactor](https://www.codefactor.io/repository/github/cconard96/siem/badge/master)](https://www.codefactor.io/repository/github/cconard96/siem/overview/master)
 
