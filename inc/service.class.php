@@ -449,7 +449,7 @@ class PluginSiemService extends CommonDBTM
          $out .= "</td><td>{$service['name']}</td>";
          $out .= "<td title='{$status_since}'>{$status_since_diff}</td>";
          if (!is_null($eventdata)) {
-            $latest_event = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['logger']);
+            $latest_event = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
             $out .= "<td>{$latest_event}</td>";
          } else {
             $out .= "<td></td>";

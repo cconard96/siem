@@ -291,7 +291,6 @@ class PluginSiemHost extends CommonDBTM
          $out .= "<legend>" . __('Service') . "</legend>";
          $rand = mt_rand();
          $out .= Plugin::dropdown([
-            'name'      => 'logger',
             'display'   => false,
             'on_change' => "pluginSiem.updateSensorDropdown(this, $('#dropdown_sensor$rand'), '#btn-set-hostservice');"
          ]);

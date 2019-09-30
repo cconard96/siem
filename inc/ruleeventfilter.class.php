@@ -126,10 +126,10 @@ class PluginSIEMRuleEventFilter extends Rule
       $criterias['status']['linkfield'] = 'status';
       $criterias['status']['type'] = 'dropdown_eventstatus';
 
-      $criterias['logger']['table'] = $eventtable;
-      $criterias['logger']['field'] = 'logger';
-      $criterias['logger']['name'] = __('Logger');
-      $criterias['logger']['linkfield'] = 'logger';
+      $criterias['plugins_id']['table'] = $eventtable;
+      $criterias['plugins_id']['field'] = 'plugins_id';
+      $criterias['plugins_id']['name'] = __('Plugin');
+      $criterias['plugins_id']['linkfield'] = 'plugins_id';
 
       return $criterias;
    }

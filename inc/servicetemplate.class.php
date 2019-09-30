@@ -119,9 +119,9 @@ class PluginSiemServiceTemplate extends CommonDBTM
                'name' => 'max_checks',
                'type' => 'number',
             ],
-            'logger' => [
+            'plugins_id' => [
                //FIXME Why doesn't type 'Plugin' work here?
-               'label' => __('Logger'),
+               'label' => __('Plugin'),
                'type' => 'select',
                'values' => [],
                'itemtype_name' => null,
@@ -159,14 +159,14 @@ class PluginSiemServiceTemplate extends CommonDBTM
       echo "</textarea></td></tr>";
 
       $rand = mt_rand();
-      echo "<tr><td>".__('Logger', 'siem')."</td>";
+      echo "<tr><td>".__('Plugin', 'siem')."</td>";
       echo "<td>";
       Plugin::dropdown([
-         'name'      => 'logger',
+         'name'      => 'plugins_id',
          'rand'      => $rand,
-         'on_change' => "window.pluginSiem.updateSensorDropdown('#dropdown_logger$rand', '#dropdown_sensor$rand')",
-         'value'  => isset($this->fields['logger']) && !empty($this->fields['logger']) ?
-            $this->fields['logger'] : 0
+         'on_change' => "window.pluginSiem.updateSensorDropdown('#dropdown_plugins_id$rand', '#dropdown_sensor$rand')",
+         'value'  => isset($this->fields['plugins_id']) && !empty($this->fields['plugins_id']) ?
+            $this->fields['plugins_id'] : 0
       ]);
       echo "</td></tr>";
 
@@ -178,7 +178,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
          'value'  => isset($this->fields['sensor']) && !empty($this->fields['sensor']) ?
             $this->fields['sensor'] : 0
       ]);
-      echo Html::scriptBlock("$(document).ready(function() {\$('#dropdown_logger$rand').trigger('change')});");
+      echo Html::scriptBlock("$(document).ready(function() {\$('#dropdown_plugins_id$rand').trigger('change')});");
       echo "</td>";
       echo "<td>".__('Priority', 'siem')."</td>";
       echo "<td>";

@@ -83,7 +83,7 @@ class PluginSIEMNotificationTargetHost extends NotificationTarget
          'plugin_siem_host.flap_detection' => __('Flap detection'),
          'plugin_siem_host.check_interval' => __('Check interval'),
          'plugin_siem_host.check_mode' => __('Check mode'),
-         'plugin_siem_host.logger' => __('Logger'),
+         'plugin_siem_host.plugins_id' => __('Plugin'),
          'plugin_siem_host.sensor' => __('Sensor'),
       ];
 

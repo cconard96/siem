@@ -455,18 +455,18 @@ class PluginSiemEvent extends CommonDBTM
    }
 
    /**
-    * Gets the translated event name from the event's logger (GLPI or plugin)
+    * Gets the translated event name from the event's logger ID (GLPI or plugin)
     *
     * @param string $name The unlocalized event name
-    * @param string $logger The plugin that created the event or null if made by GLPI
+    * @param string $plugins_id The plugin that created the event or null if made by GLPI
     * @return string The localized name if possible, otherwise the unlocalized name is returned
     * @since 1.0.0
     *
     */
-   public static function getLocalizedEventName($name, $logger)
+   public static function getLocalizedEventName($name, $plugins_id)
    {
-      if ($logger !== null) {
-         return Plugin::doOneHook($logger, 'translateEventName', $name);
+      if ($plugins_id !== null) {
+         return Plugin::doOneHook($plugins_id, 'translateEventName', $name);
       }
       return $name;
    }
@@ -479,7 +479,7 @@ class PluginSiemEvent extends CommonDBTM
     * @since 1.0.0
     *
     */
-   public static function getEventProperties($content, $logger, $params = [])
+   public static function getEventProperties($content, $plugins_id, $params = [])
    {
       $p = [
          'translate' => true,
@@ -505,8 +505,8 @@ class PluginSiemEvent extends CommonDBTM
          ];
       }
       if ($p['translate']) {
-         if ($logger !== null) {
-            $props_t = Plugin::doOneHook($logger, 'translateEventProperties', $props);
+         if ($plugins_id !== null) {
+            $props_t = Plugin::doOneHook($plugins_id, 'translateEventProperties', $props);
             if ($props_t) {
                $props = $props_t;
             }
@@ -563,7 +563,7 @@ class PluginSiemEvent extends CommonDBTM
       global $DB;
       if (is_subclass_of($tracking_type, 'CommonITILObject')) {
          $tracking = new $tracking_type();
-         $content = PluginSiemEvent::getEventProperties($this->fields['content'], $this->fields['logger'], [
+         $content = PluginSiemEvent::getEventProperties($this->fields['content'], $this->fields['plugins_id'], [
             'format' => 'plain'
          ]);
          $tracking_id = $tracking->add([
@@ -683,8 +683,8 @@ class PluginSiemEvent extends CommonDBTM
       $tab[] = [
          'id' => '5',
          'table' => $this->getTable(),
-         'field' => 'logger',
-         'name' => __('Logger'),
+         'field' => 'plugins_id',
+         'name' => __('Plugin'),
          'datatype' => 'string',
       ];
       $tab[] = [
@@ -788,7 +788,7 @@ class PluginSiemEvent extends CommonDBTM
          $icon = 'fas fa-info-circle';
          $active = in_array($event['status'], self::getActiveStatusArray());
          $temp_service->getFromDB($event['plugin_siem_services_id']);
-         $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['logger']);
+         $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
          if ($event['significance'] == PluginSiemEvent::WARNING) {
             if ($active) {
                $style = "style='background-color: {$_SESSION['glpieventwarning_color']}'";
@@ -810,7 +810,7 @@ class PluginSiemEvent extends CommonDBTM
          $historical .= "</tr>";
          $historical .= "<tr id='siemevent_{$event['id']}_content' class='tab_bg_2' $style hidden='hidden'>";
          $historical .= "<td colspan='6'><p>";
-         $historical .= self::getEventProperties($event['content'], $temp_service->fields['logger'], [
+         $historical .= self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
             'format' => 'pretty'
          ]);
          $historical .= "</p></td></tr>\n";
@@ -846,7 +846,7 @@ class PluginSiemEvent extends CommonDBTM
          $icon = 'fas fa-info-circle';
          $active = in_array($event['status'], self::getActiveStatusArray());
          $temp_service->getFromDB($event['plugin_siem_services_id']);
-         $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['logger']);
+         $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
          if ($event['significance'] == PluginSiemEvent::WARNING) {
             if ($active) {
                $style = "style='background-color: {$_SESSION['glpieventwarning_color']}'";
@@ -868,7 +868,7 @@ class PluginSiemEvent extends CommonDBTM
          $out .= "</tr>";
          $out .= "<tr id='siemevent_{$event['id']}_content' class='tab_bg_2' $style hidden='hidden'>";
          $out .= "<td colspan='6'><p>";
-         $out .= self::getEventProperties($event['content'], $temp_service->fields['logger'], [
+         $out .= self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
             'format' => 'pretty'
          ]);
          $out .= "</p></td></tr>\n";
@@ -926,7 +926,7 @@ class PluginSiemEvent extends CommonDBTM
             new QueryExpression('DATE_ADD(last_check, INTERVAL check_interval MINUTE) <= NOW()'),
             'check_mode' => [PluginSiemService::CHECK_MODE_ACTIVE, PluginSiemService::CHECK_MODE_HYBRID],
             'is_active' => 1,
-            new QueryExpression('logger IS NOT NULL'),
+            new QueryExpression('plugins_id IS NOT NULL'),
             new QueryExpression('sensor IS NOT NULL'),
          ]
       ]);
@@ -935,7 +935,7 @@ class PluginSiemEvent extends CommonDBTM
       $poll_queue = [];
       while ($data = $to_poll->next()) {
          array_push($allservices, $data['id']);
-         $poll_queue[$data['logger']][$data['sensor']][] = $data['id'];
+         $poll_queue[$data['plugins_id']][$data['sensor']][] = $data['id'];
       }
       foreach ($poll_queue as $logger => $sensors) {
          foreach ($sensors as $sensor => $service_ids) {
