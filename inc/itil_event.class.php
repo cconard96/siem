@@ -21,8 +21,9 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access directly to this file");
+   die("Sorry. You can't access directly to this file");
 }
+
 /**
  * PluginSIEMItil_SIEMEvent Class
  *
@@ -32,90 +33,90 @@ if (!defined('GLPI_ROOT')) {
 class PluginSIEMItil_Event extends CommonDBRelation
 {
 
-    // From CommonDBRelation
-    static public $itemtype_1          = 'PluginSIEMEvent';
-    static public $items_id_1          = 'plugin_siem_events_id';
-    static public $itemtype_2          = 'itemtype';
-    static public $items_id_2          = 'items_id';
-    static public $checkItem_2_Rights  = self::HAVE_VIEW_RIGHT_ON_ITEM;
+   // From CommonDBRelation
+   static public $itemtype_1 = 'PluginSIEMEvent';
+   static public $items_id_1 = 'plugin_siem_events_id';
+   static public $itemtype_2 = 'itemtype';
+   static public $items_id_2 = 'items_id';
+   static public $checkItem_2_Rights = self::HAVE_VIEW_RIGHT_ON_ITEM;
 
-    function getForbiddenStandardMassiveAction()
-    {
-        $forbidden   = parent::getForbiddenStandardMassiveAction();
-        $forbidden[] = 'update';
-        return $forbidden;
-    }
+   function getForbiddenStandardMassiveAction()
+   {
+      $forbidden = parent::getForbiddenStandardMassiveAction();
+      $forbidden[] = 'update';
+      return $forbidden;
+   }
 
-    function canCreateItem()
-    {
-        $event = new PluginSIEMEvent();
-        if ($event->canUpdateItem()) {
-            return true;
-        }
-        return parent::canCreateItem();
-    }
+   function canCreateItem()
+   {
+      $event = new PluginSiemEvent();
+      if ($event->canUpdateItem()) {
+         return true;
+      }
+      return parent::canCreateItem();
+   }
 
-    function prepareInputForAdd($input)
-    {
-        // Avoid duplicate entry
-        if (countElementsInTable($this->getTable(), ['plugin_siem_events_id' => $input['plugin_siem_events_id'],
-                'itemtype'   => $input['itemtype'],
-                'items_id'   => $input['items_id']]) > 0) {
-            return false;
-        }
-        return parent::prepareInputForAdd($input);
-    }
+   function prepareInputForAdd($input)
+   {
+      // Avoid duplicate entry
+      if (countElementsInTable($this->getTable(), ['plugin_siem_events_id' => $input['plugin_siem_events_id'],
+            'itemtype' => $input['itemtype'],
+            'items_id' => $input['items_id']]) > 0) {
+         return false;
+      }
+      return parent::prepareInputForAdd($input);
+   }
 
-    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
-    {
-        if (!$withtemplate) {
-            $nb = 0;
-            switch ($item->getType()) {
-                case Change::class :
-                case Problem::class :
-                case Ticket::class :
-                    if ($_SESSION['glpishow_count_on_tabs']) {
-                        $nb = countElementsInTable(
-                            self::getTable(),
-                            [
-                                'itemtype' => $item->getType(),
-                                'items_id' => $item->getID(),
-                            ]
-                        );
-                    }
-                    return self::createTabEntry(PluginSIEMEvent::getTypeName(Session::getPluralNumber()), $nb);
-                    break;
-                case 'PluginSIEMEvent' :
-                    if ($_SESSION['glpishow_count_on_tabs']) {
-                        $nb = countElementsInTable(self::getTable(), ['plugin_siem_events_id' => $item->getID()]);
-                    }
-                    return self::createTabEntry(_n('Itil item', 'Itil items', Session::getPluralNumber()), $nb);
-            }
-        }
-        return '';
-    }
-
-    static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
-    {
-        switch ($item->getType()) {
+   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
+   {
+      if (!$withtemplate) {
+         $nb = 0;
+         switch ($item->getType()) {
+            case Change::class :
+            case Problem::class :
+            case Ticket::class :
+               if ($_SESSION['glpishow_count_on_tabs']) {
+                  $nb = countElementsInTable(
+                     self::getTable(),
+                     [
+                        'itemtype' => $item->getType(),
+                        'items_id' => $item->getID(),
+                     ]
+                  );
+               }
+               return self::createTabEntry(PluginSiemEvent::getTypeName(Session::getPluralNumber()), $nb);
+               break;
             case 'PluginSIEMEvent' :
-                self::showForSIEMEvent($item);
-                break;
-            default:
-                self::showForItil($item);
-                break;
-        }
-        return true;
-    }
+               if ($_SESSION['glpishow_count_on_tabs']) {
+                  $nb = countElementsInTable(self::getTable(), ['plugin_siem_events_id' => $item->getID()]);
+               }
+               return self::createTabEntry(_n('Itil item', 'Itil items', Session::getPluralNumber()), $nb);
+         }
+      }
+      return '';
+   }
 
-    /**
-     * Display events for an item
-     *
-     * @param $item            CommonDBTM object for which the event tab need to be displayed
-     * @param $withtemplate    withtemplate param (default 0)
-     **/
-    static function showForItil(CommonDBTM $item, $withtemplate = 0)
-    {
-        PluginSIEMEvent::showListForItil(false, $item);
-    }
+   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
+   {
+      switch ($item->getType()) {
+         case 'PluginSIEMEvent' :
+            self::showForSIEMEvent($item);
+            break;
+         default:
+            self::showForItil($item);
+            break;
+      }
+      return true;
+   }
+
+   /**
+    * Display events for an item
+    *
+    * @param $item            CommonDBTM object for which the event tab need to be displayed
+    * @param $withtemplate    withtemplate param (default 0)
+    **/
+   static function showForItil(CommonDBTM $item, $withtemplate = 0)
+   {
+      PluginSiemEvent::showListForItil(false, $item);
+   }
 }

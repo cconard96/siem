@@ -24,9 +24,10 @@
  * PluginSIEMMenu class. This class adds a menu which contains links to pages related to this plugin.
  * See /front/menu.php file for the menu content.
  */
-class PluginSIEMMenu extends CommonGLPI {
-    static function getMenuName()
-    {
-        return __('SIEM plugin', 'siem');
-    }
+class PluginSiemMenu extends CommonGLPI
+{
+   static function getMenuName()
+   {
+      return __('SIEM plugin', 'siem');
+   }
 }

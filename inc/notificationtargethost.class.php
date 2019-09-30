@@ -21,7 +21,7 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access this file directly");
+   die("Sorry. You can't access this file directly");
 }
 
 
@@ -29,67 +29,71 @@ if (!defined('GLPI_ROOT')) {
  * PluginSIEMNotificationTargetHost Class
  * @since 1.0.0
  **/
-class PluginSIEMNotificationTargetHost extends NotificationTarget {
+class PluginSIEMNotificationTargetHost extends NotificationTarget
+{
 
 
-    function getEvents() {
-        return [
-            'recovery_soft'      => __('Soft recovery'),
-            'recovery_hard'      => __('Hard recovery'),
-            'problem_soft'       => __('Soft problem'),
-            'problem_hard'       => __('Hard problem'),
-            'flapping_start'     => __('Flapping started'),
-            'flapping_stop'      => __('Flapping stopped'),
-            'flapping_disable'   => __('Flapping disabled')
-        ];
-    }
+   function getEvents()
+   {
+      return [
+         'recovery_soft' => __('Soft recovery'),
+         'recovery_hard' => __('Hard recovery'),
+         'problem_soft' => __('Soft problem'),
+         'problem_hard' => __('Hard problem'),
+         'flapping_start' => __('Flapping started'),
+         'flapping_stop' => __('Flapping stopped'),
+         'flapping_disable' => __('Flapping disabled')
+      ];
+   }
 
 
-    function addDataForTemplate($event, $options = []) {
+   function addDataForTemplate($event, $options = [])
+   {
 
-        $events = $this->getAllEvents();
-        $host = new PluginSiemHost();
-        $host->getFromDB($options['id']);
-        $service = $host->getAvailabilityService();
+      $events = $this->getAllEvents();
+      $host = new PluginSiemHost();
+      $host->getFromDB($options['id']);
+      $service = $host->getAvailabilityService();
 
-        $this->data['##plugin_siem_host.action##'] = $events[$event];
-        $this->data['##plugin_siem_host.name##'] = $host->getHostName();
-        // TODO Finish
+      $this->data['##plugin_siem_host.action##'] = $events[$event];
+      $this->data['##plugin_siem_host.name##'] = $host->getHostName();
+      // TODO Finish
 
-        $this->getTags();
-        foreach ($this->tag_descriptions[NotificationTarget::TAG_LANGUAGE] as $tag => $values) {
-            if (!isset($this->data[$tag])) {
-                $this->data[$tag] = $values['label'];
-            }
-        }
-    }
+      $this->getTags();
+      foreach ($this->tag_descriptions[NotificationTarget::TAG_LANGUAGE] as $tag => $values) {
+         if (!isset($this->data[$tag])) {
+            $this->data[$tag] = $values['label'];
+         }
+      }
+   }
 
 
-    function getTags() {
+   function getTags()
+   {
 
-        $tags = [
-            'plugin_siem_host.name'                  => __('Name'),
-            'plugin_siem_host.itemtype'              => __('Item type'),
-            'plugin_siem_host.availabilityservice'   => __('Availability service'),
-            'plugin_siem_host.status'                => __('Status'),
-            'plugin_siem_host.is_flapping'           => __('Is flapping'),
-            'plugin_siem_host.state_type'            => __('State type'),
-            'plugin_siem_host.current_check'         => __('Current checkk'),
-            'plugin_siem_host.max_check'             => __('Max checks'),
-            'plugin_siem_host.flap_detection'        => __('Flap detection'),
-            'plugin_siem_host.check_interval'        => __('Check interval'),
-            'plugin_siem_host.check_mode'            => __('Check mode'),
-            'plugin_siem_host.logger'                => __('Logger'),
-            'plugin_siem_host.sensor'                => __('Sensor'),
-        ];
+      $tags = [
+         'plugin_siem_host.name' => __('Name'),
+         'plugin_siem_host.itemtype' => __('Item type'),
+         'plugin_siem_host.availabilityservice' => __('Availability service'),
+         'plugin_siem_host.status' => __('Status'),
+         'plugin_siem_host.is_flapping' => __('Is flapping'),
+         'plugin_siem_host.state_type' => __('State type'),
+         'plugin_siem_host.current_check' => __('Current checkk'),
+         'plugin_siem_host.max_check' => __('Max checks'),
+         'plugin_siem_host.flap_detection' => __('Flap detection'),
+         'plugin_siem_host.check_interval' => __('Check interval'),
+         'plugin_siem_host.check_mode' => __('Check mode'),
+         'plugin_siem_host.logger' => __('Logger'),
+         'plugin_siem_host.sensor' => __('Sensor'),
+      ];
 
-        foreach ($tags as $tag => $label) {
-            $this->addTagToList(['tag'   => $tag,
-                'label' => $label,
-                'value' => true]);
-        }
+      foreach ($tags as $tag => $label) {
+         $this->addTagToList(['tag' => $tag,
+            'label' => $label,
+            'value' => true]);
+      }
 
-        asort($this->tag_descriptions);
-    }
+      asort($this->tag_descriptions);
+   }
 
 }

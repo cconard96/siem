@@ -19,39 +19,8 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-/**
- * DB utilities for SIEM plugin.
- * Contains several methods not yet available in the core for interacting with the DB and tables.
- */
-class PluginSIEMDBUtil
-{
-
-   public static function dropTable($table)
-   {
-      global $DB;
-      return $DB->query('DROP TABLE' . $DB->quoteName($table));
-   }
-
-   public static function dropTableOrDie($table, $message = '')
-   {
-      global $DB;
-      $res = $DB->query('DROP TABLE' . $DB->quoteName($table));
-      if (!$res) {
-         //TRANS: %1$s is the description, %2$s is the query, %3$s is the error message
-         $message = sprintf(
-            __('%1$s - Error while dropping table %2$s - Error is %3$s'),
-            $message,
-            $table,
-            $DB->error()
-         );
-         if (isCommandLine()) {
-            throw new RuntimeException($message);
-         } else {
-            echo $message . "\n";
-            die(1);
-         }
-      }
-      return $res;
-   }
-}
+include('../../../inc/includes.php');
+Session::checkRight(PluginSiemService::$rightname, READ);
+Html::header(PluginSiemService::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', 'pluginsiemservice');
+Search::show('PluginSiemService');
+Html::footer();

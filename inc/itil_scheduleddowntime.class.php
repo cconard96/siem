@@ -21,8 +21,9 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access directly to this file");
+   die("Sorry. You can't access directly to this file");
 }
+
 /**
  * PluginSIEMItil_ScheduledDowntime Class
  *
@@ -32,70 +33,70 @@ if (!defined('GLPI_ROOT')) {
 class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
 {
 
-    // From CommonDBRelation
-    static public $itemtype_1          = 'ScheduledDowntime';
-    static public $items_id_1          = 'scheduleddowntimes_id';
-    static public $itemtype_2          = 'itemtype';
-    static public $items_id_2          = 'items_id';
-    static public $checkItem_2_Rights  = self::HAVE_VIEW_RIGHT_ON_ITEM;
+   // From CommonDBRelation
+   static public $itemtype_1 = 'ScheduledDowntime';
+   static public $items_id_1 = 'scheduleddowntimes_id';
+   static public $itemtype_2 = 'itemtype';
+   static public $items_id_2 = 'items_id';
+   static public $checkItem_2_Rights = self::HAVE_VIEW_RIGHT_ON_ITEM;
 
-    function getForbiddenStandardMassiveAction()
-    {
-        $forbidden   = parent::getForbiddenStandardMassiveAction();
-        $forbidden[] = 'update';
-        return $forbidden;
-    }
+   function getForbiddenStandardMassiveAction()
+   {
+      $forbidden = parent::getForbiddenStandardMassiveAction();
+      $forbidden[] = 'update';
+      return $forbidden;
+   }
 
-    function canCreateItem()
-    {
-        $downtime = new PluginSIEMScheduledDowntime();
-        if ($downtime->canUpdateItem()) {
-            return true;
-        }
-        return parent::canCreateItem();
-    }
+   function canCreateItem()
+   {
+      $downtime = new PluginSiemScheduledDowntime();
+      if ($downtime->canUpdateItem()) {
+         return true;
+      }
+      return parent::canCreateItem();
+   }
 
-    function post_addItem()
-    {
-        $downtime = new PluginSIEMScheduledDowntime();
-        $input  = [
-            'id'              => $this->fields[self::$items_id_1],
-            'date_mod'        => $_SESSION["glpi_currenttime"],
-        ];
-        $downtime->update($input);
-        parent::post_addItem();
-    }
+   function post_addItem()
+   {
+      $downtime = new PluginSiemScheduledDowntime();
+      $input = [
+         'id' => $this->fields[self::$items_id_1],
+         'date_mod' => $_SESSION["glpi_currenttime"],
+      ];
+      $downtime->update($input);
+      parent::post_addItem();
+   }
 
-    function post_purgeItem()
-    {
-        $downtime = new PluginSIEMScheduledDowntime();
-        $input  = [
-            'id'              => $this->fields[self::$items_id_1],
-            'date_mod'        => $_SESSION["glpi_currenttime"],
-        ];
-        $downtime->update($input);
-        parent::post_purgeItem();
-    }
+   function post_purgeItem()
+   {
+      $downtime = new PluginSiemScheduledDowntime();
+      $input = [
+         'id' => $this->fields[self::$items_id_1],
+         'date_mod' => $_SESSION["glpi_currenttime"],
+      ];
+      $downtime->update($input);
+      parent::post_purgeItem();
+   }
 
-    function prepareInputForAdd($input)
-    {
-        // Avoid duplicate entry
-        if (countElementsInTable($this->getTable(), [self::$items_id_1 => $input[self::$items_id_1],
-                self::$itemtype_2 => $input[self::$itemtype_2],
-                self::$items_id_2 => $input[self::$items_id_2]]) > 0) {
-            return false;
-        }
-        return parent::prepareInputForAdd($input);
-    }
+   function prepareInputForAdd($input)
+   {
+      // Avoid duplicate entry
+      if (countElementsInTable($this->getTable(), [self::$items_id_1 => $input[self::$items_id_1],
+            self::$itemtype_2 => $input[self::$itemtype_2],
+            self::$items_id_2 => $input[self::$items_id_2]]) > 0) {
+         return false;
+      }
+      return parent::prepareInputForAdd($input);
+   }
 
-    /**
-     * Display events for an item
-     *
-     * @param $item            CommonDBTM object for which the event tab need to be displayed
-     * @param $withtemplate    withtemplate param (default 0)
-     **/
-    static function showForItil(CommonDBTM $item, $withtemplate = 0)
-    {
-        PluginSIEMScheduledDowntime::showListForItil(false, $item);
-    }
+   /**
+    * Display events for an item
+    *
+    * @param $item            CommonDBTM object for which the event tab need to be displayed
+    * @param $withtemplate    withtemplate param (default 0)
+    **/
+   static function showForItil(CommonDBTM $item, $withtemplate = 0)
+   {
+      PluginSiemScheduledDowntime::showListForItil(false, $item);
+   }
 }

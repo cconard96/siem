@@ -21,183 +21,186 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access this file directly");
+   die("Sorry. You can't access this file directly");
 }
+
 /**
  * Trait for shared functions between Event Management hosts and services.
  * @since 1.0.0
  **/
-trait PluginSiemMonitored {
-    private function getMonitoredField($field)
-    {
-        if (static::getType() == 'PluginSiemHost') {
-            $service = $this->getAvailabilityService();
-            if ($service) {
-                return $service->fields[$field];
-            } else {
-                return null;
-            }
-        } else {
-            return $this->fields[$field];
-        }
-    }
+trait PluginSiemMonitored
+{
+   private function getMonitoredField($field)
+   {
+      if (static::getType() == 'PluginSiemHost') {
+         $service = $this->getAvailabilityService();
+         if ($service) {
+            return $service->fields[$field];
+         } else {
+            return null;
+         }
+      } else {
+         return $this->fields[$field];
+      }
+   }
 
-    public function isAlertState()
-    {
-        $status = $this->getStatus();
-        return $status !== 0 && $status !== 2;
-    }
+   public function isAlertState()
+   {
+      $status = $this->getStatus();
+      return $status !== 0 && $status !== 2;
+   }
 
-    /**
-     * Returns true if the host or service is currently flapping.
-     * @since 1.0.0
-     */
-    public function isFlapping()
-    {
-        $flapping = $this->getMonitoredField('is_flapping');
-        return (!is_null($flapping) && $flapping);
-    }
+   /**
+    * Returns true if the host or service is currently flapping.
+    * @since 1.0.0
+    */
+   public function isFlapping()
+   {
+      $flapping = $this->getMonitoredField('is_flapping');
+      return (!is_null($flapping) && $flapping);
+   }
 
-    public function getStatus()
-    {
-        $status = $this->getMonitoredField('status');
-        return !is_null($status) ? $status : PluginSiemHost::STATUS_UNKNOWN;
-    }
+   public function getStatus()
+   {
+      $status = $this->getMonitoredField('status');
+      return !is_null($status) ? $status : PluginSiemHost::STATUS_UNKNOWN;
+   }
 
-    public function isHardStatus()
-    {
-        $flapping = $this->getMonitoredField('is_hard_status');
-        return (!is_null($flapping) && $flapping);
-    }
+   public function isHardStatus()
+   {
+      $flapping = $this->getMonitoredField('is_hard_status');
+      return (!is_null($flapping) && $flapping);
+   }
 
-    public function getLastStatusCheck()
-    {
-        return $this->getMonitoredField('last_check');
-    }
+   public function getLastStatusCheck()
+   {
+      return $this->getMonitoredField('last_check');
+   }
 
-    public function getLastStatusChange()
-    {
-        return $this->getMonitoredField('status_since');
-    }
+   public function getLastStatusChange()
+   {
+      return $this->getMonitoredField('status_since');
+   }
 
-    /**
-     * Returns the translated name of the host or service's current status.
-     * @since 1.0.0
-     */
-    public function getCurrentStatusName()
-    {
-        if (static::getType() == 'PluginSiemHost') {
-            if ($this->fields['is_reachable']) {
-                return PluginSiemHost::getStatusName($this->getStatus());
-            } else {
-                return __('Unreachable');
-            }
-        } else {
+   /**
+    * Returns the translated name of the host or service's current status.
+    * @since 1.0.0
+    */
+   public function getCurrentStatusName()
+   {
+      if (static::getType() == 'PluginSiemHost') {
+         if ($this->fields['is_reachable']) {
             return PluginSiemHost::getStatusName($this->getStatus());
-        }
-    }
+         } else {
+            return __('Unreachable');
+         }
+      } else {
+         return PluginSiemHost::getStatusName($this->getStatus());
+      }
+   }
 
-    /**
-     * Returns true if the host or service is scheduled for downtime right now.
-     * @since 1.0.0
-     */
-    public function isScheduledDown()
-    {
-        static $is_scheduleddown = null;
-        if ($is_scheduleddown == null) {
-            $iterator = PluginSIEMScheduledDowntime::getForHostOrService($this->getID(), static::class == 'PluginSiemService');
-            while ($data = $iterator->next()) {
-                if ($data['is_fixed']) {
-                    $is_scheduleddown = true;
-                } else {
-                    $downtime = new PluginSIEMScheduledDowntime();
-                    $is_scheduleddown = true;
-                }
-                $is_scheduleddown = true;
-                break;
-            }
-            $is_scheduleddown = false;
-        }
-        return $is_scheduleddown;
-    }
-
-    public function getHost() {
-        static $host = null;
-        if ($host == null) {
-            if (static::getType() == 'PluginSiemHost') {
-                return $this;
+   /**
+    * Returns true if the host or service is scheduled for downtime right now.
+    * @since 1.0.0
+    */
+   public function isScheduledDown()
+   {
+      static $is_scheduleddown = null;
+      if ($is_scheduleddown == null) {
+         $iterator = PluginSiemScheduledDowntime::getForHostOrService($this->getID(), static::class == 'PluginSiemService');
+         while ($data = $iterator->next()) {
+            if ($data['is_fixed']) {
+               $is_scheduleddown = true;
             } else {
-                $host = new PluginSiemHost();
-                $host->getFromDB($this->fields['plugin_siem_hosts_id']);
+               $downtime = new PluginSiemScheduledDowntime();
+               $is_scheduleddown = true;
             }
-        }
-        return $host;
-    }
+            $is_scheduleddown = true;
+            break;
+         }
+         $is_scheduleddown = false;
+      }
+      return $is_scheduleddown;
+   }
 
-    /**
-     * Returns the name of this host (or service's host).
-     * @since 1.0.0
-     */
-    public function getHostName()
-    {
-        global $DB;
+   public function getHost()
+   {
+      static $host = null;
+      if ($host == null) {
+         if (static::getType() == 'PluginSiemHost') {
+            return $this;
+         } else {
+            $host = new PluginSiemHost();
+            $host->getFromDB($this->fields['plugin_siem_hosts_id']);
+         }
+      }
+      return $host;
+   }
 
-        if (static::class == 'PluginSiemHost') {
-            $hosttype = $this->fields['itemtype'];
-            $iterator = $DB->request([
-                'SELECT' => ['name'],
-                'FROM'   => $hosttype::getTable(),
-                'WHERE'  => [
-                    'id'  => $this->fields['items_id']
-                ]
-            ]);
-            return $iterator->next()['name'];
-        } else {
-            if ($this->isHostless()) {
-                return '';
-            }
-            $host = $this->getHost();
-            return $host ? $host->getHostName() : null;
-        }
-    }
+   /**
+    * Returns the name of this host (or service's host).
+    * @since 1.0.0
+    */
+   public function getHostName()
+   {
+      global $DB;
 
-    public function getEvents($where = [], $start = 0, $limit = -1)
-    {
-        global $DB;
-        $eventtable = PluginSIEMEvent::getTable();
-        $servicetable = PluginSiemService::getTable();
-        $criteria = [
-            'FROM'      => PluginSIEMEvent::getTable(),
-            'LEFT JOIN' => [
-                $servicetable => [
-                    'FKEY'   => [
-                        $eventtable    => 'plugin_siem_services_id',
-                        $servicetable  => 'id'
-                    ]
-                ]
+      if (static::class == 'PluginSiemHost') {
+         $hosttype = $this->fields['itemtype'];
+         $iterator = $DB->request([
+            'SELECT' => ['name'],
+            'FROM' => $hosttype::getTable(),
+            'WHERE' => [
+               'id' => $this->fields['items_id']
             ]
-        ];
-        if (static::getType() == 'SIEMHost') {
-            $hosttable = PluginSiemHost::getTable();
-            $criteria['LEFT JOIN'][$hosttable] = [
-                'FKEY'   => [
-                    $servicetable  => 'plugin_siem_hosts_id',
-                    $hosttable     => 'id'
-                ]
-            ];
-            $criteria['WHERE'] = [
-                'plugin_siem_hosts_id' => $this->getID()
-            ];
-        } else {
-            $criteria['WHERE'] = [
-                'plugin_siem_services_id' => $this->getID()
-            ];
-        }
-        $iterator = $DB->request($criteria);
-        $events = [];
-        while ($data = $iterator->next()) {
-            $events[] = $data;
-        }
-        return $events;
-    }
+         ]);
+         return $iterator->next()['name'];
+      } else {
+         if ($this->isHostless()) {
+            return '';
+         }
+         $host = $this->getHost();
+         return $host ? $host->getHostName() : null;
+      }
+   }
+
+   public function getEvents($where = [], $start = 0, $limit = -1)
+   {
+      global $DB;
+      $eventtable = PluginSiemEvent::getTable();
+      $servicetable = PluginSiemService::getTable();
+      $criteria = [
+         'FROM' => PluginSiemEvent::getTable(),
+         'LEFT JOIN' => [
+            $servicetable => [
+               'FKEY' => [
+                  $eventtable => 'plugin_siem_services_id',
+                  $servicetable => 'id'
+               ]
+            ]
+         ]
+      ];
+      if (static::getType() == 'SIEMHost') {
+         $hosttable = PluginSiemHost::getTable();
+         $criteria['LEFT JOIN'][$hosttable] = [
+            'FKEY' => [
+               $servicetable => 'plugin_siem_hosts_id',
+               $hosttable => 'id'
+            ]
+         ];
+         $criteria['WHERE'] = [
+            'plugin_siem_hosts_id' => $this->getID()
+         ];
+      } else {
+         $criteria['WHERE'] = [
+            'plugin_siem_services_id' => $this->getID()
+         ];
+      }
+      $iterator = $DB->request($criteria);
+      $events = [];
+      while ($data = $iterator->next()) {
+         $events[] = $data;
+      }
+      return $events;
+   }
 }

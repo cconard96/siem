@@ -322,21 +322,8 @@ class PluginSiemEventManagement
 
    public static function showDashboard()
    {
-      echo "<div id='siem-dashboard'>
-            <div id='siem-toolbar' class='siem-toolbar'></div>
-            <div id='siem-cards' class='siem-deck'></div>
-            </div>";
-      $js = <<<JAVASCRIPT
-         $(function(){
-            siemPlugin = new SIEMPlugin();
-            siemPlugin.init({
-               dashboard: "#siem-dashboard"
-            });
-            siemPlugin.refreshDashboard();
-         });
-JAVASCRIPT;
-      echo Html::scriptBlock($js);
-
+      // The JS will auto-initialize based on this element and will load it over AJAX. Nothing else is needed here.
+      echo "<div id='siem-dashboard'></div>";
    }
 
    /**

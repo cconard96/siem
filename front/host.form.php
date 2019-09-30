@@ -21,25 +21,36 @@
 
 
 use Glpi\Event;
-include ('../../../inc/includes.php');
+
+include('../../../inc/includes.php');
 $host = new PluginSiemHost();
 if (isset($_POST['add'])) {
-    $host->check(-1, CREATE, $_POST);
-    $newID = $host->add($_POST, false);
-    Event::log($newID, 'PluginSiemHost', 3, 'tools', 'add');
-    Html::back();
+   $host->check(-1, CREATE, $_POST);
+   $newID = $host->add($_POST, false);
+   Event::log($newID, 'PluginSiemHost', 3, 'tools', 'add');
+   Html::back();
 } else if (isset($_POST['purge'])) {
-    $host->check($_POST['id'], PURGE);
-    $host->delete($_POST, 1);
-    Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'add');
-    Html::back();
+   $host->check($_POST['id'], PURGE);
+   $host->delete($_POST, 1);
+   Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'purge');
+   Html::back();
 } else if (isset($_POST['update'])) {
-    $host->check($_POST['id'], UPDATE);
-    $host->update($_POST);
-    Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'add');
-    Html::back();
+   $host->check($_POST['id'], UPDATE);
+   $host->update($_POST);
+   Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'update');
+   Html::back();
+} else if (isset($_POST['set_host_service']) && isset($_POST['sensor'])) {
+   $host->check($_POST['id'], UPDATE);
+   $service = new PluginSiemService();
+
+   $host->update([
+      'id' => $_POST['id'],
+      'plugin_siem_services_id_availability' => $_POST['sensor']
+   ]);
+   Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'update');
+   Html::back();
 } else {
-    Html::header(PluginSiemHost::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'tools', 'siemevent');
-    $host->display(['id'           => $_GET['id']]);
-    Html::footer();
+   Html::header(PluginSiemHost::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'tools', 'siemevent');
+   $host->display(['id' => $_GET['id']]);
+   Html::footer();
 }

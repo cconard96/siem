@@ -20,42 +20,44 @@
  */
 
 
-class PluginSIEMToolbox {
+class PluginSIEMToolbox
+{
 
-    /**
-     * Get a time difference string in a human readable format.
-     * @since 1.0.0
-     * @param string $start DateTime 1
-     * @param string $end DateTime 2 or now if null
-     * @return string Human readable date format
-     */
-    public static function getHumanReadableTimeDiff($start, $end = null) {
-        if (is_null($start) || $start == 'NULL') {
-            return null;
-        }
-        if (is_null($end)) {
-            $end = $_SESSION['glpi_currenttime'];
-        }
-        $diff = date_diff(date_create($start), date_create($end));
-        $text_arr = [];
-        if ($diff->y > 0) {
-            $text_arr[] = sprintf('%d Y', $diff->y);
-        }
-        if ($diff->m > 0) {
-            $text_arr[] = sprintf('%d M', $diff->m);
-        }
-        if ($diff->d > 0) {
-            $text_arr[] = sprintf('%d D', $diff->d);
-        }
-        if ($diff->h > 0) {
-            $text_arr[] = sprintf('%d H', $diff->h);
-        }
-        if ($diff->i > 0) {
-            $text_arr[] = sprintf('%d m', $diff->i);
-        }
-        if ($diff->s > 0) {
-            $text_arr[] = sprintf('%d s', $diff->s);
-        }
-        return implode(' ', $text_arr);
-    }
+   /**
+    * Get a time difference string in a human readable format.
+    * @param string $start DateTime 1
+    * @param string $end DateTime 2 or now if null
+    * @return string Human readable date format
+    * @since 1.0.0
+    */
+   public static function getHumanReadableTimeDiff($start, $end = null)
+   {
+      if (is_null($start) || $start == 'NULL') {
+         return null;
+      }
+      if (is_null($end)) {
+         $end = $_SESSION['glpi_currenttime'];
+      }
+      $diff = date_diff(date_create($start), date_create($end));
+      $text_arr = [];
+      if ($diff->y > 0) {
+         $text_arr[] = sprintf('%d Y', $diff->y);
+      }
+      if ($diff->m > 0) {
+         $text_arr[] = sprintf('%d M', $diff->m);
+      }
+      if ($diff->d > 0) {
+         $text_arr[] = sprintf('%d D', $diff->d);
+      }
+      if ($diff->h > 0) {
+         $text_arr[] = sprintf('%d H', $diff->h);
+      }
+      if ($diff->i > 0) {
+         $text_arr[] = sprintf('%d m', $diff->i);
+      }
+      if ($diff->s > 0) {
+         $text_arr[] = sprintf('%d s', $diff->s);
+      }
+      return implode(' ', $text_arr);
+   }
 }

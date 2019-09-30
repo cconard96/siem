@@ -21,193 +21,193 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access this file directly");
+   die("Sorry. You can't access this file directly");
 }
 
 
 class PluginSIEMRuleEvent extends Rule
 {
 
-    // From Rule
-    static $rightname = 'rule_event';
-    public $can_sort  = true;
-    const PARENT      = 1024;
+   // From Rule
+   static $rightname = 'rule_event';
+   public $can_sort = true;
+   const PARENT = 1024;
 
-    const ONADD    = 1;
+   const ONADD = 1;
 
-    function getTitle()
-    {
-        return __('Business rules for events');
-    }
+   function getTitle()
+   {
+      return __('Business rules for events');
+   }
 
 
-    function maybeRecursive()
-    {
-        return true;
-    }
+   function maybeRecursive()
+   {
+      return true;
+   }
 
-    function isEntityAssign()
-    {
-        return true;
-    }
+   function isEntityAssign()
+   {
+      return true;
+   }
 
-    function canUnrecurs()
-    {
-        return true;
-    }
+   function canUnrecurs()
+   {
+      return true;
+   }
 
-    function maxActionsCount()
-    {
-        return 0;
-    }
+   function maxActionsCount()
+   {
+      return 0;
+   }
 
-    function addSpecificParamsForPreview($params)
-    {
+   function addSpecificParamsForPreview($params)
+   {
 
-        if (!isset($params["entities_id"])) {
-            $params["entities_id"] = $_SESSION["glpiactive_entity"];
-        }
-        return $params;
-    }
+      if (!isset($params["entities_id"])) {
+         $params["entities_id"] = $_SESSION["glpiactive_entity"];
+      }
+      return $params;
+   }
 
-    function executeActions($output, $params, array $input = [])
-    {
-        if (count($this->actions)) {
-            $siemevent = new PluginSIEMEvent();
-            if (!$siemevent->getFromDB($output['id'])) {
-                return $output;
+   function executeActions($output, $params, array $input = [])
+   {
+      if (count($this->actions)) {
+         $siemevent = new PluginSiemEvent();
+         if (!$siemevent->getFromDB($output['id'])) {
+            return $output;
+         }
+         foreach ($this->actions as $action) {
+            switch ($action->fields["action_type"]) {
+               case 'assign_correlated' :
+                  // Set field of all events correlated with this one (Example: Resolve all)
+                  $siemevent->updateCorrelated([$action->fields['field'] => $action->fields['value']]);
+                  break;
             }
-            foreach ($this->actions as $action) {
-                switch ($action->fields["action_type"]) {
-                    case 'assign_correlated' :
-                        // Set field of all events correlated with this one (Example: Resolve all)
-                        $siemevent->updateCorrelated([$action->fields['field'] => $action->fields['value']]);
-                        break;
-                }
+         }
+         //Ensure notification and tracking actions are run last
+         foreach ($this->actions as $action) {
+            switch ($action->fields["action_type"]) {
+               case "send" :
+               case "send_email" :
+                  NotificationEvent::raiseEvent('new', $siemevent);
+                  break;
+
+               case "create_ticket" :
+                  $siemevent->createTracking('Ticket');
+                  break;
+
+               case "create_change" :
+                  $siemevent->createTracking('Change');
+                  break;
+
+               case "create_problem" :
+                  $siemevent->createTracking('Problem');
+                  break;
             }
-            //Ensure notification and tracking actions are run last
-            foreach ($this->actions as $action) {
-                switch ($action->fields["action_type"]) {
-                    case "send" :
-                    case "send_email" :
-                        NotificationEvent::raiseEvent('new', $siemevent);
-                        break;
+         }
+      }
+      return $output;
+   }
 
-                    case "create_ticket" :
-                        $siemevent->createTracking('Ticket');
-                        break;
+   function getCriterias()
+   {
+      static $criterias = [];
 
-                    case "create_change" :
-                        $siemevent->createTracking('Change');
-                        break;
+      if (count($criterias)) {
+         return $criterias;
+      }
 
-                    case "create_problem" :
-                        $siemevent->createTracking('Problem');
-                        break;
-                }
-            }
-        }
-        return $output;
-    }
+      $eventtable = PluginSiemEvent::getTable();
 
-    function getCriterias()
-    {
-        static $criterias = [];
+      $criterias['name']['table'] = $eventtable;
+      $criterias['name']['field'] = 'name';
+      $criterias['name']['name'] = __('Name');
+      $criterias['name']['linkfield'] = 'name';
 
-        if (count($criterias)) {
-            return $criterias;
-        }
+      $criterias['content']['table'] = $eventtable;
+      $criterias['content']['field'] = 'content';
+      $criterias['content']['name'] = __('Content');
+      $criterias['content']['linkfield'] = 'content';
 
-        $eventtable = PluginSIEMEvent::getTable();
+      $criterias['significance']['table'] = $eventtable;
+      $criterias['significance']['field'] = 'significance';
+      $criterias['significance']['name'] = __('Significance');
+      $criterias['significance']['type'] = 'dropdown_eventsignificance';
+      $criterias['significance']['linkfield'] = 'significance';
 
-        $criterias['name']['table']                           = $eventtable;
-        $criterias['name']['field']                           = 'name';
-        $criterias['name']['name']                            = __('Name');
-        $criterias['name']['linkfield']                       = 'name';
+      $criterias['status']['table'] = $eventtable;
+      $criterias['status']['field'] = 'status';
+      $criterias['status']['name'] = __('Status');
+      $criterias['status']['type'] = 'dropdown_eventstatus';
+      $criterias['status']['linkfield'] = 'status';
 
-        $criterias['content']['table']                        = $eventtable;
-        $criterias['content']['field']                        = 'content';
-        $criterias['content']['name']                         = __('Content');
-        $criterias['content']['linkfield']                    = 'content';
+      return $criterias;
+   }
 
-        $criterias['significance']['table']                   = $eventtable;
-        $criterias['significance']['field']                   = 'significance';
-        $criterias['significance']['name']                    = __('Significance');
-        $criterias['significance']['type']                    = 'dropdown_eventsignificance';
-        $criterias['significance']['linkfield']               = 'significance';
+   function checkCriteria(&$criteria, &$input)
+   {
+      switch ($criteria) {
+         default:
+            return parent::checkCriteria($criteria, $input);
+      }
+   }
 
-        $criterias['status']['table']                         = $eventtable;
-        $criterias['status']['field']                         = 'status';
-        $criterias['status']['name']                          = __('Status');
-        $criterias['status']['type']                          = 'dropdown_eventstatus';
-        $criterias['status']['linkfield']                     = 'status';
+   static function getConditionsArray()
+   {
+      return [static::ONADD => __('Add')];
+   }
 
-        return $criterias;
-    }
+   function getActions()
+   {
+      $actions = [];
 
-    function checkCriteria(&$criteria, &$input)
-    {
-        switch ($criteria) {
-            default:
-                return parent::checkCriteria($criteria, $input);
-        }
-    }
+      $actions['_ticket']['name'] = __('Create ticket');
+      $actions['_ticket']['type'] = 'yesonly';
+      $actions['_ticket']['force_actions'] = ['create_ticket'];
 
-    static function getConditionsArray()
-    {
-        return [static::ONADD => __('Add')];
-    }
+      $actions['_change']['name'] = __('Create change');
+      $actions['_change']['type'] = 'yesonly';
+      $actions['_change']['force_actions'] = ['create_change'];
 
-    function getActions()
-    {
-        $actions                                        = [];
+      $actions['_problem']['name'] = __('Create problem');
+      $actions['_problem']['type'] = 'yesonly';
+      $actions['_problem']['force_actions'] = ['create_problem'];
 
-        $actions['_ticket']['name']                     = __('Create ticket');
-        $actions['_ticket']['type']                     = 'yesonly';
-        $actions['_ticket']['force_actions']            = ['create_ticket'];
+      $actions['users_id_email']['name'] = __('Send email alert to user');
+      $actions['users_id_email']['type'] = 'dropdown_users';
+      $actions['users_id_email']['force_actions'] = ['send_email'];
+      $actions['users_id_email']['permitseveral'] = ['send_email'];
 
-        $actions['_change']['name']                      = __('Create change');
-        $actions['_change']['type']                     = 'yesonly';
-        $actions['_change']['force_actions']            = ['create_change'];
+      $actions['group_id_email']['name'] = __('Send email alert to group');
+      $actions['group_id_email']['type'] = 'dropdown_groups';
+      $actions['group_id_email']['force_actions'] = ['send_email'];
+      $actions['group_id_email']['permitseveral'] = ['send_email'];
 
-        $actions['_problem']['name']                    = __('Create problem');
-        $actions['_problem']['type']                    = 'yesonly';
-        $actions['_problem']['force_actions']           = ['create_problem'];
+      $actions['name']['name'] = __('Name');
+      $actions['name']['linkfield'] = 'name';
+      $actions['name']['table'] = $this->getTable();
+      $actions['name']['force_actions'] = ['assign', 'assign_correlated'];
 
-        $actions['users_id_email']['name']              = __('Send email alert to user');
-        $actions['users_id_email']['type']              = 'dropdown_users';
-        $actions['users_id_email']['force_actions']     = ['send_email'];
-        $actions['users_id_email']['permitseveral']     = ['send_email'];
+      $actions['significance']['name'] = __('Significance');
+      $actions['significance']['type'] = 'dropdown_eventsignificance';
+      $actions['significance']['table'] = $this->getTable();
+      $actions['significance']['force_actions'] = ['assign', 'assign_correlated'];
 
-        $actions['group_id_email']['name']              = __('Send email alert to group');
-        $actions['group_id_email']['type']              = 'dropdown_groups';
-        $actions['group_id_email']['force_actions']     = ['send_email'];
-        $actions['group_id_email']['permitseveral']     = ['send_email'];
+      $actions['status']['name'] = __('Status');
+      $actions['status']['type'] = 'dropdown_eventstatus';
+      $actions['status']['force_actions'] = ['assign', 'assign_correlated'];
 
-        $actions['name']['name']                              = __('Name');
-        $actions['name']['linkfield']                         = 'name';
-        $actions['name']['table']                             = $this->getTable();
-        $actions['name']['force_actions']                     = ['assign', 'assign_correlated'];
+      return $actions;
+   }
 
-        $actions['significance']['name']                      = __('Significance');
-        $actions['significance']['type']                      = 'dropdown_eventsignificance';
-        $actions['significance']['table']                     = $this->getTable();
-        $actions['significance']['force_actions']             = ['assign', 'assign_correlated'];
+   function getRights($interface = 'central')
+   {
 
-        $actions['status']['name']                            = __('Status');
-        $actions['status']['type']                            = 'dropdown_eventstatus';
-        $actions['status']['force_actions']                   = ['assign', 'assign_correlated'];
+      $values = parent::getRights();
+      $values[self::PARENT] = ['short' => __('Parent business'),
+         'long' => __('Business rules for event (entity parent)')];
 
-        return $actions;
-    }
-
-    function getRights($interface = 'central')
-    {
-
-        $values = parent::getRights();
-        $values[self::PARENT] = ['short' => __('Parent business'),
-            'long'  => __('Business rules for event (entity parent)')];
-
-        return $values;
-    }
+      return $values;
+   }
 }
