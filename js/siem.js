@@ -156,8 +156,53 @@
 
       }
 
-      function addService() {
-
+      this.addHostService = function(hosts_id) {
+         $.ajax({
+            type: "GET",
+            url: self.ajax_root + 'getSiemServiceTemplates.php',
+            data: {},
+            success: function (servicetemplates) {
+               $("<div id='add-host-form'><select class='service-template-dropdown'></select></div>").dialog({
+                  modal: true,
+                  title: "Add service from template",
+                  open: function() {
+                     var templatedropdown_jobj = $("#add-host-form .service-template-dropdown");
+                     templatedropdown_jobj.empty().select2({
+                        width: 'max-content'
+                     });
+                     if (Object.keys(servicetemplates).length > 0) {
+                        templatedropdown_jobj.removeAttr('disabled');
+                        //$(linked_btn).removeAttr('disabled');
+                     } else {
+                        templatedropdown_jobj.attr('disabled', 'disabled');
+                        //$(linked_btn).attr('disabled', 'disabled');
+                     }
+                     $.each(servicetemplates, function(id, name) {
+                        templatedropdown_jobj.append(new Option(name, id, false, false));
+                     });
+                     templatedropdown_jobj.trigger('change');
+                  },
+                  buttons: {
+                     Add: function() {
+                        var parentDialog = $(this);
+                        var templates_id = $("#add-host-form").find("select").select2('val');
+                        $.ajax({
+                           type: "POST",
+                           url: self.ajax_root + 'siemhost.php',
+                           data: {
+                              _add_service: true,
+                              hosts_id: hosts_id,
+                              servicetemplates_id: templates_id
+                           },
+                           complete: function() {
+                              parentDialog.dialog('close');
+                           }
+                        });
+                     }
+                  }
+               });
+            }
+         });
       }
    };
    // Always initialize this JS object to prevent needing inline JS to intialize it.

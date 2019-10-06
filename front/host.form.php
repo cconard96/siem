@@ -39,18 +39,16 @@ if (isset($_POST['add'])) {
    $host->update($_POST);
    Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'update');
    Html::back();
-} else if (isset($_POST['set_host_service']) && isset($_POST['sensor'])) {
+} else if (isset($_POST['set_host_service']) && isset($_POST['plugin_siem_services_id'])) {
    $host->check($_POST['id'], UPDATE);
-   $service = new PluginSiemService();
-
    $host->update([
       'id' => $_POST['id'],
-      'plugin_siem_services_id_availability' => $_POST['sensor']
+      'plugin_siem_services_id_availability' => $_POST['plugin_siem_services_id']
    ]);
    Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'update');
    Html::back();
-} else {
-   Html::header(PluginSiemHost::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'tools', 'siemevent');
-   $host->display(['id' => $_GET['id']]);
-   Html::footer();
 }
+Html::back();
+//Html::header(PluginSiemHost::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'tools', 'siemevent');
+//$host->display(['id' => $_REQUEST['id']]);
+//Html::footer();

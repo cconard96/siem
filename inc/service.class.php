@@ -430,8 +430,7 @@ class PluginSiemService extends CommonDBTM
             $status_badges[] = ['class' => 'badge badge-warning', 'label' => __('Flapping')];
          }
          $status_since = $service['status_since'];
-         $status_since_diff = PluginSIEMToolbox::getHumanReadableTimeDiff($status_since);
-         $status_since_diff = sprintf(__('%s ago'), $status_since_diff);
+         $status_since_diff = PluginSiemToolbox::getHumanReadableTimeDiff($status_since);
          $eventiterator = $DB->request([
             'SELECT' => ['name'],
             'FROM' => PluginSiemEvent::getTable(),
@@ -500,5 +499,93 @@ class PluginSiemService extends CommonDBTM
          $fields[] = 'current_check';
       }
       return $fields;
+   }
+
+   function rawSearchOptions()
+   {
+      $tab = [];
+      $tab[] = [
+         'id' => 'common',
+         'name' => __('Characteristics')
+      ];
+      $tab[] = [
+         'id'              => '2',
+         'table'           => PluginSiemHost::getTable(),
+         'field'           => 'name',
+         'linkfield'       => 'plugin_siem_hosts_id',
+         'name'            => __('Host'),
+         'massiveaction'   => false,
+         'datatype'        => 'itemlink'
+      ];
+      $tab[] = [
+         'id' => '3',
+         'table' => $this->getTable(),
+         'field' => 'itemtype',
+         'name' => __('Item type'),
+         'datatype' => 'itemtypename'
+      ];
+      $tab[] = [
+         'id' => '4',
+         'table' => $this->getTable(),
+         'field' => 'items_id',
+         'name' => __('Item ID'),
+         'datatype' => 'number'
+      ];
+      $tab[] = [
+         'id' => '7',
+         'table' => 'glpi_plugin_siem_services',
+         'field' => 'name',
+         'linkfield' => 'plugin_siem_services_id_availability',
+         'name' => __('Availability service'),
+         'datatype' => 'itemlink'
+      ];
+      $tab[] = [
+         'id' => '19',
+         'table' => $this->getTable(),
+         'field' => 'date_mod',
+         'name' => __('Last update'),
+         'datatype' => 'datetime',
+         'massiveaction' => false
+      ];
+      $tab[] = [
+         'id' => '121',
+         'table' => $this->getTable(),
+         'field' => 'date_creation',
+         'name' => __('Creation date'),
+         'datatype' => 'datetime',
+         'massiveaction' => false
+      ];
+      //TODO Add availability service search options
+      return $tab;
+   }
+
+   static function getDropdownForHost($hosts_id) {
+      global $DB;
+
+      $values = [];
+      $service_table = self::getTable();
+      $template_table = PluginSiemServiceTemplate::getTable();
+      $iterator = $DB->request([
+         'SELECT'    => [
+            'glpi_plugin_siem_services.id',
+            'name'
+         ],
+         'FROM'      => $service_table,
+         'LEFT JOIN' => [
+            $template_table => [
+               'FKEY'   => [
+                  $template_table   => 'id',
+                  $service_table    => 'plugin_siem_servicetemplates_id'
+               ]
+            ]
+         ],
+         'WHERE'     => [
+            'plugin_siem_hosts_id'  => $hosts_id
+         ]
+      ]);
+      while ($data = $iterator->next()) {
+         $values[$data['id']] = $data['name'];
+      }
+      return Dropdown::showFromArray('plugin_siem_services_id', $values, ['display' => false]);
    }
 }

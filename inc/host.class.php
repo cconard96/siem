@@ -92,6 +92,24 @@ class PluginSiemHost extends CommonDBTM
       }
    }
 
+   static function getFormURLWithID($id = 0, $full = true)
+   {
+      global $DB;
+      $iterator = $DB->request([
+         'SELECT' => [
+            'itemtype',
+            'items_id'
+         ],
+         'FROM'   => self::getTable(),
+         'WHERE'  => ['id' => $id]
+      ]);
+      if ($iterator->count()) {
+         $item = $iterator->next();
+         return $item['itemtype']::getFormURLWithID($item['items_id'], $full) . '&forcetab=PluginSiemEvent$1';
+      }
+      return '#';
+   }
+
    function rawSearchOptions()
    {
       $tab = [];
@@ -105,7 +123,7 @@ class PluginSiemHost extends CommonDBTM
          'field' => 'id',
          'name' => __('ID'),
          'massiveaction' => false,
-         'datatype' => 'number'
+         'datatype' => 'itemlink'
       ];
       $tab[] = [
          'id' => '3',
@@ -170,14 +188,14 @@ class PluginSiemHost extends CommonDBTM
     */
    public function getAvailabilityService()
    {
-      if (!$this->fields['plugin_siem_services_id_availability']) {
+      if (!$this->fields['plugin_siem_services_id_availability'] || $this->fields['plugin_siem_services_id_availability'] < 0) {
          return null;
       }
       // Load and cache availability service in case of multiple calls per page
       static $service = null;
       if ($service == null) {
          $service = new PluginSiemService();
-         if (!$service->getFromDB($this->fields['siemservices_id_availability'])) {
+         if (!$service->getFromDB($this->fields['plugin_siem_services_id_availability'])) {
             return null;
          }
       }
@@ -191,8 +209,8 @@ class PluginSiemHost extends CommonDBTM
       $host_info_bg = $this->getBackgroundColorClass();
       $status = self::getStatusName($this->getStatus());
       if ($this->getAvailabilityService()) {
-         $status_since_diff = PluginSIEMToolbox::getHumanReadableTimeDiff($this->getLastStatusChange());
-         $last_check_diff = PluginSIEMToolbox::getHumanReadableTimeDiff($this->getLastStatusCheck());
+         $status_since_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusChange());
+         $last_check_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusCheck());
          $host_stats = [
             __('Last status change') => (is_null($status_since_diff) ? __('No change') : $status_since_diff),
             __('Last check') => (is_null($last_check_diff) ? __('Not checked') : $last_check_diff),
@@ -214,7 +232,7 @@ class PluginSiemHost extends CommonDBTM
          ],
          [
             'label' => sprintf(__('Add %s'), PluginSiemService::getTypeName(1)),
-            'action' => "addService({$this->getID()})",
+            'action' => "window.pluginSiem.addHostService({$this->getID()})",
          ]
       ];
       if (in_array($this->getStatus(), [self::STATUS_DOWN, self::STATUS_UNREACHABLE])) {
@@ -289,16 +307,7 @@ class PluginSiemHost extends CommonDBTM
          $out .= Html::hidden('id', ['value' => $this->fields['id']]);
          $out .= '<fieldset>';
          $out .= "<legend>" . __('Service') . "</legend>";
-         $rand = mt_rand();
-         $out .= Plugin::dropdown([
-            'display'   => false,
-            'on_change' => "pluginSiem.updateSensorDropdown(this, $('#dropdown_sensor$rand'), '#btn-set-hostservice');"
-         ]);
-         $out .= Dropdown::showFromArray('sensor', [], [
-            'disabled'  => true,
-            'display'   => false,
-            'rand'      => $rand
-         ]);
+         $out .= PluginSiemService::getDropdownForHost($this->getID());
          $out .= Html::submit(__('Set availability service'), [
             'name' => 'set_host_service',
             'id' => '#btn-set-hostservice'
@@ -374,7 +383,7 @@ class PluginSiemHost extends CommonDBTM
                ]
             ],
             'WHERE' => [
-               'siemhosts_id' => $this->getID()
+               'plugin_siem_hosts_id' => $this->getID()
             ]
          ]);
          $services = [];
@@ -383,5 +392,24 @@ class PluginSiemHost extends CommonDBTM
          }
       }
       return $services;
+   }
+
+   /**
+    * Sets the given service as the availability service for its host. If another availability service is already set, it is replaced.
+    * @param integer $services_id The ID of the service that already belongs to the host.
+    * @return boolean True if the availability service was successfully saved.
+    */
+   public function setAvailabilityService($services_id)
+   {
+      global $DB;
+      $service = new PluginSiemService();
+      $match = $service->find([
+         'id'  => $services_id
+      ]);
+      if (count($match) && reset($match)['plugin_siem_hosts_id'] == $this->getID()) {
+         $DB->update(self::getTable(), ['plugin_siem_services_id_availability' => $services_id], ['id' => $this->getID()]);
+         return true;
+      }
+      return false;
    }
 }

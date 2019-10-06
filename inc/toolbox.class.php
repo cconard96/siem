@@ -20,7 +20,7 @@
  */
 
 
-class PluginSIEMToolbox
+class PluginSiemToolbox
 {
 
    /**
@@ -33,7 +33,7 @@ class PluginSIEMToolbox
    public static function getHumanReadableTimeDiff($start, $end = null)
    {
       if (is_null($start) || $start == 'NULL') {
-         return null;
+         return __('Never', 'siem');
       }
       if (is_null($end)) {
          $end = $_SESSION['glpi_currenttime'];
