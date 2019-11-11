@@ -155,31 +155,32 @@ class PluginSiemEvent extends CommonDBTM
       if (!isset($input['significance']) || $input['significance'] < 0 || $input['significance'] > 2) {
          $input['significance'] = self::INFORMATION;
       }
-      // Process event filtering rules
-      $rules = new PluginSIEMRuleEventFilterCollection();
-      $input['_accept'] = true;
-      $input = $rules->processAllRules($input,
-         $input,
-         ['recursive' => true],
-         ['condition' => PluginSIEMRuleEvent::ONADD]);
-      $input = Toolbox::stripslashes_deep($input);
-      if (!$input['_accept']) {
-         // Drop the event
-         return false;
-      } else {
-         if ($input['plugin_siem_services_id'] >= 0) {
-            $service = new PluginSiemService();
-            $service->getFromDB($input['plugin_siem_services_id']);
-            if ($service->fields['suppress_informational']) {
-               // Process event to update service/host state, then drop it so it doesn't get saved.
-               $event = new self();
-               $event->fields = $input;
-               $service->onEventAdd($event);
-               return false;
-            }
-         }
-         return $input;
-      }
+//      // Process event filtering rules
+//      $rules = new PluginSIEMRuleEventFilterCollection();
+//      $input['_accept'] = true;
+//      $input = $rules->processAllRules($input,
+//         $input,
+//         ['recursive' => true],
+//         ['condition' => PluginSIEMRuleEvent::ONADD]);
+//      $input = Toolbox::stripslashes_deep($input);
+//      if (!$input['_accept']) {
+//         // Drop the event
+//         return false;
+//      } else {
+//         if ($input['plugin_siem_services_id'] >= 0) {
+//            $service = new PluginSiemService();
+//            $service->getFromDB($input['plugin_siem_services_id']);
+//            if ($service->fields['suppress_informational']) {
+//               // Process event to update service/host state, then drop it so it doesn't get saved.
+//               $event = new self();
+//               $event->fields = $input;
+//               $service->onEventAdd($event);
+//               return false;
+//            }
+//         }
+//         return $input;
+//      }
+      return $input;
    }
 
    function post_addItem()
@@ -193,12 +194,12 @@ class PluginSiemEvent extends CommonDBTM
          'correlation_id' => $this->fields['correlation_id']
       ]);
       // Process event business rules. Only used for correlation, notifications, and tracking
-      $rules = new PluginSIEMRuleEventCollection();
-      $input = $rules->processAllRules($this->fields, $this->fields, ['recursive' => true], ['condition' => PluginSIEMRuleEvent::ONADD]);
-      $input = Toolbox::stripslashes_deep($input);
-      $this->update([
-            'id' => $this->getID()
-         ] + $input);
+//      $rules = new PluginSIEMRuleEventCollection();
+//      $input = $rules->processAllRules($this->fields, $this->fields, ['recursive' => true], ['condition' => PluginSIEMRuleEvent::ONADD]);
+//      $input = Toolbox::stripslashes_deep($input);
+//      $this->update([
+//            'id' => $this->getID()
+//         ] + $input);
       // Update the related service
       PluginSiemService::onEventAdd($this);
 
@@ -465,8 +466,12 @@ class PluginSiemEvent extends CommonDBTM
     */
    public static function getLocalizedEventName($name, $plugins_id)
    {
-      if ($plugins_id !== null) {
-         return Plugin::doOneHook($plugins_id, 'translateEventName', $name);
+      if ($name === 'sensor_fault') {
+         return __('Sensor fault', 'siem');
+      }
+      if ($plugins_id !== null && isset(Plugin::getPlugins()[$plugins_id])) {
+         $plugin_name = Plugin::getPlugins()[$plugins_id];
+         return Plugin::doOneHook($plugin_name, 'translateEventName', $name);
       }
       return $name;
    }
@@ -505,8 +510,9 @@ class PluginSiemEvent extends CommonDBTM
          ];
       }
       if ($p['translate']) {
-         if ($plugins_id !== null) {
-            $props_t = Plugin::doOneHook($plugins_id, 'translateEventProperties', $props);
+         if ($plugins_id !== null && isset(Plugin::getPlugins()[$plugins_id])) {
+            $plugin_name = Plugin::getPlugins()[$plugins_id];
+            $props_t = Plugin::doOneHook($plugin_name, 'translateEventProperties', $props);
             if ($props_t) {
                $props = $props_t;
             }
@@ -752,8 +758,9 @@ class PluginSiemEvent extends CommonDBTM
       if (!$has_host) {
          $has_services = false;
       } else {
-         $eventhost->getFromDB($matchinghosts[0]['id']);
-         $matchingservices = $eventservice->find(['plugin_siem_hosts_id' => $matchinghosts[0]]);
+         $matchinghost = reset($matchinghosts);
+         $eventhost->getFromDB($matchinghost['id']);
+         $matchingservices = $eventservice->find(['plugin_siem_hosts_id' => $eventhost->getID()]);
          $has_services = (count($matchingservices) > 0);
       }
       if (!$has_host && !$has_services) {
@@ -786,21 +793,18 @@ class PluginSiemEvent extends CommonDBTM
       foreach ($events as $event) {
          $style = '';
          $icon = 'fas fa-info-circle';
-         $active = in_array($event['status'], self::getActiveStatusArray());
+         //$active = in_array($event['status'], self::getActiveStatusArray());
          $temp_service->getFromDB($event['plugin_siem_services_id']);
          $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
+         $event_class = 'tab_bg_2 ';
          if ($event['significance'] == PluginSiemEvent::WARNING) {
-            if ($active) {
-               $style = "style='background-color: {$_SESSION['glpieventwarning_color']}'";
-            }
+            $event_class .= 'bg-warning ';
             $icon = 'fas fa-exclamation-triangle';
          } else if ($event['significance'] == PluginSiemEvent::EXCEPTION) {
-            if ($active) {
-               $style = "style='background-color: {$_SESSION['glpieventexception_color']}'";
-            }
+            $event_class .= 'bg-danger ';
             $icon = 'fas fa-exclamation-circle';
          }
-         $historical .= "<tr id='siemevent_{$event['id']}' class='tab_bg_2' $style onclick='toggleEventDetails(this);'>";
+         $historical .= "<tr id='siemevent_{$event['id']}' class='$event_class' $style onclick='window.pluginSiem.toggleEventDetails(this);'>";
          $historical .= "<td class='center'><i class='{$icon} fa-lg' title='" .
             PluginSiemEvent::getSignificanceName($event['significance']) . "'/></td>";
          $historical .= "<td>{$localized_name}</td>";
@@ -858,7 +862,7 @@ class PluginSiemEvent extends CommonDBTM
             }
             $icon = 'fas fa-exclamation-circle';
          }
-         $out .= "<tr id='siemevent_{$event['id']}' class='tab_bg_2' $style onclick='toggleEventDetails(this);'>";
+         $out .= "<tr id='siemevent_{$event['id']}' class='tab_bg_2' $style onclick='window.pluginSiem.toggleEventDetails(this);'>";
          $out .= "<td class='center'><i class='{$icon} fa-lg' title='" .
             PluginSiemEvent::getSignificanceName($event['significance']) . "'/></td>";
          $out .= "<td>{$localized_name}</td>";
@@ -913,17 +917,21 @@ class PluginSiemEvent extends CommonDBTM
       global $DB;
       $event = new PluginSiemEvent();
       $to_poll = $DB->request([
+         'SELECT' => ['glpi_plugin_siem_services.id', 'plugins_id', 'sensor'],
          'FROM' => PluginSiemService::getTable(),
          'LEFT JOIN' => [
             PluginSiemServiceTemplate::getTable() => [
                'FKEY' => [
-                  PluginSiemService::getTable() => 'siemservicetemplates_id',
+                  PluginSiemService::getTable() => 'plugin_siem_servicetemplates_id',
                   PluginSiemServiceTemplate::getTable() => 'id',
                ]
             ]
          ],
          'WHERE' => [
-            new QueryExpression('DATE_ADD(last_check, INTERVAL check_interval MINUTE) <= NOW()'),
+            'OR' => [
+               'last_check'   => null,
+               new QueryExpression('DATE_ADD(last_check, INTERVAL check_interval MINUTE) <= NOW()'),
+            ],
             'check_mode' => [PluginSiemService::CHECK_MODE_ACTIVE, PluginSiemService::CHECK_MODE_HYBRID],
             'is_active' => 1,
             new QueryExpression('plugins_id IS NOT NULL'),
@@ -937,10 +945,12 @@ class PluginSiemEvent extends CommonDBTM
          array_push($allservices, $data['id']);
          $poll_queue[$data['plugins_id']][$data['sensor']][] = $data['id'];
       }
+      $plugin = new Plugin();
       foreach ($poll_queue as $logger => $sensors) {
+         $plugin->getFromDB($logger);
          foreach ($sensors as $sensor => $service_ids) {
-            $results = Plugin::doOneHook($logger, 'poll_sensor', ['sensor' => $sensor, 'service_ids' => $service_ids]);
-            $eventdatas[$logger][$sensor] = $results;
+            $results = Plugin::doOneHook($plugin->fields['directory'], 'poll_sensor', ['sensor' => $sensor, 'service_ids' => $service_ids]);
+            $eventdatas[$plugin->fields['directory']][$sensor] = $results;
          }
       }
       // Array of service ids that had some data from the sensors
@@ -948,12 +958,14 @@ class PluginSiemEvent extends CommonDBTM
       // Create event from the results
       foreach ($eventdatas as $logger => $sensors) {
          foreach ($sensors as $sensor => $results) {
-            foreach ($results as $service_id => $result) {
-               if (!is_null($result) && is_array($result)) {
-                  $input = $result;
-                  $input['plugin_siem_services_id'] = $service_id;
-                  $event->add($input);
-                  array_push($reported, $service_id);
+            if (!is_null($results) && is_array($results)) {
+               foreach ($results as $service_id => $result) {
+                  if (!is_null($result) && is_array($result)) {
+                     $input = $result;
+                     $input['plugin_siem_services_id'] = $service_id;
+                     $event->add($input);
+                     array_push($reported, $service_id);
+                  }
                }
             }
          }

@@ -204,7 +204,7 @@ function plugin_siem_uninstall()
    return true;
 }
 
-function plugin_siemsensors_poll_sensor(array $params)
+function plugin_siem_poll_sensor(array $params)
 {
    if (!isset($params['sensor']) || !isset($params['service_ids'])) {
       return [];
@@ -215,6 +215,51 @@ function plugin_siemsensors_poll_sensor(array $params)
       case 'http_ok':
          return PluginSiemSensorHttp_OK::invokePoll($params['service_ids']);
    }
+}
+
+function plugin_siem_translateEventName($name) {
+   switch ($name) {
+      case 'sensor_ping_ok':
+         return __('Ping OK', 'siem');
+      case 'sensor_http_ok_ok':
+         return __('HTTP OK', 'siem');
+      case 'sensor_http_ok_error':
+         return __('HTP not OK', 'siem');
+      default:
+         return $name;
+   }
+}
+
+function plugin_siem_translateEventProperties($props) {
+   foreach ($props as $name => &$params) {
+      switch ($name) {
+         case 'percent_loss':
+            $params['name'] = __('Percent loss', 'siem');
+            break;
+         case 'min':
+            $params['name'] = __('Minimum (ms)', 'siem');
+            break;
+         case 'avg':
+            $params['name'] = __('Average (ms)', 'siem');
+            break;
+         case 'max':
+            $params['name'] = __('Maximum (ms)', 'siem');
+            break;
+         case 'mdev':
+            $params['name'] = __('Standard deviation (ms)', 'siem');
+            break;
+         case 'http_code':
+            $params['name'] = __('HTTP code', 'siem');
+            break;
+         case 'response_time':
+            $params['name'] = __('Response time (ms)', 'siem');
+            break;
+         case 'response_size':
+            $params['name'] = __('Response size (bytes)', 'siem');
+            break;
+      }
+   }
+   return $props;
 }
 
 function plugin_siem_getAddSearchOptions($itemtype)

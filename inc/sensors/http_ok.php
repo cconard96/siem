@@ -25,6 +25,73 @@ class PluginSiemSensorHttp_OK extends PluginSiemSensor
 
    protected static function poll($service_ids = [])
    {
+      foreach ($service_ids as $service_id) {
+         $service = new PluginSiemService();
+         if (!$service->getFromDB($service_id)) {
+            return false;
+         }
+         $hosts_id = $service->fields['plugin_siem_hosts_id'];
+         $host = new PluginSiemHost();
+         if (!$host->getFromDB($hosts_id)) {
+            return [];
+         }
+         $hosttype = $host->fields['itemtype'];
+         $host_item = new $hosttype();
+         if (!$host_item->getFromDB($host->fields['items_id'])) {
+            return [];
+         }
 
+         $ch = curl_init();
+         curl_setopt($ch, CURLOPT_URL, $host_item->fields['name']);
+         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+         $output = curl_exec($ch);
+         $info = curl_getinfo($ch);
+
+         if (curl_error($ch)) {
+            curl_close($ch);
+            $results[$service_id] = [
+               'name' => 'sensor_http_ok_error',
+               'status' => PluginSiemEvent::STATUS_NEW,
+               'significance' => PluginSiemEvent::EXCEPTION,
+               'date' => $_SESSION['glpi_currenttime'],
+               'content' => json_encode([
+                  'errorno'   => curl_errno($ch),
+                  'error_msg' => curl_error($ch)
+               ]),
+            ];
+         } else {
+            curl_close($ch);
+            $httpcode = $info['http_code'];
+            $totaltime = $info['total_time'];
+            $download_size = $info['size_download'];
+
+            if ($httpcode === 200) {
+               $results[$service_id] = [
+                  'name' => 'sensor_http_ok_ok',
+                  'status' => PluginSiemEvent::STATUS_NEW,
+                  'significance' => PluginSiemEvent::INFORMATION,
+                  'date' => $_SESSION['glpi_currenttime'],
+                  'content' => json_encode([
+                     'response_time'   => $totaltime,
+                     'response_size'   => $download_size
+                  ])
+               ];
+            } else {
+               $results[$service_id] = [
+                  'name' => 'sensor_http_ok_error',
+                  'status' => PluginSiemEvent::STATUS_NEW,
+                  'significance' => PluginSiemEvent::WARNING,
+                  'date' => $_SESSION['glpi_currenttime'],
+                  'content' => json_encode([
+                     'http_code'       => $httpcode,
+                     'response_time'   => $totaltime,
+                     'response_size'   => $download_size
+                  ])
+               ];
+            }
+         }
+      }
+
+      return $results;
    }
 }

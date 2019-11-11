@@ -108,6 +108,10 @@
    }
 }
 
+.inline-block {
+   display: inline-block;
+}
+
 /** Bootstrap Compatibility */
 button.btn-primary {
    background-color: #0694f9;
@@ -145,6 +149,18 @@ button.btn-primary {
 .card-body {
    flex: 1 1 auto;
    color: black;
+}
+
+.w-25 {
+   width: 25%;
+}
+
+.w-50 {
+   width: 50%;
+}
+
+.w-75 {
+   width: 75%;
 }
 
 .w-100 {

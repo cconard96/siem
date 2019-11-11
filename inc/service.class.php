@@ -342,24 +342,24 @@ class PluginSiemService extends CommonDBTM
             $is_hostservice = true;
          }
       }
-      if (isset($this->input['_problem'])) {
-         if ($is_hostservice) {
-            $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_DOWN, $this->isHardStatus());
-         } else {
-            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_PROBLEM, $this->isHardStatus());
-         }
-      } else if (isset($this->input['_recovery'])) {
-         if ($is_hostservice) {
-            $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_UP, $this->isHardStatus());
-         } else {
-            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_RECOVERY, $this->isHardStatus());
-         }
-      }
+//      if (isset($this->input['_problem'])) {
+//         if ($is_hostservice) {
+//            $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_DOWN, $this->isHardStatus());
+//         } else {
+//            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_PROBLEM, $this->isHardStatus());
+//         }
+//      } else if (isset($this->input['_recovery'])) {
+//         if ($is_hostservice) {
+//            $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_UP, $this->isHardStatus());
+//         } else {
+//            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_RECOVERY, $this->isHardStatus());
+//         }
+//      }
       if (isset($this->input['is_active']) && $this->input['is_active'] != $this->fields['is_active']) {
          if ($this->input['is_active']) {
-            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_ENABLE);
+            //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_ENABLE);
          } else {
-            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_DISABLE);
+            //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_DISABLE);
             if ($is_hostservice) {
                $host->update([
                   'id' => $host->getID(),
@@ -370,32 +370,32 @@ class PluginSiemService extends CommonDBTM
       }
       if (isset($this->input['_acknowledge'])) {
          if ($is_hostservice) {
-            $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_ACKNOWLEDGE);
+            //$host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_ACKNOWLEDGE);
          } else {
-            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_ACKNOWLEDGE);
+            //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_ACKNOWLEDGE);
          }
       }
       if (isset($this->input['use_flap_detection']) &&
          $this->input['use_flap_detection'] != $this->fields['use_flap_detection']) {
          if (!$this->input['use_flap_detection']) {
             if ($is_hostservice) {
-               $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_DISABLE_FLAPPING);
+               //$host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_DISABLE_FLAPPING);
             } else {
-               $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_DISABLE_FLAPPING);
+               //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_DISABLE_FLAPPING);
             }
          }
       } else if (isset($this->input['is_flapping']) && $this->input['is_flapping'] != $this->fields['is_flapping']) {
          if ($this->input['is_flapping']) {
             if ($is_hostservice) {
-               $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_START_FLAPPING);
+               //$host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_START_FLAPPING);
             } else {
-               $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_START_FLAPPING);
+               //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_START_FLAPPING);
             }
          } else {
             if ($is_hostservice) {
-               $host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_STOP_FLAPPING);
+               //$host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_STOP_FLAPPING);
             } else {
-               $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_STOP_FLAPPING);
+               //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_STOP_FLAPPING);
             }
          }
       }
@@ -445,7 +445,8 @@ class PluginSiemService extends CommonDBTM
          foreach ($status_badges as $status_badge) {
             $out .= "<span class='{$status_badge['class']}' style='font-size: 1.0em;'>{$status_badge['label']}</span>";
          }
-         $out .= "</td><td>{$service['name']}</td>";
+         $servicelink = Html::link($service['name'], self::getFormURLWithID($service_id));
+         $out .= "</td><td>{$servicelink}</td>";
          $out .= "<td title='{$status_since}'>{$status_since_diff}</td>";
          if (!is_null($eventdata)) {
             $latest_event = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
@@ -508,21 +509,21 @@ class PluginSiemService extends CommonDBTM
          'id' => 'common',
          'name' => __('Characteristics')
       ];
-      $tab[] = [
-         'id'              => '2',
-         'table'           => PluginSiemHost::getTable(),
-         'field'           => 'name',
-         'linkfield'       => 'plugin_siem_hosts_id',
-         'name'            => __('Host'),
-         'massiveaction'   => false,
-         'datatype'        => 'itemlink'
-      ];
+//      $tab[] = [
+//         'id'              => '2',
+//         'table'           => $this->getTable(),
+//         'field'           => '_name',
+//         'name'            => __('Host'),
+//         'massiveaction'   => false,
+//         'datatype'        => 'specific'
+//      ];
       $tab[] = [
          'id' => '3',
-         'table' => $this->getTable(),
-         'field' => 'itemtype',
-         'name' => __('Item type'),
-         'datatype' => 'itemtypename'
+         'table' => PluginSiemServiceTemplate::getTable(),
+         'field' => 'name',
+         'linkfield' => 'plugin_siem_servicetemplates_id',
+         'name' => __('Service template'),
+         'datatype' => 'itemlink'
       ];
       $tab[] = [
          'id' => '4',
@@ -532,12 +533,25 @@ class PluginSiemService extends CommonDBTM
          'datatype' => 'number'
       ];
       $tab[] = [
+         'id' => '5',
+         'table' => $this->getTable(),
+         'field' => 'status',
+         'name' => __('Status'),
+         'datatype' => 'specific'
+      ];
+      $tab[] = [
+         'id' => '6',
+         'table' => $this->getTable(),
+         'field' => 'is_flapping',
+         'name' => __('Is flapping'),
+         'datatype' => 'bool'
+      ];
+      $tab[] = [
          'id' => '7',
-         'table' => 'glpi_plugin_siem_services',
-         'field' => 'name',
-         'linkfield' => 'plugin_siem_services_id_availability',
-         'name' => __('Availability service'),
-         'datatype' => 'itemlink'
+         'table' => $this->getTable(),
+         'field' => 'is_hard_status',
+         'name' => __('Is hard status'),
+         'datatype' => 'bool'
       ];
       $tab[] = [
          'id' => '19',
@@ -557,6 +571,35 @@ class PluginSiemService extends CommonDBTM
       ];
       //TODO Add availability service search options
       return $tab;
+   }
+
+   static function getSpecificValueToDisplay($field, $values, array $options = [])
+   {
+
+      global $DB;
+
+      if (!is_array($values)) {
+         $values = [$field => $values];
+      }
+      switch ($field) {
+         case 'host_name' :
+            /** @var CommonDBTM $itemtype */
+            $itemtype = $values['itemtype'];
+            $item_table = $itemtype::getTable();
+            $iterator = $DB->request([
+               'SELECT' => [$item_table.'.id', $item_table.'name'],
+               'FROM'   => $item_table,
+               'WHERE'  => ['id' => $values['items_id']]
+            ]);
+            if ($iterator->count()) {
+               $item = $iterator->next();
+               return Html::link($item['name'], $itemtype::getFormURLWithID($item['id']));
+            }
+            break;
+         case 'status':
+            return self::getStatusName($values[$field]);
+      }
+      return parent::getSpecificValueToDisplay($field, $values, $options);
    }
 
    static function getDropdownForHost($hosts_id) {
@@ -587,5 +630,19 @@ class PluginSiemService extends CommonDBTM
          $values[$data['id']] = $data['name'];
       }
       return Dropdown::showFromArray('plugin_siem_services_id', $values, ['display' => false]);
+   }
+
+   function showForm($ID, $options = []) {
+
+      $this->initForm($ID, $options);
+      $this->showFormHeader($options);
+
+      echo "<tr><td>".PluginSiemServiceTemplate::getTypeName(1)."</td><td>";
+      echo Html::link($this->fields['name'], PluginSiemServiceTemplate::getFormURLWithID($this->fields['plugin_siem_servicetemplates_id']));
+      echo "</td></tr>";
+
+      $this->showFormButtons($options);
+
+      return true;
    }
 }

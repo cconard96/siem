@@ -1,4 +1,7 @@
 <?php
+
+use Symfony\Component\Process\Process;
+
 /**
  *  -------------------------------------------------------------------------
  *  SIEM plugin for GLPI
@@ -40,7 +43,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
             $sensor_params = $defparams;
          }
          $sensor_params = array_replace($defparams, $sensor_params);
-         $hosts_id = $service->fields['hosts_id'];
+         $hosts_id = $service->fields['plugin_siem_hosts_id'];
          $host = new PluginSiemHost();
          if (!$host->getFromDB($hosts_id)) {
             return [];

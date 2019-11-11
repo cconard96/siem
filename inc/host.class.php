@@ -110,6 +110,25 @@ class PluginSiemHost extends CommonDBTM
       return '#';
    }
 
+   static function getSpecificValueToDisplay($field, $values, array $options = []) {
+      global $DB;
+
+      switch ($field) {
+         case 'name':
+            $iterator = $DB->request([
+               'SELECT'    => ['name'],
+               'FROM'      => $values['itemtype']::getTable(),
+               'WHERE'     => ['id' => $values['items_id']]
+            ]);
+            if ($iterator->count()) {
+               return $iterator->next()['name'];
+            } else {
+               return null;
+            }
+      }
+      return parent::getSpecificValueToDisplay($field, $values, $options);
+   }
+
    function rawSearchOptions()
    {
       $tab = [];
@@ -248,7 +267,8 @@ class PluginSiemHost extends CommonDBTM
       }
       $toolbar .= "</div></div>";
       $out = $toolbar;
-      $out .= "<div id='host-info' class='w-25 float-right inline {$host_info_bg}'>";
+      $out .= "<div id='host-info-box'>";
+      $out .= "<div id='host-info' class='w-25 inline-block {$host_info_bg}'>";
       $out .= "<table class='text-center w-100'><thead><tr>";
       $out .= "<th colspan='2'><h3>{$status}</h3></th>";
       $out .= "</tr></thead><tbody>";
@@ -256,7 +276,7 @@ class PluginSiemHost extends CommonDBTM
          $out .= "<tr><td><p style='font-size: 1.5em; margin: 0px'>{$label}</p><p style='font-size: 1.25em; margin: 0px'>{$value}</p></td></tr>";
       }
       $out .= '</tbody></table></div>';
-      $out .= "<div id='host-service-info' class='inline float-left w-75'>";
+      $out .= "<div id='host-service-info' class='inline-block w-75'>";
       if ($this->getAvailabilityService()) {
          $host_service = $this->getAvailabilityService();
          $calendar_name = __('Unspecified');
@@ -300,6 +320,7 @@ class PluginSiemHost extends CommonDBTM
             $out .= "</tr>";
          }
          $out .= '</tbody></table>';
+         $out .= "</div>";
 
       } else {
          $form_url = self::getFormURL(true);
@@ -373,6 +394,12 @@ class PluginSiemHost extends CommonDBTM
          $servicetable = PluginSiemService::getTable();
          $templatetable = PluginSiemServiceTemplate::getTable();
          $iterator = $DB->request([
+            'SELECT' => [
+               $servicetable.'.*',
+               $templatetable.'.name',
+               $templatetable.'.plugins_id',
+               $templatetable.'.sensor'
+            ],
             'FROM' => $servicetable,
             'LEFT JOIN' => [
                $templatetable => [
@@ -411,5 +438,16 @@ class PluginSiemHost extends CommonDBTM
          return true;
       }
       return false;
+   }
+
+   /**
+    * Gets the asset that this host is tied to
+    */
+   public function getItemInfo()
+   {
+      $itemtype = $this->fields['itemtype'];
+      $item = new $itemtype();
+      $match = $item->find(['id' => $this->fields['items_id']]);
+      return reset($match);
    }
 }

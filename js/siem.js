@@ -102,7 +102,7 @@
          });
       };
 
-      function toggleEventDetails(row) {
+      this.toggleEventDetails = function(row) {
          var id = $(row).attr('id');
          var content_row = $("#" + id + "_content");
 
@@ -114,7 +114,7 @@
                content_row.attr('hidden', 'hidden');
             }
          }
-      }
+      };
 
       this.updateSensorDropdown = function(plugin_dropdown, sensor_dropdown, linked_btn) {
          var selected_plugin = $(plugin_dropdown).val();

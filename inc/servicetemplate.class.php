@@ -175,8 +175,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
       Dropdown::showFromArray('sensor', [], [
          'rand'      => $rand,
          'disabled'  => true,
-         'value'  => isset($this->fields['sensor']) && !empty($this->fields['sensor']) ?
-            $this->fields['sensor'] : 0
+         'value'  => isset($this->fields['sensor']) ? $this->fields['sensor'] : 0
       ]);
       echo Html::scriptBlock("$(document).ready(function() {\$('#dropdown_plugins_id$rand').trigger('change')});");
       echo "</td>";
@@ -267,5 +266,51 @@ class PluginSiemServiceTemplate extends CommonDBTM
       $this->showFormButtons($options);
 
       return true;
+   }
+
+   /**
+    * Show a list of all hosts with services using this template
+    */
+   function showHosts()
+   {
+
+   }
+
+   /**
+    * Show a list of all services using this template
+    */
+   function showServices()
+   {
+      $siemservice = new PluginSiemService();
+      $siemhost = new PluginSiemHost();
+      $services = $siemservice->find(['plugin_siem_servicetemplates_id' => $this->getID()]);
+
+      echo "<table><tr>";
+      echo "<th>".__('Host')."</th>";
+      echo "<th>".__('Last check')."</th>";
+      echo "<th>".__('Status')."</th>";
+      echo "<th>".__('Is hard')."</th>";
+      echo "<th>".__('Is flapping')."</th>";
+      echo "<th>".__('Is acknowledged')."</th>";
+      echo "<th>".__('Is active')."</th>";
+      echo "</tr>";
+      if (!count($services)) {
+         echo "<tr><td colspan='7'>".__('No services')."</td></tr>";
+      } else {
+         foreach ($services as $service) {
+            $host = $siemhost->find(['id' => 'plugin_siem_hosts_id']);
+            $host = reset($host);
+            $assetinfo = $host->getItemInfo();
+            echo "<tr>";
+            echo "<td>".Html::link($assetinfo['name'], $host['itemtype']::getFormURLWithID($host['items_id']))."</td>";
+            echo "<td>".PluginSiemToolbox::getHumanReadableTimeDiff($service['last_check'])."</td>";
+            echo "<td>".PluginSiemService::getStatusName($service['status'])."</td>";
+            echo "<td>".$service['is_hard'] ? __('True') : __('False')."</td>";
+            echo "<td>".$service['is_flapping'] ? __('True') : __('False')."</td>";
+            echo "<td>".$service['is_acknowledged'] ? __('True') : __('False')."</td>";
+            echo "<td>".$service['is_active'] ? __('True') : __('False')."</td>";
+            echo "</tr>";
+         }
+      }
    }
 }
