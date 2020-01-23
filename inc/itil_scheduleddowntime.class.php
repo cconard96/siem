@@ -40,14 +40,14 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
    static public $items_id_2 = 'items_id';
    static public $checkItem_2_Rights = self::HAVE_VIEW_RIGHT_ON_ITEM;
 
-   function getForbiddenStandardMassiveAction()
+   public function getForbiddenStandardMassiveAction()
    {
       $forbidden = parent::getForbiddenStandardMassiveAction();
       $forbidden[] = 'update';
       return $forbidden;
    }
 
-   function canCreateItem()
+   public function canCreateItem()
    {
       $downtime = new PluginSiemScheduledDowntime();
       if ($downtime->canUpdateItem()) {
@@ -56,29 +56,29 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
       return parent::canCreateItem();
    }
 
-   function post_addItem()
+   public function post_addItem()
    {
       $downtime = new PluginSiemScheduledDowntime();
       $input = [
          'id' => $this->fields[self::$items_id_1],
-         'date_mod' => $_SESSION["glpi_currenttime"],
+         'date_mod' => $_SESSION['glpi_currenttime'],
       ];
       $downtime->update($input);
       parent::post_addItem();
    }
 
-   function post_purgeItem()
+   public function post_purgeItem()
    {
       $downtime = new PluginSiemScheduledDowntime();
       $input = [
          'id' => $this->fields[self::$items_id_1],
-         'date_mod' => $_SESSION["glpi_currenttime"],
+         'date_mod' => $_SESSION['glpi_currenttime'],
       ];
       $downtime->update($input);
       parent::post_purgeItem();
    }
 
-   function prepareInputForAdd($input)
+   public function prepareInputForAdd($input)
    {
       // Avoid duplicate entry
       if (countElementsInTable($this->getTable(), [self::$items_id_1 => $input[self::$items_id_1],
@@ -93,8 +93,8 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
     * Display events for an item
     *
     * @param $item            CommonDBTM object for which the event tab need to be displayed
-    * @param $withtemplate    withtemplate param (default 0)
-    **/
+    * @param int $withtemplate withtemplate param (default 0)
+    */
    static function showForItil(CommonDBTM $item, $withtemplate = 0)
    {
       PluginSiemScheduledDowntime::showListForItil(false, $item);

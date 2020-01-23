@@ -221,6 +221,8 @@ function plugin_siem_translateEventName($name) {
    switch ($name) {
       case 'sensor_ping_ok':
          return __('Ping OK', 'siem');
+      case 'sensor_ping_notok':
+         return __('Ping not OK', 'siem');
       case 'sensor_http_ok_ok':
          return __('HTTP OK', 'siem');
       case 'sensor_http_ok_error':

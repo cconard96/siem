@@ -36,6 +36,7 @@ class PluginSiemSensorHttp_OK extends PluginSiemSensor
             return [];
          }
          $hosttype = $host->fields['itemtype'];
+         /** @var CommonDBTM $host_item */
          $host_item = new $hosttype();
          if (!$host_item->getFromDB($host->fields['items_id'])) {
             return [];

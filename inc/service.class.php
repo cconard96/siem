@@ -30,7 +30,7 @@ class PluginSiemService extends CommonDBTM
 {
    use PluginSiemMonitored;
 
-   static $rightname = 'plugin_siem_service';
+   public static $rightname = 'plugin_siem_service';
 
    /** Service is functioning as expected. */
    const STATUS_OK = 0;
@@ -58,7 +58,7 @@ class PluginSiemService extends CommonDBTM
    protected $twig_compat = true;
 
 
-   static function getTypeName($nb = 0)
+   public static function getTypeName($nb = 0)
    {
       return _n('Service', 'Services', $nb, 'siem');
    }
@@ -116,8 +116,8 @@ class PluginSiemService extends CommonDBTM
       $last_check_diff = PluginSIEMToolbox::getHumanReadableTimeDiff($this->fields['last_check']);
       $service_stats = [
          PluginSiemHost::getTypeName(1) => $this->getHostName(),
-         __('Last status change') => (is_null($status_since_diff) ? __('No change') : $status_since_diff),
-         __('Last check') => (is_null($last_check_diff) ? __('Not checked') : $last_check_diff),
+         __('Last status change') => ($status_since_diff === null ? __('No change') : $status_since_diff),
+         __('Last check') => ($last_check_diff === null ? __('Not checked') : $last_check_diff),
          __('Flapping') => $this->isFlapping() ? __('Yes') : __('No')
       ];
       $toolbar_buttons = [
@@ -135,20 +135,20 @@ class PluginSiemService extends CommonDBTM
       $btn_classes = 'btn btn-primary mx-1';
       $toolbar = "<div id='service-actions-toolbar'><div class='btn-toolbar'>";
       foreach ($toolbar_buttons as $button) {
-         if ($button['type'] == 'button') {
+         if ($button['type'] === 'button') {
             $toolbar .= "<button type='button' class='{$btn_classes}' onclick='{$button['action']}'>{$button['label']}</button>";
-         } else if ($button['type'] == 'link') {
+         } else if ($button['type'] === 'link') {
             $toolbar .= "<a href='{$button['action']}' class='{$btn_classes}'>{$button['label']}</a>";
          }
       }
-      $toolbar .= "</div></div>";
+      $toolbar .= '</div></div>';
       $out = $toolbar;
       $out .= "<div id='service-info' class='inline'>";
       $out .= "<table class='text-center w-100'><thead><tr>";
       $out .= "<th colspan='2'><h3>{$status}</h3></th>";
-      $out .= "</tr></thead><tbody>";
+      $out .= '</tr></thead><tbody>';
       foreach ($service_stats as $label => $value) {
-         $out .= "<tr><td><p style='font-size: 1.5em; margin: 0px'>{$label}</p><p style='font-size: 1.25em; margin: 0px'>{$value}</p></td></tr>";
+         $out .= "<tr><td><p style='font-size: 1.5em; margin: 0'>{$label}</p><p style='font-size: 1.25em; margin: 0'>{$value}</p></td></tr>";
       }
       $out .= '</tbody></table></div>';
       return $out;
@@ -180,13 +180,14 @@ class PluginSiemService extends CommonDBTM
       $weight = 0.80;
       $state_changes = 0.00;
       $last_state = $flap_cache[0];
-      for ($i = 0; $i < count($flap_cache); $i++) {
-         if ($flap_cache[$i] != $last_state) {
+
+      foreach ($flap_cache as $iValue) {
+         if ($iValue !== $last_state) {
             $state_changes += $weight;
          }
          // Newer state changes are weighted heigher
          $weight += 0.02;
-         $last_state = $flap_cache[$i];
+         $last_state = $iValue;
       }
       $total_state_change = (int)(($state_changes / 20.00) * 100.00);
       if ($total_state_change < $this->fields['flap_threshold_low']) {
@@ -227,7 +228,7 @@ class PluginSiemService extends CommonDBTM
                'last_check' => $_SESSION['glpi_currenttime']
             ];
             // Stateful service checks
-            if ($significance == PluginSiemEvent::EXCEPTION && $last_status == self::STATUS_OK) {
+            if ($significance === PluginSiemEvent::EXCEPTION && $last_status === self::STATUS_OK) {
                if (!$in_downtime) {
                   // Transition to problem state
                   $to_update['_problem'] = true;
@@ -235,7 +236,7 @@ class PluginSiemService extends CommonDBTM
                      $to_update['is_hard_status'] = false;
                   }
                }
-            } else if ($significance == PluginSiemEvent::EXCEPTION && $last_status != self::STATUS_OK) {
+            } else if ($significance === PluginSiemEvent::EXCEPTION && $last_status !== self::STATUS_OK) {
                if (!$in_downtime) {
                   if (!$service->isHardStatus()) {
                      $to_update['current_check'] = $service->fields['current_check'] + 1;
@@ -244,15 +245,15 @@ class PluginSiemService extends CommonDBTM
                      }
                   }
                }
-            } else if ($significance == PluginSiemEvent::INFORMATION && $last_status != self::STATUS_OK) {
+            } else if ($significance === PluginSiemEvent::INFORMATION && $last_status !== self::STATUS_OK) {
                // Transition to recovery state
                $to_update['_recovery'] = true;
                // Recoveries should cancel all non-fixed, active downtimes
                if ($in_downtime) {
-                  $downtime = new PluginScheduledDowntime();
-                  $downtimes = PluginScheduledDowntime::getForHostOrService($service->getID());
+                  $downtime = new PluginSiemScheduledDowntime();
+                  $downtimes = PluginSiemScheduledDowntime::getForHostOrService($service->getID());
                   while ($data = $downtimes->next()) {
-                     if ($data['is_fixed'] == 0) {
+                     if ($data['is_fixed'] === 0) {
                         $downtime->update([
                            'id' => $data['id'],
                            '_cancel' => true
@@ -273,7 +274,7 @@ class PluginSiemService extends CommonDBTM
             // Check flapping state if not in downtime and if it is enabled
             $service->checkFlappingState();
             // Update status change timestamp if needed
-            if ($service->isFlapping() != $was_flapping || $last_status != $service->fields['status']) {
+            if ($service->isFlapping() !== $was_flapping || $last_status !== $service->fields['status']) {
                $service->update([
                   'id' => $service->getID(),
                   'status_since' => $_SESSION['glpi_currenttime']
@@ -338,7 +339,7 @@ class PluginSiemService extends CommonDBTM
       $host = new PluginSiemHost();
       $is_hostservice = false;
       if ($host = $this->getHost()) {
-         if ($host->fields['plugin_siem_services_id_availability'] == $this->getID()) {
+         if ($host->fields['plugin_siem_services_id_availability'] === $this->getID()) {
             $is_hostservice = true;
          }
       }
@@ -355,7 +356,7 @@ class PluginSiemService extends CommonDBTM
 //            $this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_RECOVERY, $this->isHardStatus());
 //         }
 //      }
-      if (isset($this->input['is_active']) && $this->input['is_active'] != $this->fields['is_active']) {
+      if (isset($this->input['is_active']) && $this->input['is_active'] !== $this->fields['is_active']) {
          if ($this->input['is_active']) {
             //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_ENABLE);
          } else {
@@ -376,7 +377,7 @@ class PluginSiemService extends CommonDBTM
          }
       }
       if (isset($this->input['use_flap_detection']) &&
-         $this->input['use_flap_detection'] != $this->fields['use_flap_detection']) {
+         $this->input['use_flap_detection'] !== $this->fields['use_flap_detection']) {
          if (!$this->input['use_flap_detection']) {
             if ($is_hostservice) {
                //$host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_DISABLE_FLAPPING);
@@ -384,7 +385,7 @@ class PluginSiemService extends CommonDBTM
                //$this->dispatchSIEMServiceEvent(SIEMServiceEvent::SERVICE_DISABLE_FLAPPING);
             }
          }
-      } else if (isset($this->input['is_flapping']) && $this->input['is_flapping'] != $this->fields['is_flapping']) {
+      } else if (isset($this->input['is_flapping']) && $this->input['is_flapping'] !== $this->fields['is_flapping']) {
          if ($this->input['is_flapping']) {
             if ($is_hostservice) {
                //$host->dispatchSIEMHostEvent(SIEMHostEvent::HOST_START_FLAPPING);
@@ -405,24 +406,24 @@ class PluginSiemService extends CommonDBTM
    {
       global $DB;
       $services = $host->getServices();
-      $out = "<form>";
+      $out = '<form>';
       $out .= "<table class='tab_cadre_fixe'><thead><tr><th colspan='4'>Services</th></tr>";
-      $out .= "<tr><th>" . __('Status') . "</th>";
-      $out .= "<th>" . __('Name') . "</th>";
-      $out .= "<th>" . __('Last status change') . "</th>";
-      $out .= "<th>" . __('Latest event') . "</th></tr></thead><tbody>";
+      $out .= '<tr><th>' . __('Status') . '</th>';
+      $out .= '<th>' . __('Name') . '</th>';
+      $out .= '<th>' . __('Last status change') . '</th>';
+      $out .= '<th>' . __('Latest event') . '</th></tr></thead><tbody>';
       foreach ($services as $service_id => $service) {
          $status = self::getStatusName($service['status']);
          $status_badges = [];
          $status_badge = 'badge badge-secondary';
          switch ($service['status']) {
-            case PluginSiemService::STATUS_OK:
+            case self::STATUS_OK:
                $status_badges[] = ['class' => 'badge badge-success', 'label' => $status];
                break;
-            case PluginSiemService::STATUS_CRITICAL:
+            case self::STATUS_CRITICAL:
                $status_badges[] = ['class' => 'badge badge-danger', 'label' => $status];
                break;
-            case PluginSiemService::STATUS_WARNING:
+            case self::STATUS_WARNING:
                $status_badges[] = ['class' => 'badge badge-warning', 'label' => $status];
                break;
          }
@@ -448,13 +449,13 @@ class PluginSiemService extends CommonDBTM
          $servicelink = Html::link($service['name'], self::getFormURLWithID($service_id));
          $out .= "</td><td>{$servicelink}</td>";
          $out .= "<td title='{$status_since}'>{$status_since_diff}</td>";
-         if (!is_null($eventdata)) {
+         if ($eventdata !== null) {
             $latest_event = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
             $out .= "<td>{$latest_event}</td>";
          } else {
-            $out .= "<td></td>";
+            $out .= '<td></td>';
          }
-         $out .= "</tr>";
+         $out .= '</tr>';
       }
       $out .= Html::closeForm(false);
       return $out;
@@ -487,7 +488,7 @@ class PluginSiemService extends CommonDBTM
    protected function getFormFieldsToDrop($add = false)
    {
       $fields = [];
-      if ($add == true) {
+      if ($add === true) {
          $fields[] = 'id';
          //FIXME Why isn't this field dropped on add form?
          $fields[] = 'last_check';
@@ -527,35 +528,35 @@ class PluginSiemService extends CommonDBTM
       ];
       $tab[] = [
          'id' => '4',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'items_id',
          'name' => __('Item ID'),
          'datatype' => 'number'
       ];
       $tab[] = [
          'id' => '5',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'status',
          'name' => __('Status'),
          'datatype' => 'specific'
       ];
       $tab[] = [
          'id' => '6',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'is_flapping',
          'name' => __('Is flapping'),
          'datatype' => 'bool'
       ];
       $tab[] = [
          'id' => '7',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'is_hard_status',
          'name' => __('Is hard status'),
          'datatype' => 'bool'
       ];
       $tab[] = [
          'id' => '19',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'date_mod',
          'name' => __('Last update'),
          'datatype' => 'datetime',
@@ -563,7 +564,7 @@ class PluginSiemService extends CommonDBTM
       ];
       $tab[] = [
          'id' => '121',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'date_creation',
          'name' => __('Creation date'),
          'datatype' => 'datetime',
@@ -573,7 +574,7 @@ class PluginSiemService extends CommonDBTM
       return $tab;
    }
 
-   static function getSpecificValueToDisplay($field, $values, array $options = [])
+   public static function getSpecificValueToDisplay($field, $values, array $options = [])
    {
 
       global $DB;
@@ -602,7 +603,7 @@ class PluginSiemService extends CommonDBTM
       return parent::getSpecificValueToDisplay($field, $values, $options);
    }
 
-   static function getDropdownForHost($hosts_id) {
+   public static function getDropdownForHost($hosts_id) {
       global $DB;
 
       $values = [];
@@ -632,14 +633,14 @@ class PluginSiemService extends CommonDBTM
       return Dropdown::showFromArray('plugin_siem_services_id', $values, ['display' => false]);
    }
 
-   function showForm($ID, $options = []) {
+   public function showForm($ID, $options = []) {
 
       $this->initForm($ID, $options);
       $this->showFormHeader($options);
 
-      echo "<tr><td>".PluginSiemServiceTemplate::getTypeName(1)."</td><td>";
+      echo '<tr><td>' .PluginSiemServiceTemplate::getTypeName(1). '</td><td>';
       echo Html::link($this->fields['name'], PluginSiemServiceTemplate::getFormURLWithID($this->fields['plugin_siem_servicetemplates_id']));
-      echo "</td></tr>";
+      echo '</td></tr>';
 
       $this->showFormButtons($options);
 

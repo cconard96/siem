@@ -35,7 +35,7 @@ class PluginSiemScheduledDowntime extends CommonDBTM
     * @param $nb : number of item in the type
     * @return string
     **/
-   static function getTypeName($nb = 0)
+   public static function getTypeName($nb = 0)
    {
       return _n('Scheduled Downtime', 'Scheduled Downtimes', $nb);
    }
@@ -58,10 +58,10 @@ class PluginSiemScheduledDowntime extends CommonDBTM
          "$downtimetable.is_service" => $is_service
       ];
 
-      if (!is_null($p['start'])) {
+      if ($p['start'] !== null) {
          $where[] = new QueryExpression("'{$p['start']}' >= begin_date");
       }
-      if (!is_null($p['end'])) {
+      if ($p['end'] !== null) {
          $where[] = new QueryExpression("'{$p['end']}' <= end_date");
       }
 
@@ -87,10 +87,10 @@ class PluginSiemScheduledDowntime extends CommonDBTM
 
       $iterator = $DB->request([
          'SELECT' => ['is_service', 'items_id'],
-         'FROM' => PluginSiemScheduledDowntime::getTable(),
+         'FROM' => self::getTable(),
          'WHERE' => [
-            new QueryExpression("begin_date <= NOW()"),
-            new QueryExpression("end_date >= NOW()")
+            new QueryExpression('begin_date <= NOW()'),
+            new QueryExpression('end_date >= NOW()')
          ]
       ]);
 

@@ -33,7 +33,7 @@ class PluginSIEMNotificationTargetHost extends NotificationTarget
 {
 
 
-   function getEvents()
+   public function getEvents()
    {
       return [
          'recovery_soft' => __('Soft recovery'),
@@ -47,7 +47,7 @@ class PluginSIEMNotificationTargetHost extends NotificationTarget
    }
 
 
-   function addDataForTemplate($event, $options = [])
+   public function addDataForTemplate($event, $options = [])
    {
 
       $events = $this->getAllEvents();
@@ -68,7 +68,7 @@ class PluginSIEMNotificationTargetHost extends NotificationTarget
    }
 
 
-   function getTags()
+   public function getTags()
    {
 
       $tags = [

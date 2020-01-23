@@ -22,13 +22,13 @@
 
 $AJAX_INCLUDE = 1;
 include('../../../inc/includes.php');
-header("Content-Type: application/json; charset=UTF-8");
+header('Content-Type: application/json; charset=UTF-8');
 Html::header_nocache();
 
 global $PLUGIN_HOOKS;
 
 if (isset($_GET['plugins_id'])) {
-   if ($_GET['plugins_id'] == 0) {
+   if ($_GET['plugins_id'] === 0) {
       // GLPI Core
       // No internal sensors yet so return empty array
       echo '{}';

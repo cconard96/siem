@@ -21,46 +21,47 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access this file directly");
+   die("Sorry. You can't access this file directly");
 }
 
 class PluginSIEMRuleEventCollection extends RuleCollection
 {
 
-    // From RuleCollection
-    static $rightname             = 'rule_event';
-    public $stop_on_first_match   = true;
-    public $menu_option           = 'plugin_siem_rulesevent';
+   // From RuleCollection
+   public static $rightname = 'rule_event';
+   public $stop_on_first_match = true;
+   public $menu_option = 'plugin_siem_rulesevent';
 
 
-    function __construct($entity = 0)
-    {
-        $this->entity = $entity;
-    }
+   public function __construct($entity = 0)
+   {
+      parent::__construct();
+      $this->entity = $entity;
+   }
 
-    static function canView()
-    {
-        return Session::haveRightsOr(self::$rightname, [READ, PluginSIEMRuleEvent::PARENT]);
-    }
+   public static function canView()
+   {
+      return Session::haveRightsOr(self::$rightname, [READ, PluginSIEMRuleEvent::PARENT]);
+   }
 
-    function canList()
-    {
-        return static::canView();
-    }
+   public function canList()
+   {
+      return static::canView();
+   }
 
-    function getTitle()
-    {
-        return __('Business rules for events');
-    }
+   public function getTitle()
+   {
+      return __('Business rules for events');
+   }
 
-    function showInheritedTab()
-    {
-        return (Session::haveRight(self::$rightname, PluginSIEMRuleEvent::PARENT) && ($this->entity));
-    }
+   public function showInheritedTab()
+   {
+      return (Session::haveRight(self::$rightname, PluginSIEMRuleEvent::PARENT) && ($this->entity));
+   }
 
-    function showChildrensTab()
-    {
-        return (Session::haveRight(self::$rightname, READ)
-            && (count($_SESSION['glpiactiveentities']) > 1));
-    }
+   public function showChildrensTab()
+   {
+      return (Session::haveRight(self::$rightname, READ)
+         && (count($_SESSION['glpiactiveentities']) > 1));
+   }
 }

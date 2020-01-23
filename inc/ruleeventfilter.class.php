@@ -29,52 +29,52 @@ class PluginSIEMRuleEventFilter extends Rule
 {
 
    // From Rule
-   static $rightname = 'plugin_siem_rule_event';
+   public static $rightname = 'plugin_siem_rule_event';
    public $can_sort = true;
    const PARENT = 1024;
 
    const ONADD = 1;
 
-   function getTitle()
+   public function getTitle()
    {
       return __('Rules for event filtering');
    }
 
-   function maybeRecursive()
+   public function maybeRecursive()
    {
       return true;
    }
 
-   function isEntityAssign()
+   public function isEntityAssign()
    {
       return true;
    }
 
-   function canUnrecurs()
+   public function canUnrecurs()
    {
       return true;
    }
 
-   function maxActionsCount()
+   public function maxActionsCount()
    {
       return 1;
    }
 
-   function addSpecificParamsForPreview($params)
+   public function addSpecificParamsForPreview($params)
    {
-      if (!isset($params["entities_id"])) {
-         $params["entities_id"] = $_SESSION["glpiactive_entity"];
+      if (!isset($params['entities_id'])) {
+         $params['entities_id'] = $_SESSION['glpiactive_entity'];
       }
       return $params;
    }
 
-   function executeActions($output, $params, array $input = [])
+   public function executeActions($output, $params, array $input = [])
    {
       if (count($this->actions)) {
          foreach ($this->actions as $action) {
-            switch ($action->fields["action_type"]) {
+            switch ($action->fields['action_type']) {
                case 'assign':
-                  $output[$action->fields["field"]] = $action->fields["value"];
+                  $output[$action->fields['field']] = $action->fields['value'];
                   break;
             }
          }
@@ -82,13 +82,13 @@ class PluginSIEMRuleEventFilter extends Rule
       return $output;
    }
 
-   function preProcessPreviewResults($output)
+   public function preProcessPreviewResults($output)
    {
       $output = parent::preProcessPreviewResults($output);
       return Ticket::showPreviewAssignAction($output);
    }
 
-   function getCriterias()
+   public function getCriterias()
    {
       static $criterias = [];
 
@@ -134,12 +134,12 @@ class PluginSIEMRuleEventFilter extends Rule
       return $criterias;
    }
 
-   static function getConditionsArray()
+   public static function getConditionsArray()
    {
       return [static::ONADD => __('Add')];
    }
 
-   function getActions()
+   public function getActions()
    {
       $actions = [];
       $actions['accept']['name'] = __('Acceptance');
@@ -150,7 +150,7 @@ class PluginSIEMRuleEventFilter extends Rule
       return $actions;
    }
 
-   function getRights($interface = 'central')
+   public function getRights($interface = 'central')
    {
       $values = parent::getRights();
       //TRANS: short for : Business rules for ticket (entity parent)

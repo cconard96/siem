@@ -53,15 +53,15 @@ class PluginSiemEventManagement
          'acknowledged' => 0,
          'scheduleddown' => 0,
       ];
-      $actively_down = [
-         'SIEMService' => [],
-         'SIEMHost' => []
-      ];
+//      $actively_acknowledged = [
+//         'SIEMService' => [],
+//         'SIEMHost' => []
+//      ];
       $actively_acknowledged = PluginSiemAcknowledgement::getActivelyAcknowldged();
-      $actively_down = [
-         'SIEMService' => [],
-         'SIEMHost' => []
-      ];
+//      $actively_down = [
+//         'SIEMService' => [],
+//         'SIEMHost' => []
+//      ];
       $actively_down = PluginSiemScheduledDowntime::getActivelyDown();
       $iterator = $DB->request([
          'SELECT' => ['glpi_plugin_siem_hosts.id', 'status', 'is_reachable'],
@@ -77,10 +77,10 @@ class PluginSiemEventManagement
       ]);
       while ($data = $iterator->next()) {
          if (isset($actively_acknowledged['PluginSiemHost']) &&
-            (in_array($data['id'], $actively_acknowledged['PluginSiemHost']))) {
+            (in_array($data['id'], $actively_acknowledged['PluginSiemHost'], true))) {
             $host_statuses['acknowledged']++;
          } else if (isset($actively_down['PluginSiemHost']) &&
-            (in_array($data['id'], $actively_down['PluginSiemHost']))) {
+            (in_array($data['id'], $actively_down['PluginSiemHost'], true))) {
             $host_statuses['scheduleddown']++;
          } else if (!$data['is_reachable']) {
             $host_statuses['unreachable']++;
@@ -105,10 +105,10 @@ class PluginSiemEventManagement
       ]);
       while ($data = $iterator->next()) {
          if (isset($actively_acknowledged['PluginSiemService']) &&
-            (in_array($data['id'], $actively_acknowledged['PluginSiemService']))) {
+            (in_array($data['id'], $actively_acknowledged['PluginSiemService'], true))) {
             $service_statuses['acknowledged']++;
          } else if (isset($actively_down['PluginSiemService']) &&
-            (in_array($data['id'], $actively_down['PluginSiemService']))) {
+            (in_array($data['id'], $actively_down['PluginSiemService'], true))) {
             $service_statuses['scheduleddown']++;
          } else {
             switch ($data['status']) {
@@ -243,7 +243,7 @@ class PluginSiemEventManagement
                'value' => $alert['date']
             ],
             [
-               'value' => substr(json_decode($alert['content']), 0, 100)
+               'value' => substr(json_decode($alert['content'], false), 0, 100)
             ]
          ];
       }
@@ -329,10 +329,8 @@ class PluginSiemEventManagement
    /**
     * Get the dashboard page URL for the current class
     *
-    * @param bool $full True if the full path is returned, otherwise it is a relative path.
     * @return string
     * @since 1.0.0
-    *
     */
    public static function getDashboardURL()
    {

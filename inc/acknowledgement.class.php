@@ -39,7 +39,9 @@ class PluginSiemAcknowledgement extends CommonDBTM
    /**
     *
     * @param PluginSiemMonitored $itemtype
-    * @param PluginSiemMonitored $items_id
+    * @param int $items_id
+    * @param string $comment
+    * @param array $params
     * @return bool True if the item was acknowledged. False if an error occurred or it is already acknowledged.
     * @since 1.0.0
     */
@@ -57,6 +59,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
          return false;
       }
 
+      /** @var PluginSiemMonitored|CommonDBTM $item */
       $item = new $itemtype();
       if ($item->isScheduledDown() || !$item->isAlertStatus()) {
          // Cannot acknowledge an item during scheduled downtime
@@ -95,7 +98,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
    {
       $user = new User();
       $user_name = getUserName($this->fields['users_id']);
-      if (strlen($user_name) === 0) {
+      if ($user_name === '') {
          return __('Anonymous');
       }
       return $user_name;
@@ -104,7 +107,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
    public function isExpired()
    {
       $expiredate = $this->fields['date_expiration'];
-      return (!is_null($expiredate) && ($expiredate <= $_SESSION['glpi_currenttime']));
+      return ($expiredate !== null && ($expiredate <= $_SESSION['glpi_currenttime']));
    }
 
    public static function getForHost($host_id, $active = true)
@@ -141,7 +144,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
       if ($active) {
          $criteria['WHERE']['OR'] = [
             'date_expiration' => null,
-            new QueryExpression("date_expiration <= NOW()")
+            new QueryExpression('date_expiration <= NOW()')
          ];
          $criteria['LIMIT'] = 1;
       }
@@ -178,7 +181,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
          'WHERE' => [
             'OR' => [
                'date_expiration' => null,
-               new QueryExpression("date_expiration <= NOW()")
+               new QueryExpression('date_expiration <= NOW()')
             ]
          ]
       ]);
@@ -214,9 +217,9 @@ class PluginSiemAcknowledgement extends CommonDBTM
 
       $dispatcher = $CONTAINER->get(EventDispatcher::class);
 
-      if ($item->getType() == 'PluginSiemService') {
+      if ($item->getType() === 'PluginSiemService') {
          $dispatcher->dispatch(SIEMServiceEvent::SERVICE_ACKNOWLEDGE, new SIEMServiceEvent($this, $item));
-      } else if ($item->getType() == 'PluginSiemHost') {
+      } else if ($item->getType() === 'PluginSiemHost') {
          $dispatcher->dispatch(SIEMHostEvent::HOST_ACKNOWLEDGE, new SIEMHostEvent($this, $item));
       }
    }

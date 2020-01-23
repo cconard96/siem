@@ -40,14 +40,14 @@ class PluginSIEMItil_Event extends CommonDBRelation
    static public $items_id_2 = 'items_id';
    static public $checkItem_2_Rights = self::HAVE_VIEW_RIGHT_ON_ITEM;
 
-   function getForbiddenStandardMassiveAction()
+   public function getForbiddenStandardMassiveAction()
    {
       $forbidden = parent::getForbiddenStandardMassiveAction();
       $forbidden[] = 'update';
       return $forbidden;
    }
 
-   function canCreateItem()
+   public function canCreateItem()
    {
       $event = new PluginSiemEvent();
       if ($event->canUpdateItem()) {
@@ -56,7 +56,7 @@ class PluginSIEMItil_Event extends CommonDBRelation
       return parent::canCreateItem();
    }
 
-   function prepareInputForAdd($input)
+   public function prepareInputForAdd($input)
    {
       // Avoid duplicate entry
       if (countElementsInTable($this->getTable(), ['plugin_siem_events_id' => $input['plugin_siem_events_id'],
@@ -67,7 +67,7 @@ class PluginSIEMItil_Event extends CommonDBRelation
       return parent::prepareInputForAdd($input);
    }
 
-   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
+   public function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
    {
       if (!$withtemplate) {
          $nb = 0;
@@ -96,7 +96,7 @@ class PluginSIEMItil_Event extends CommonDBRelation
       return '';
    }
 
-   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
+   public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       switch ($item->getType()) {
          case 'PluginSIEMEvent' :
@@ -113,9 +113,9 @@ class PluginSIEMItil_Event extends CommonDBRelation
     * Display events for an item
     *
     * @param $item            CommonDBTM object for which the event tab need to be displayed
-    * @param $withtemplate    withtemplate param (default 0)
-    **/
-   static function showForItil(CommonDBTM $item, $withtemplate = 0)
+    * @param int $withtemplate withtemplate param (default 0)
+    */
+   public static function showForItil(CommonDBTM $item, $withtemplate = 0)
    {
       PluginSiemEvent::showListForItil(false, $item);
    }

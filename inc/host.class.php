@@ -40,12 +40,12 @@ class PluginSiemHost extends CommonDBTM
    /** Host is not reachable because an upstream device is down. */
    const STATUS_UNREACHABLE = 3;
 
-   static function getTypeName($nb = 0)
+   public static function getTypeName($nb = 0)
    {
       return _n('Host', 'Hosts', $nb, 'siem');
    }
 
-   function defineTabs($options = [])
+   public function defineTabs($options = [])
    {
       $ong = [];
       $this->addDefaultFormTab($ong)
@@ -53,7 +53,7 @@ class PluginSiemHost extends CommonDBTM
       return $ong;
    }
 
-   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
+   public function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
    {
       if (!$withtemplate) {
          $nb = 0;
@@ -67,7 +67,7 @@ class PluginSiemHost extends CommonDBTM
       return '';
    }
 
-   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
+   public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       switch ($item->getType()) {
          case 'PluginSiemHost' :
@@ -92,7 +92,7 @@ class PluginSiemHost extends CommonDBTM
       }
    }
 
-   static function getFormURLWithID($id = 0, $full = true)
+   public static function getFormURLWithID($id = 0, $full = true)
    {
       global $DB;
       $iterator = $DB->request([
@@ -110,7 +110,7 @@ class PluginSiemHost extends CommonDBTM
       return '#';
    }
 
-   static function getSpecificValueToDisplay($field, $values, array $options = []) {
+   public static function getSpecificValueToDisplay($field, $values, array $options = []) {
       global $DB;
 
       switch ($field) {
@@ -129,7 +129,7 @@ class PluginSiemHost extends CommonDBTM
       return parent::getSpecificValueToDisplay($field, $values, $options);
    }
 
-   function rawSearchOptions()
+   public function rawSearchOptions()
    {
       $tab = [];
       $tab[] = [
@@ -138,7 +138,7 @@ class PluginSiemHost extends CommonDBTM
       ];
       $tab[] = [
          'id' => '2',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'id',
          'name' => __('ID'),
          'massiveaction' => false,
@@ -146,14 +146,14 @@ class PluginSiemHost extends CommonDBTM
       ];
       $tab[] = [
          'id' => '3',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'itemtype',
          'name' => __('Item type'),
          'datatype' => 'itemtypename'
       ];
       $tab[] = [
          'id' => '4',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'items_id',
          'name' => __('Item ID'),
          'datatype' => 'number'
@@ -168,7 +168,7 @@ class PluginSiemHost extends CommonDBTM
       ];
       $tab[] = [
          'id' => '19',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'date_mod',
          'name' => __('Last update'),
          'datatype' => 'datetime',
@@ -176,7 +176,7 @@ class PluginSiemHost extends CommonDBTM
       ];
       $tab[] = [
          'id' => '121',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'date_creation',
          'name' => __('Creation date'),
          'datatype' => 'datetime',
@@ -212,7 +212,7 @@ class PluginSiemHost extends CommonDBTM
       }
       // Load and cache availability service in case of multiple calls per page
       static $service = null;
-      if ($service == null) {
+      if ($service === null) {
          $service = new PluginSiemService();
          if (!$service->getFromDB($this->fields['plugin_siem_services_id_availability'])) {
             return null;
@@ -226,13 +226,13 @@ class PluginSiemHost extends CommonDBTM
       global $DB;
 
       $host_info_bg = $this->getBackgroundColorClass();
-      $status = self::getStatusName($this->getStatus());
+      $status = $this->getCurrentStatusName();
       if ($this->getAvailabilityService()) {
          $status_since_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusChange());
          $last_check_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusCheck());
          $host_stats = [
-            __('Last status change') => (is_null($status_since_diff) ? __('No change') : $status_since_diff),
-            __('Last check') => (is_null($last_check_diff) ? __('Not checked') : $last_check_diff),
+            __('Last status change') => ($status_since_diff === null ? __('No change') : $status_since_diff),
+            __('Last check') => ($last_check_diff === null ? __('Not checked') : $last_check_diff),
             __('Flapping') => $this->isFlapping() ? __('Yes') : __('No')
          ];
       } else {
@@ -265,13 +265,13 @@ class PluginSiemHost extends CommonDBTM
       foreach ($toolbar_buttons as $button) {
          $toolbar .= "<button type='button' class='{$btn_classes}' onclick='{$button['action']}'>{$button['label']}</button>";
       }
-      $toolbar .= "</div></div>";
+      $toolbar .= '</div></div>';
       $out = $toolbar;
       $out .= "<div id='host-info-box'>";
       $out .= "<div id='host-info' class='w-25 inline-block {$host_info_bg}'>";
       $out .= "<table class='text-center w-100'><thead><tr>";
       $out .= "<th colspan='2'><h3>{$status}</h3></th>";
-      $out .= "</tr></thead><tbody>";
+      $out .= '</tr></thead><tbody>';
       foreach ($host_stats as $label => $value) {
          $out .= "<tr><td><p style='font-size: 1.5em; margin: 0px'>{$label}</p><p style='font-size: 1.25em; margin: 0px'>{$value}</p></td></tr>";
       }
@@ -280,7 +280,7 @@ class PluginSiemHost extends CommonDBTM
       if ($this->getAvailabilityService()) {
          $host_service = $this->getAvailabilityService();
          $calendar_name = __('Unspecified');
-         if (!is_null($host_service->fields['calendars_id'])) {
+         if ($host_service->fields['calendars_id'] !== null) {
             $iterator = $DB->request([
                'SELECT' => ['name'],
                'FROM' => Calendar::getTable(),
@@ -292,9 +292,9 @@ class PluginSiemHost extends CommonDBTM
          }
          $service_name = $host_service->fields['name'];
          $check_mode = PluginSiemService::getCheckModeName($host_service->fields['check_mode']);
-         $check_interval = !is_null($host_service->fields['check_interval']) ?
+         $check_interval = $host_service->fields['check_interval'] !== null ?
             $host_service->fields['check_interval'] : __('Unspecified');
-         $notif_interval = !is_null($host_service->fields['notificationinterval']) ?
+         $notif_interval = $host_service->fields['notificationinterval'] !== null ?
             $host_service->fields['notificationinterval'] : __('Unspecified');
          $service_stats = [
             [
@@ -310,24 +310,24 @@ class PluginSiemHost extends CommonDBTM
                __('Flap detection') => $host_service->fields['use_flap_detection'] ? __('Yes') : __('No')
             ]
          ];
-         $out .= "<h3>" . __('Availability service info') . "</h3>";
+         $out .= '<h3>' . __('Availability service info') . '</h3>';
          $out .= "<table class='text-center w-100'><tbody>";
          foreach ($service_stats as $statrow) {
-            $out .= "<tr>";
+            $out .= '<tr>';
             foreach ($statrow as $label => $value) {
                $out .= "<td><p style='font-size: 1.5em; margin: 0px'>{$label}</p><p style='font-size: 1.25em; margin: 0px'>{$value}</p></td>";
             }
-            $out .= "</tr>";
+            $out .= '</tr>';
          }
          $out .= '</tbody></table>';
-         $out .= "</div>";
+         $out .= '</div>';
 
       } else {
          $form_url = self::getFormURL(true);
          $out .= "<form method='POST' action='$form_url'>";
          $out .= Html::hidden('id', ['value' => $this->fields['id']]);
          $out .= '<fieldset>';
-         $out .= "<legend>" . __('Service') . "</legend>";
+         $out .= '<legend>' . __('Service') . '</legend>';
          $out .= PluginSiemService::getDropdownForHost($this->getID());
          $out .= Html::submit(__('Set availability service'), [
             'name' => 'set_host_service',
@@ -336,7 +336,7 @@ class PluginSiemHost extends CommonDBTM
          $out .= '</fieldset>';
          $out .= Html::closeForm(false);
       }
-      $out .= "</div>";
+      $out .= '</div>';
       return $out;
    }
 
@@ -433,7 +433,7 @@ class PluginSiemHost extends CommonDBTM
       $match = $service->find([
          'id'  => $services_id
       ]);
-      if (count($match) && reset($match)['plugin_siem_hosts_id'] == $this->getID()) {
+      if (count($match) && reset($match)['plugin_siem_hosts_id'] === $this->getID()) {
          $DB->update(self::getTable(), ['plugin_siem_services_id_availability' => $services_id], ['id' => $this->getID()]);
          return true;
       }

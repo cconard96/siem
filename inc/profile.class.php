@@ -32,7 +32,7 @@ class PluginSiemProfile extends Profile
 {
    static $rightname = "config";
 
-   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
+   public function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
    {
       return self::createTabEntry(__('SIEM Plugin', 'siem'));
    }
@@ -40,7 +40,7 @@ class PluginSiemProfile extends Profile
    static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       $siemprofile = new self();
-      if ($item->fields['interface'] == 'central') {
+      if ($item->fields['interface'] === 'central') {
          $siemprofile->showForm($item->getID());
       } else {
          return false;
@@ -56,7 +56,7 @@ class PluginSiemProfile extends Profile
     * @param bool $closeform Close the form (true by default)
     * @return void|bool
     **/
-   function showForm($profiles_id = 0, $openform = true, $closeform = true)
+   public function showForm($profiles_id = 0, $openform = true, $closeform = true)
    {
       global $CFG_GLPI;
       if (!self::canView()) {
@@ -65,8 +65,7 @@ class PluginSiemProfile extends Profile
       echo "<div class='spaced'>";
       $profile = new Profile();
       $profile->getFromDB($profiles_id);
-      if (($canedit = Session::haveRightsOr(self::$rightname, [CREATE, UPDATE, PURGE]))
-         && $openform) {
+      if ($openform && ($canedit = Session::haveRightsOr(self::$rightname, [CREATE, UPDATE, PURGE]))) {
          echo "<form method='post' action='" . $profile->getFormURL() . "'>";
       }
       $rights = [['itemtype' => 'PluginSiemHost',
@@ -88,6 +87,6 @@ class PluginSiemProfile extends Profile
          echo "</div>\n";
          Html::closeForm();
       }
-      echo "</div>";
+      echo '</div>';
    }
 }

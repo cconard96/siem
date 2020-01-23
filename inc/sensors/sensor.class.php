@@ -39,8 +39,8 @@ class PluginSiemSensor
 
    }
 
-   public static final function invokePoll($service_ids = [])
+   final public static function invokePoll($service_ids = [])
    {
-
+      return static::poll($service_ids);
    }
 }

@@ -26,7 +26,7 @@
  */
 class PluginSiemMenu extends CommonGLPI
 {
-   static function getMenuName()
+   public static function getMenuName()
    {
       return __('SIEM plugin', 'siem');
    }

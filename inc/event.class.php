@@ -86,12 +86,12 @@ class PluginSiemEvent extends CommonDBTM
     */
    const STATUS_EXPIRED = 5;
 
-   static function getTypeName($nb = 0)
+   public static function getTypeName($nb = 0)
    {
       return _n('Event', 'Events', $nb);
    }
 
-   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
+   public function getTabNameForItem(CommonGLPI $item, $withtemplate = 0)
    {
       if (!$withtemplate) {
          $nb = 0;
@@ -105,7 +105,7 @@ class PluginSiemEvent extends CommonDBTM
       return '';
    }
 
-   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
+   public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       switch ($item->getType()) {
          case 'PluginSIEMEvent' :
@@ -118,15 +118,15 @@ class PluginSiemEvent extends CommonDBTM
       return true;
    }
 
-   static function getForbiddenActionsForMenu()
+   public static function getForbiddenActionsForMenu()
    {
       return ['add'];
    }
 
-   static function getAdditionalMenuContent()
+   public static function getAdditionalMenuContent()
    {
       $menu['plugin_siem_event']['title'] = __('Event Management');
-      $menu['plugin_siem_event']['page'] = PluginSiemEventManagement::getDashboardURL(false);
+      $menu['plugin_siem_event']['page'] = PluginSiemEventManagement::getDashboardURL();
       $menu['plugin_siem_event']['options']['PluginSiemHost']['title'] = PluginSiemHost::getTypeName(2);
       $menu['plugin_siem_event']['options']['PluginSiemHost']['page'] = PluginSiemHost::getSearchURL(false);
       $menu['plugin_siem_event']['options']['PluginSiemHost']['links']['search'] = PluginSiemHost::getSearchURL(false);
@@ -138,11 +138,11 @@ class PluginSiemEvent extends CommonDBTM
       return $menu;
    }
 
-   function prepareInputForAdd($input)
+   public function prepareInputForAdd($input)
    {
       $input = parent::prepareInputForAdd($input);
       // All events must be associated to a service or have a service id of -1 for internal
-      if (!isset($input['plugin_siem_services_id']) && $input['plugin_siem_services_id'] != -1) {
+      if (!isset($input['plugin_siem_services_id']) && $input['plugin_siem_services_id'] !== -1) {
          return false;
       }
       if (isset($input['_sensor_fault'])) {
@@ -183,7 +183,7 @@ class PluginSiemEvent extends CommonDBTM
       return $input;
    }
 
-   function post_addItem()
+   public function post_addItem()
    {
       if (!isset($this->input['correlation_id']) && !isset($this->fields['correlation_id'])) {
          // Create a new correlation ID in case one isn't assigned by the correlation engine
@@ -206,7 +206,7 @@ class PluginSiemEvent extends CommonDBTM
       parent::post_addItem();
    }
 
-   function cleanDBonPurge()
+   public function cleanDBonPurge()
    {
       $this->deleteChildrenAndRelationsFromDb(
          [
@@ -225,7 +225,7 @@ class PluginSiemEvent extends CommonDBTM
     * @since 1.0.0
     *
     */
-   static function getSignificanceName($significance)
+   public static function getSignificanceName($significance)
    {
       switch ($significance) {
          case 1:
@@ -249,7 +249,7 @@ class PluginSiemEvent extends CommonDBTM
     *
     * @see Dropdown::showFromArray()
     */
-   static function dropdownSignificance(array $options = [])
+   public static function dropdownSignificance(array $options = [])
    {
       global $CFG_GLPI;
       $p = [
@@ -279,7 +279,7 @@ class PluginSiemEvent extends CommonDBTM
     * @since 1.0.0
     *
     */
-   static function getStatusName($status)
+   public static function getStatusName($status)
    {
       switch ($status) {
          case 0:
@@ -310,7 +310,7 @@ class PluginSiemEvent extends CommonDBTM
     *
     * @see Dropdown::showFromArray()
     */
-   static function dropdownStatus(array $options = [])
+   public static function dropdownStatus(array $options = [])
    {
       global $CFG_GLPI;
       $p = [
@@ -479,10 +479,11 @@ class PluginSiemEvent extends CommonDBTM
    /**
     * Get an associative array of event properties from the content JSON field
     *
-    * @param boolean $translate Attempt to translate the event properties.
+    * @param $content
+    * @param $plugins_id
+    * @param array $params
     * @return array|string Associative array or HTML display of event properties
     * @since 1.0.0
-    *
     */
    public static function getEventProperties($content, $plugins_id, $params = [])
    {
@@ -499,7 +500,7 @@ class PluginSiemEvent extends CommonDBTM
       } else {
          return '';
       }
-      if ($properties == null) {
+      if ($properties === null) {
          return '';
       }
       $props = [];
@@ -520,14 +521,14 @@ class PluginSiemEvent extends CommonDBTM
             Glpi\Event::translateEventProperties($props);
          }
       }
-      if ($p['format'] == 'array') {
+      if ($p['format'] === 'array') {
          return $props;
       } else {
          $text_content = '';
          foreach ($props as $event_property) {
             $propname = strip_tags($event_property['name']);
             $propvalue = strip_tags($event_property['value']);
-            if ($p['format'] == 'pretty') {
+            if ($p['format'] === 'pretty') {
                $text_content .= "<b>{$propname}</b>: {$propvalue}<br>";
             } else {
                $text_content .= "{$propname}: {$propvalue}<br>";
@@ -569,7 +570,7 @@ class PluginSiemEvent extends CommonDBTM
       global $DB;
       if (is_subclass_of($tracking_type, 'CommonITILObject')) {
          $tracking = new $tracking_type();
-         $content = PluginSiemEvent::getEventProperties($this->fields['content'], $this->fields['plugins_id'], [
+         $content = self::getEventProperties($this->fields['content'], $this->fields['plugins_id'], [
             'format' => 'plain'
          ]);
          $tracking_id = $tracking->add([
@@ -581,9 +582,9 @@ class PluginSiemEvent extends CommonDBTM
             return false;
          } else {
             // Add related items if they exist
-            if ($tracking_type == 'Change') {
+            if ($tracking_type === 'Change') {
                $items_tracking = 'glpi_items_changes';
-            } else if ($tracking_type == 'Problem') {
+            } else if ($tracking_type === 'Problem') {
                $items_tracking = 'glpi_items_problems';
             } else {
                $items_tracking = 'glpi_items_tickets';
@@ -609,10 +610,10 @@ class PluginSiemEvent extends CommonDBTM
                   'FROM' => $data['itemtype']::getTable(),
                   'WHERE' => ['id' => $data['items_id']]
                ])->next();
-               if (!is_null($actors['users_id_tech'])) {
+               if ($actors['users_id_tech'] !== null) {
                   $actors_responsible['user'][] = $actors['users_id_tech'];
                }
-               if (!is_null($actors['groups_id_tech'])) {
+               if ($actors['groups_id_tech'] !== null) {
                   $actors_responsible['group'][] = $actors['groups_id_tech'];
                }
             }
@@ -621,13 +622,13 @@ class PluginSiemEvent extends CommonDBTM
             $tracking_user = new $tracking->userlinkclass();
             $tracking_group = new $tracking->grouplinkclass();
             foreach ($actors_responsible as $type => $actor_id) {
-               if ($type == 'user') {
+               if ($type === 'user') {
                   $tracking_user->add([
                      'type' => CommonITILActor::ASSIGN,
                      'users_id' => $actor_id[0],
                      $tracking::getForeignKeyField() => $tracking_id
                   ]);
-               } else if ($type == 'group') {
+               } else if ($type === 'group') {
                   $tracking_group->add([
                      'type' => CommonITILActor::ASSIGN,
                      'groups_id' => $actor_id[0],
@@ -658,7 +659,7 @@ class PluginSiemEvent extends CommonDBTM
       ];
       $tab[] = [
          'id' => '1',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'name',
          'name' => __('Name'),
          'datatype' => 'itemlink',
@@ -666,7 +667,7 @@ class PluginSiemEvent extends CommonDBTM
       ];
       $tab[] = [
          'id' => '2',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'id',
          'name' => __('ID'),
          'massiveaction' => false,
@@ -674,35 +675,35 @@ class PluginSiemEvent extends CommonDBTM
       ];
       $tab[] = [
          'id' => '3',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'significance',
          'name' => __('Significance'),
          'datatype' => 'specific',
       ];
       $tab[] = [
          'id' => '4',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'correlation_id',
          'name' => __('Correlation ID'),
          'datatype' => 'string',
       ];
       $tab[] = [
          'id' => '5',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'plugins_id',
          'name' => __('Plugin'),
          'datatype' => 'string',
       ];
       $tab[] = [
          'id' => '16',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'content',
          'name' => __('Content'),
          'datatype' => 'text'
       ];
       $tab[] = [
          'id' => '19',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'date_mod',
          'name' => __('Last update'),
          'datatype' => 'datetime',
@@ -725,14 +726,14 @@ class PluginSiemEvent extends CommonDBTM
       ];
       $tab[] = [
          'id' => '86',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'is_recursive',
          'name' => __('Child entities'),
          'datatype' => 'bool'
       ];
       $tab[] = [
          'id' => '121',
-         'table' => $this->getTable(),
+         'table' => self::getTable(),
          'field' => 'date_creation',
          'name' => __('Creation date'),
          'datatype' => 'datetime',
@@ -741,18 +742,18 @@ class PluginSiemEvent extends CommonDBTM
       return $tab;
    }
 
-   static function showEventManagementTab(CommonDBTM $item)
+   public static function showEventManagementTab(CommonDBTM $item)
    {
       global $DB, $PLUGIN_HOOKS;
-      if (isset($_GET["start"])) {
-         $start = intval($_GET["start"]);
+      if (isset($_GET['start'])) {
+         $start = (int)$_GET['start'];
       } else {
          $start = 0;
       }
       $eventhost = new PluginSiemHost();
       $eventservice = new PluginSiemService();
       $matchinghosts = $eventhost->find(['items_id' => $item->getID(), 'itemtype' => $item::getType()], [], 1);
-      $has_host = (count($matchinghosts) == 1);
+      $has_host = (count($matchinghosts) === 1);
       $matchingservices = [];
       $has_services = false;
       if (!$has_host) {
@@ -764,16 +765,16 @@ class PluginSiemEvent extends CommonDBTM
          $has_services = (count($matchingservices) > 0);
       }
       if (!$has_host && !$has_services) {
-         echo "<div class='alert alert-warning'>" . __('This host is not monitored by any plugin') . "</div>";
+         echo "<div class='alert alert-warning'>" . __('This host is not monitored by any plugin') . '</div>';
          Html::showSimpleForm(PluginSiemHost::getFormURL(),
             'add', __('Enable monitoring'),
             ['itemtype' => $item->getType(),
                'items_id' => $item->getID()]);
          return;
       } else if (!$has_services) {
-         echo "<div class='alert alert-warning'>" . __('No services on this host are monitored by any plugin') . "</div>";
+         echo "<div class='alert alert-warning'>" . __('No services on this host are monitored by any plugin') . '</div>';
       } else if (!$eventhost->getAvailabilityService()) {
-         echo "<div class='alert alert-warning'>" . __('No host availability service set') . "</div>";
+         echo "<div class='alert alert-warning'>" . __('No host availability service set') . '</div>';
       }
       $out = $eventhost->getHostInfoDisplay();
       $out .= PluginSiemService::getFormForHost($eventhost);
@@ -784,11 +785,11 @@ class PluginSiemEvent extends CommonDBTM
       $historical = Html::printAjaxPager('', $start, count($events), '', false);
       $historical .= "<table class='tab_cadre_fixehov'><thead>";
       $historical .= "<tr><th colspan='5'>Historical</th></tr><tr><th></th>";
-      $historical .= "<th>" . __('Name') . "</th>";
-      $historical .= "<th>" . __('Significance') . "</th>";
-      $historical .= "<th>" . __('Date') . "</th>";
-      $historical .= "<th>" . __('Status') . "</th>";
-      $historical .= "</tr></thead><tbody>";
+      $historical .= '<th>' . __('Name') . '</th>';
+      $historical .= '<th>' . __('Significance') . '</th>';
+      $historical .= '<th>' . __('Date') . '</th>';
+      $historical .= '<th>' . __('Status') . '</th>';
+      $historical .= '</tr></thead><tbody>';
       $temp_service = new PluginSiemService();
       foreach ($events as $event) {
          $style = '';
@@ -797,10 +798,10 @@ class PluginSiemEvent extends CommonDBTM
          $temp_service->getFromDB($event['plugin_siem_services_id']);
          $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
          $event_class = 'tab_bg_2 ';
-         if ($event['significance'] == PluginSiemEvent::WARNING) {
+         if ($event['significance'] === PluginSiemEvent::WARNING) {
             $event_class .= 'bg-warning ';
             $icon = 'fas fa-exclamation-triangle';
-         } else if ($event['significance'] == PluginSiemEvent::EXCEPTION) {
+         } else if ($event['significance'] === PluginSiemEvent::EXCEPTION) {
             $event_class .= 'bg-danger ';
             $icon = 'fas fa-exclamation-circle';
          }
@@ -819,7 +820,7 @@ class PluginSiemEvent extends CommonDBTM
          ]);
          $historical .= "</p></td></tr>\n";
       }
-      $historical .= "</tbody></table>";
+      $historical .= '</tbody></table>';
       $historical .= Html::printAjaxPager('', $start, count($events), '', false);
       $out .= $historical;
       echo $out;
@@ -839,11 +840,11 @@ class PluginSiemEvent extends CommonDBTM
       $out = Html::printAjaxPager('', $p['start'], count($events), '', false);
       $out .= "<table class='tab_cadre_fixehov'><thead>";
       $out .= "<tr><th colspan='5'>Historical</th></tr><tr><th></th>";
-      $out .= "<th>" . __('Name') . "</th>";
-      $out .= "<th>" . __('Significance') . "</th>";
-      $out .= "<th>" . __('Date') . "</th>";
-      $out .= "<th>" . __('Status') . "</th>";
-      $out .= "</tr></thead><tbody>";
+      $out .= '<th>' . __('Name') . '</th>';
+      $out .= '<th>' . __('Significance') . '</th>';
+      $out .= '<th>' . __('Date') . '</th>';
+      $out .= '<th>' . __('Status') . '</th>';
+      $out .= '</tr></thead><tbody>';
       $temp_service = new PluginSiemService();
       foreach ($events as $event) {
          $style = '';
@@ -851,12 +852,12 @@ class PluginSiemEvent extends CommonDBTM
          $active = in_array($event['status'], self::getActiveStatusArray());
          $temp_service->getFromDB($event['plugin_siem_services_id']);
          $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
-         if ($event['significance'] == PluginSiemEvent::WARNING) {
+         if ($event['significance'] === self::WARNING) {
             if ($active) {
                $style = "style='background-color: {$_SESSION['glpieventwarning_color']}'";
             }
             $icon = 'fas fa-exclamation-triangle';
-         } else if ($event['significance'] == PluginSiemEvent::EXCEPTION) {
+         } else if ($event['significance'] === self::EXCEPTION) {
             if ($active) {
                $style = "style='background-color: {$_SESSION['glpieventexception_color']}'";
             }
@@ -864,12 +865,12 @@ class PluginSiemEvent extends CommonDBTM
          }
          $out .= "<tr id='siemevent_{$event['id']}' class='tab_bg_2' $style onclick='window.pluginSiem.toggleEventDetails(this);'>";
          $out .= "<td class='center'><i class='{$icon} fa-lg' title='" .
-            PluginSiemEvent::getSignificanceName($event['significance']) . "'/></td>";
+            self::getSignificanceName($event['significance']) . "'/></td>";
          $out .= "<td>{$localized_name}</td>";
-         $out .= "<td>" . self::getSignificanceName($event['significance']) . "</td>";
+         $out .= '<td>' . self::getSignificanceName($event['significance']) . '</td>';
          $out .= "<td>{$event['date']}</td>";
-         $out .= "<td>" . self::getStatusName($event['status']) . "</td>";
-         $out .= "</tr>";
+         $out .= '<td>' . self::getStatusName($event['status']) . '</td>';
+         $out .= '</tr>';
          $out .= "<tr id='siemevent_{$event['id']}_content' class='tab_bg_2' $style hidden='hidden'>";
          $out .= "<td colspan='6'><p>";
          $out .= self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
@@ -877,7 +878,7 @@ class PluginSiemEvent extends CommonDBTM
          ]);
          $out .= "</p></td></tr>\n";
       }
-      $out .= "</tbody></table>";
+      $out .= '</tbody></table>';
       $out .= Html::printAjaxPager('', $p['start'], count($events), '', false);
       return $out;
    }
@@ -909,13 +910,14 @@ class PluginSiemEvent extends CommonDBTM
    /**
     * Checks for any active or hybrid services that are due to check for events.
     * Then, signals the service's logger to poll for the events.
-    * @return void
+    * @param CronTask $task
+    * @return int
     * @since 1.0.0
     */
    public static function cronPollEvents(CronTask $task)
    {
       global $DB;
-      $event = new PluginSiemEvent();
+      $event = new self();
       $to_poll = $DB->request([
          'SELECT' => ['glpi_plugin_siem_services.id', 'plugins_id', 'sensor'],
          'FROM' => PluginSiemService::getTable(),
@@ -942,7 +944,7 @@ class PluginSiemEvent extends CommonDBTM
       $allservices = [];
       $poll_queue = [];
       while ($data = $to_poll->next()) {
-         array_push($allservices, $data['id']);
+         $allservices[] = $data['id'];
          $poll_queue[$data['plugins_id']][$data['sensor']][] = $data['id'];
       }
       $plugin = new Plugin();
@@ -958,13 +960,13 @@ class PluginSiemEvent extends CommonDBTM
       // Create event from the results
       foreach ($eventdatas as $logger => $sensors) {
          foreach ($sensors as $sensor => $results) {
-            if (!is_null($results) && is_array($results)) {
+            if ($results !== null && is_array($results)) {
                foreach ($results as $service_id => $result) {
-                  if (!is_null($result) && is_array($result)) {
+                  if ($result !== null && is_array($result)) {
                      $input = $result;
                      $input['plugin_siem_services_id'] = $service_id;
                      $event->add($input);
-                     array_push($reported, $service_id);
+                     $reported[] = $service_id;
                   }
                }
             }
@@ -981,11 +983,7 @@ class PluginSiemEvent extends CommonDBTM
          ]);
       }
       $task->addVolume(count($reported));
-      if (count($reported) > 0) {
-         return 1;
-      } else {
-         return 0;
-      }
+      return (count($reported) > 0) ? 1 : 0;
    }
 
    public static function getActiveAlerts()

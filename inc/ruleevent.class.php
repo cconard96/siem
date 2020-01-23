@@ -35,42 +35,37 @@ class PluginSIEMRuleEvent extends Rule
 
    const ONADD = 1;
 
-   function getTitle()
+   public function getTitle()
    {
       return __('Business rules for events');
    }
 
 
-   function maybeRecursive()
+   public function maybeRecursive()
    {
       return true;
    }
 
-   function isEntityAssign()
+   public function isEntityAssign()
    {
       return true;
    }
 
-   function canUnrecurs()
+   public function canUnrecurs()
    {
       return true;
    }
 
-   function maxActionsCount()
-   {
-      return 0;
-   }
-
-   function addSpecificParamsForPreview($params)
+   public function addSpecificParamsForPreview($params)
    {
 
-      if (!isset($params["entities_id"])) {
-         $params["entities_id"] = $_SESSION["glpiactive_entity"];
+      if (!isset($params['entities_id'])) {
+         $params['entities_id'] = $_SESSION['glpiactive_entity'];
       }
       return $params;
    }
 
-   function executeActions($output, $params, array $input = [])
+   public function executeActions($output, $params, array $input = [])
    {
       if (count($this->actions)) {
          $siemevent = new PluginSiemEvent();
@@ -78,7 +73,7 @@ class PluginSIEMRuleEvent extends Rule
             return $output;
          }
          foreach ($this->actions as $action) {
-            switch ($action->fields["action_type"]) {
+            switch ($action->fields['action_type']) {
                case 'assign_correlated' :
                   // Set field of all events correlated with this one (Example: Resolve all)
                   $siemevent->updateCorrelated([$action->fields['field'] => $action->fields['value']]);
@@ -87,21 +82,21 @@ class PluginSIEMRuleEvent extends Rule
          }
          //Ensure notification and tracking actions are run last
          foreach ($this->actions as $action) {
-            switch ($action->fields["action_type"]) {
-               case "send" :
-               case "send_email" :
+            switch ($action->fields['action_type']) {
+               case 'send' :
+               case 'send_email' :
                   NotificationEvent::raiseEvent('new', $siemevent);
                   break;
 
-               case "create_ticket" :
+               case 'create_ticket' :
                   $siemevent->createTracking('Ticket');
                   break;
 
-               case "create_change" :
+               case 'create_change' :
                   $siemevent->createTracking('Change');
                   break;
 
-               case "create_problem" :
+               case 'create_problem' :
                   $siemevent->createTracking('Problem');
                   break;
             }
@@ -110,7 +105,7 @@ class PluginSIEMRuleEvent extends Rule
       return $output;
    }
 
-   function getCriterias()
+   public function getCriterias()
    {
       static $criterias = [];
 
@@ -145,7 +140,7 @@ class PluginSIEMRuleEvent extends Rule
       return $criterias;
    }
 
-   function checkCriteria(&$criteria, &$input)
+   public function checkCriteria(&$criteria, &$input)
    {
       switch ($criteria) {
          default:
@@ -153,12 +148,12 @@ class PluginSIEMRuleEvent extends Rule
       }
    }
 
-   static function getConditionsArray()
+   public static function getConditionsArray()
    {
       return [static::ONADD => __('Add')];
    }
 
-   function getActions()
+   public function getActions()
    {
       $actions = [];
 
@@ -186,12 +181,12 @@ class PluginSIEMRuleEvent extends Rule
 
       $actions['name']['name'] = __('Name');
       $actions['name']['linkfield'] = 'name';
-      $actions['name']['table'] = $this->getTable();
+      $actions['name']['table'] = self::getTable();
       $actions['name']['force_actions'] = ['assign', 'assign_correlated'];
 
       $actions['significance']['name'] = __('Significance');
       $actions['significance']['type'] = 'dropdown_eventsignificance';
-      $actions['significance']['table'] = $this->getTable();
+      $actions['significance']['table'] = self::getTable();
       $actions['significance']['force_actions'] = ['assign', 'assign_correlated'];
 
       $actions['status']['name'] = __('Status');
@@ -201,7 +196,7 @@ class PluginSIEMRuleEvent extends Rule
       return $actions;
    }
 
-   function getRights($interface = 'central')
+   public function getRights($interface = 'central')
    {
 
       $values = parent::getRights();

@@ -32,7 +32,7 @@ trait PluginSiemMonitored
 {
    private function getMonitoredField($field)
    {
-      if (static::getType() == 'PluginSiemHost') {
+      if (static::getType() === 'PluginSiemHost') {
          $service = $this->getAvailabilityService();
          if ($service) {
             return $service->fields[$field];
@@ -57,19 +57,19 @@ trait PluginSiemMonitored
    public function isFlapping()
    {
       $flapping = $this->getMonitoredField('is_flapping');
-      return (!is_null($flapping) && $flapping);
+      return ($flapping !== null && $flapping);
    }
 
    public function getStatus()
    {
       $status = $this->getMonitoredField('status');
-      return !is_null($status) ? $status : PluginSiemHost::STATUS_UNKNOWN;
+      return $status !== null ? $status : PluginSiemHost::STATUS_UNKNOWN;
    }
 
    public function isHardStatus()
    {
       $flapping = $this->getMonitoredField('is_hard_status');
-      return (!is_null($flapping) && $flapping);
+      return ($flapping !== null && $flapping);
    }
 
    public function getLastStatusCheck()
@@ -88,7 +88,7 @@ trait PluginSiemMonitored
     */
    public function getCurrentStatusName()
    {
-      if (static::getType() == 'PluginSiemHost') {
+      if (static::getType() === 'PluginSiemHost') {
          if ($this->fields['is_reachable']) {
             return PluginSiemHost::getStatusName($this->getStatus());
          } else {
@@ -106,7 +106,7 @@ trait PluginSiemMonitored
    public function isScheduledDown()
    {
       static $is_scheduleddown = null;
-      if ($is_scheduleddown == null) {
+      if ($is_scheduleddown === null) {
          $iterator = PluginSiemScheduledDowntime::getForHostOrService($this->getID(), static::class == 'PluginSiemService');
          while ($data = $iterator->next()) {
             if ($data['is_fixed']) {
@@ -126,8 +126,8 @@ trait PluginSiemMonitored
    public function getHost()
    {
       static $host = null;
-      if ($host == null) {
-         if (static::getType() == 'PluginSiemHost') {
+      if ($host === null) {
+         if (static::getType() === 'PluginSiemHost') {
             return $this;
          } else {
             $host = new PluginSiemHost();
@@ -145,7 +145,7 @@ trait PluginSiemMonitored
    {
       global $DB;
 
-      if (static::class == 'PluginSiemHost') {
+      if (static::class === 'PluginSiemHost') {
          $hosttype = $this->fields['itemtype'];
          $iterator = $DB->request([
             'SELECT' => ['name'],
@@ -180,7 +180,7 @@ trait PluginSiemMonitored
             ]
          ]
       ];
-      if (static::getType() == 'SIEMHost') {
+      if (static::getType() === 'SIEMHost') {
          $hosttable = PluginSiemHost::getTable();
          $criteria['LEFT JOIN'][$hosttable] = [
             'FKEY' => [

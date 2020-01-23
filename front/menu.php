@@ -38,16 +38,16 @@ if (Session::haveRight('config', UPDATE)) {
 }
 if (count($links)) {
    echo "<div class='center'><table class='tab_cadre'>";
-   echo "<thead><th>" . __('SIEM plugin', 'siem') . "</th></thead>";
-   echo "<tbody>";
+   echo '<thead><th>' . __('SIEM plugin', 'siem') . '</th></thead>';
+   echo '<tbody>';
    foreach ($links as $link) {
       echo "<tr><td>{$link}</td></tr>";
    }
-   echo "</tbody></table></div>";
+   echo '</tbody></table></div>';
 } else {
    echo "<div class='center warning' style='width: 40%; margin: auto;'>";
    echo "<i class='fa fa-exclamation-triangle fa-3x'></i>";
-   echo "<p>" . __('You do not have access to any SIEM plugin items', 'siem') . "</p>";
-   echo "</div>";
+   echo '<p>' . __('You do not have access to any SIEM plugin items', 'siem') . '</p>';
+   echo '</div>';
 }
 Html::footer();

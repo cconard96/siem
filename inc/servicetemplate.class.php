@@ -27,15 +27,15 @@
  */
 class PluginSiemServiceTemplate extends CommonDBTM
 {
-   static $rightname = 'plugin_siem_servicetemplate';
+   public static $rightname = 'plugin_siem_servicetemplate';
 
 
-   static function getTypeName($nb = 0)
+   public static function getTypeName($nb = 0)
    {
       return _n('Service template', 'Service templates', $nb);
    }
 
-   static function getAdditionalMenuLinks()
+   public static function getAdditionalMenuLinks()
    {
       global $CFG_GLPI;
 
@@ -144,23 +144,23 @@ class PluginSiemServiceTemplate extends CommonDBTM
       $this->showFormHeader($options);
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>".sprintf(__('%1$s%2$s'), __('Name'),
+      echo '<td>' .sprintf(__('%1$s%2$s'), __('Name'),
             (isset($options['withtemplate'])
-            && $options['withtemplate']?"*":"")).
-         "</td>";
-      echo "<td>";
-      $objectName = autoName($this->fields["name"], "name", false, $this->getType(), $this->fields["entities_id"]);
+            && $options['withtemplate'] ? '*' : '')).
+         '</td>';
+      echo '<td>';
+      $objectName = autoName($this->fields['name'], 'name', false, self::getType(), $this->fields['entities_id']);
       Html::autocompletionTextField($this, 'name', ['value' => $objectName]);
-      echo "</td>";
-      echo "<td>".__('Comments')."</td>";
+      echo '</td>';
+      echo '<td>' .__('Comments'). '</td>';
       echo "<td rowspan='2' class='middle'>";
       echo "<textarea cols='45' rows='4' name='comment' >".
          $this->fields["comment"];
-      echo "</textarea></td></tr>";
+      echo '</textarea></td></tr>';
 
       $rand = mt_rand();
-      echo "<tr><td>".__('Plugin', 'siem')."</td>";
-      echo "<td>";
+      echo '<tr><td>' .__('Plugin', 'siem'). '</td>';
+      echo '<td>';
       Plugin::dropdown([
          'name'      => 'plugins_id',
          'rand'      => $rand,
@@ -168,19 +168,19 @@ class PluginSiemServiceTemplate extends CommonDBTM
          'value'  => isset($this->fields['plugins_id']) && !empty($this->fields['plugins_id']) ?
             $this->fields['plugins_id'] : 0
       ]);
-      echo "</td></tr>";
+      echo '</td></tr>';
 
-      echo "<tr><td>".__('Sensor', 'siem')."</td>";
-      echo "<td>";
+      echo '<tr><td>' .__('Sensor', 'siem'). '</td>';
+      echo '<td>';
       Dropdown::showFromArray('sensor', [], [
          'rand'      => $rand,
          'disabled'  => true,
          'value'  => isset($this->fields['sensor']) ? $this->fields['sensor'] : 0
       ]);
       echo Html::scriptBlock("$(document).ready(function() {\$('#dropdown_plugins_id$rand').trigger('change')});");
-      echo "</td>";
-      echo "<td>".__('Priority', 'siem')."</td>";
-      echo "<td>";
+      echo '</td>';
+      echo '<td>' .__('Priority', 'siem'). '</td>';
+      echo '<td>';
       Dropdown::showFromArray('priority', [
          1 => _x('priority', 'Very low'),
          2 => _x('priority', 'Low'),
@@ -194,10 +194,10 @@ class PluginSiemServiceTemplate extends CommonDBTM
             $this->fields['priority'] : 3
       ]);
       Html::showToolTip(__('The criticality of the service', 'siem'));
-      echo "</td></tr>";
+      echo '</td></tr>';
 
-      echo "<tr><td>".__('Max checks', 'siem')."</td>";
-      echo "<td>";
+      echo '<tr><td>' .__('Max checks', 'siem'). '</td>';
+      echo '<td>';
       echo Html::input('max_checks', [
          'type' => 'number',
          'min'    => 1,
@@ -206,9 +206,9 @@ class PluginSiemServiceTemplate extends CommonDBTM
             $this->fields['max_checks'] : 1
       ]);
       Html::showToolTip(__('The number of checks on the service needed before it can change from being in a soft state to a hard state.', 'siem'));
-      echo "</td>";
-      echo "<td>".__('Check interval', 'siem')."</td>";
-      echo "<td>";
+      echo '</td>';
+      echo '<td>' .__('Check interval', 'siem'). '</td>';
+      echo '<td>';
       echo Html::input('check_interval', [
          'type' => 'number',
          'min'    => 1,
@@ -217,17 +217,17 @@ class PluginSiemServiceTemplate extends CommonDBTM
             $this->fields['check_interval'] : 1
       ]);
       Html::showToolTip(__('How often the sensor will be polled for the service in minutes (Ignored for passive sensors).', 'siem'));
-      echo "</td></tr>";
+      echo '</td></tr>';
 
-      echo "<tr><th colspan='4'>".__('Flapping detection settings', 'siem')."</th></tr>";
-      echo "<tr><td>".__('Use flapping detection', 'siem')."</td>";
-      echo "<td>";
+      echo "<tr><th colspan='4'>".__('Flapping detection settings', 'siem'). '</th></tr>';
+      echo '<tr><td>' .__('Use flapping detection', 'siem'). '</td>';
+      echo '<td>';
       Dropdown::showYesNo('use_flap_detection', '1', -1, [
          'rand'   => $rand
       ]);
-      echo "</td>";
-      echo "<td>".__('Lower flapping threshold', 'siem')."</td>";
-      echo "<td>";
+      echo '</td>';
+      echo '<td>' .__('Lower flapping threshold', 'siem'). '</td>';
+      echo '<td>';
       echo Html::input('flap_threshold_low', [
          'type' => 'number',
          'min'    => 1,
@@ -237,9 +237,9 @@ class PluginSiemServiceTemplate extends CommonDBTM
       ]);
       Html::showToolTip(__('The maximum amount of change between states needed before the service is no longer considered flapping.
          This is calculated over a sample size of 20 checks', 'siem'));
-      echo "</td></tr>";
+      echo '</td></tr>';
 
-      echo "<tr><td>".__('Higher flapping threshold', 'siem')."</td><td>";
+      echo '<tr><td>' .__('Higher flapping threshold', 'siem'). '</td><td>';
       echo Html::input('flap_threshold_high', [
          'type' => 'number',
          'min'    => 1,
@@ -249,10 +249,10 @@ class PluginSiemServiceTemplate extends CommonDBTM
       ]);
       Html::showToolTip(__('The minimum amount of change between states needed before the service is considered flapping.
          This is calculated over a sample size of 20 checks', 'siem'));
-      echo "</td></tr>";
+      echo '</td></tr>';
 
-      echo "<tr><th colspan='4'>".__('Alert settings', 'siem')."</th></tr>";
-      echo "<tr><td>".__('Notification interval', 'siem')."</td><td>";
+      echo "<tr><th colspan='4'>".__('Alert settings', 'siem'). '</th></tr>';
+      echo '<tr><td>' .__('Notification interval', 'siem'). '</td><td>';
       echo Html::input('notificationinterval', [
          'type' => 'number',
          'min'    => 1,
@@ -261,7 +261,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
             $this->fields['notificationinterval'] : 0
       ]);
       Html::showToolTip(__('The amount of time between alerts for this service when not in downtime or acknowledged (0 for one-time alerts).', 'siem'));
-      echo "</td></tr>";
+      echo '</td></tr>';
 
       $this->showFormButtons($options);
 
@@ -271,7 +271,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
    /**
     * Show a list of all hosts with services using this template
     */
-   function showHosts()
+   public function showHosts()
    {
 
    }
@@ -279,37 +279,37 @@ class PluginSiemServiceTemplate extends CommonDBTM
    /**
     * Show a list of all services using this template
     */
-   function showServices()
+   public function showServices()
    {
       $siemservice = new PluginSiemService();
       $siemhost = new PluginSiemHost();
       $services = $siemservice->find(['plugin_siem_servicetemplates_id' => $this->getID()]);
 
-      echo "<table><tr>";
-      echo "<th>".__('Host')."</th>";
-      echo "<th>".__('Last check')."</th>";
-      echo "<th>".__('Status')."</th>";
-      echo "<th>".__('Is hard')."</th>";
-      echo "<th>".__('Is flapping')."</th>";
-      echo "<th>".__('Is acknowledged')."</th>";
-      echo "<th>".__('Is active')."</th>";
-      echo "</tr>";
+      echo '<table><tr>';
+      echo '<th>' .__('Host'). '</th>';
+      echo '<th>' .__('Last check'). '</th>';
+      echo '<th>' .__('Status'). '</th>';
+      echo '<th>' .__('Is hard'). '</th>';
+      echo '<th>' .__('Is flapping'). '</th>';
+      echo '<th>' .__('Is acknowledged'). '</th>';
+      echo '<th>' .__('Is active'). '</th>';
+      echo '</tr>';
       if (!count($services)) {
-         echo "<tr><td colspan='7'>".__('No services')."</td></tr>";
+         echo "<tr><td colspan='7'>".__('No services'). '</td></tr>';
       } else {
          foreach ($services as $service) {
             $host = $siemhost->find(['id' => 'plugin_siem_hosts_id']);
             $host = reset($host);
             $assetinfo = $host->getItemInfo();
-            echo "<tr>";
-            echo "<td>".Html::link($assetinfo['name'], $host['itemtype']::getFormURLWithID($host['items_id']))."</td>";
-            echo "<td>".PluginSiemToolbox::getHumanReadableTimeDiff($service['last_check'])."</td>";
-            echo "<td>".PluginSiemService::getStatusName($service['status'])."</td>";
-            echo "<td>".$service['is_hard'] ? __('True') : __('False')."</td>";
-            echo "<td>".$service['is_flapping'] ? __('True') : __('False')."</td>";
-            echo "<td>".$service['is_acknowledged'] ? __('True') : __('False')."</td>";
-            echo "<td>".$service['is_active'] ? __('True') : __('False')."</td>";
-            echo "</tr>";
+            echo '<tr>';
+            echo '<td>'.Html::link($assetinfo['name'], $host['itemtype']::getFormURLWithID($host['items_id'])). '</td>';
+            echo '<td>'.PluginSiemToolbox::getHumanReadableTimeDiff($service['last_check']). '</td>';
+            echo '<td>'.PluginSiemService::getStatusName($service['status']). '</td>';
+            echo '<td>' . ($service['is_hard'] ? __('True') : __('False')) . '</td>';
+            echo '<td>' . ($service['is_flapping'] ? __('True') : __('False')) . '</td>';
+            echo '<td>' . ($service['is_acknowledged'] ? __('True') : __('False')) . '</td>';
+            echo '<td>' . ($service['is_active'] ? __('True') : __('False')) . '</td>';
+            echo '</tr>';
          }
       }
    }

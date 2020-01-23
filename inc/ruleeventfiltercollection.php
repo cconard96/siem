@@ -21,49 +21,50 @@
 
 
 if (!defined('GLPI_ROOT')) {
-    die("Sorry. You can't access this file directly");
+   die("Sorry. You can't access this file directly");
 }
 
 class PluginSIEMRuleEventFilterCollection extends RuleCollection
 {
 
-    // From RuleCollection
-    static $rightname             = 'plugin_siem_rule_event';
-    public $stop_on_first_match   = true;
-    public $menu_option           = 'plugin_siem_ruleseventfilter';
+   // From RuleCollection
+   public static $rightname = 'plugin_siem_rule_event';
+   public $stop_on_first_match = true;
+   public $menu_option = 'plugin_siem_ruleseventfilter';
 
 
-    /**
-     * @param $entity (default 0)
-     **/
-    function __construct($entity = 0)
-    {
-        $this->entity = $entity;
-    }
+   /**
+    * @param $entity (default 0)
+    **/
+   public function __construct($entity = 0)
+   {
+      parent::__construct();
+      $this->entity = $entity;
+   }
 
-    static function canView()
-    {
-        return Session::haveRightsOr(self::$rightname, [READ, PluginSIEMRuleEventFilter::PARENT]);
-    }
+   public static function canView()
+   {
+      return Session::haveRightsOr(self::$rightname, [READ, PluginSIEMRuleEventFilter::PARENT]);
+   }
 
-    function canList()
-    {
-        return static::canView();
-    }
+   public function canList()
+   {
+      return static::canView();
+   }
 
-    function getTitle()
-    {
-        return __('Rules for event filtering');
-    }
+   public function getTitle()
+   {
+      return __('Rules for event filtering');
+   }
 
-    function showInheritedTab()
-    {
-        return (Session::haveRight(self::$rightname, PluginSIEMRuleEventFilter::PARENT) && ($this->entity));
-    }
+   public function showInheritedTab()
+   {
+      return (Session::haveRight(self::$rightname, PluginSIEMRuleEventFilter::PARENT) && ($this->entity));
+   }
 
-    function showChildrensTab()
-    {
-        return (Session::haveRight(self::$rightname, READ)
-            && (count($_SESSION['glpiactiveentities']) > 1));
-    }
+   public function showChildrensTab()
+   {
+      return (Session::haveRight(self::$rightname, READ)
+         && (count($_SESSION['glpiactiveentities']) > 1));
+   }
 }

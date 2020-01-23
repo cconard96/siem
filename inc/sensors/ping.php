@@ -49,6 +49,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
             return [];
          }
          $hosttype = $host->fields['itemtype'];
+         /** @var CommonDBTM $host_item */
          $host_item = new $hosttype();
          if (!$host_item->getFromDB($host->fields['items_id'])) {
             return [];
@@ -66,7 +67,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
          } else {
             $eventdata = null;
          }
-         if ($eventdata != null) {
+         if ($eventdata !== null) {
             $eventdatas[$services_id] = $eventdata;
          }
       }
@@ -77,31 +78,48 @@ class PluginSiemSensorPing extends PluginSiemSensor
    {
       $event = new PluginSiemEvent();
       $event_content = [];
-      if (isset($ping_result['percent_loss']) && isset($ping_result['min']) &&
-         isset($ping_result['avg']) && isset($ping_result['max']) && isset($ping_result['mdev'])) {
+      if (isset($ping_result['percent_loss'], $ping_result['min']) && isset($ping_result['avg']) && isset($ping_result['max']) && isset($ping_result['mdev'])) {
          $event_content['percent_loss'] = $ping_result['percent_loss'];
          $event_content['min'] = $ping_result['min'];
          $event_content['avg'] = $ping_result['avg'];
          $event_content['max'] = $ping_result['max'];
          $event_content['mdev'] = $ping_result['mdev'];
+      } else if (!isset($ping_result['_sensor_fault'])) {
+         return [
+            'name' => 'sensor_ping_notok',
+            'status' => PluginSiemEvent::STATUS_NEW,
+            'significance' => PluginSiemEvent::EXCEPTION,
+            'date' => $_SESSION['glpi_currenttime'],
+            'content' => json_encode($ping_result),
+         ];
       } else {
          //Sensor parse error
          return [
             'name' => 'sensor_ping_error',
             'status' => PluginSiemEvent::STATUS_NEW,
-            'significance' => PluginSiemEvent::WARNING,
+            'significance' => PluginSiemEvent::EXCEPTION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),
             '_sensor_fault' => true
          ];
       }
-      return [
-         'name' => 'sensor_ping_ok',
-         'status' => PluginSiemEvent::STATUS_NEW,
-         'significance' => PluginSiemEvent::INFORMATION,
-         'date' => $_SESSION['glpi_currenttime'],
-         'content' => json_encode($event_content),
-      ];
+      if ($event_content['percent_loss'] > 0) {
+         return [
+            'name' => 'sensor_ping_warn',
+            'status' => PluginSiemEvent::STATUS_NEW,
+            'significance' => PluginSiemEvent::WARNING,
+            'date' => $_SESSION['glpi_currenttime'],
+            'content' => json_encode($event_content),
+         ];
+      } else {
+         return [
+            'name' => 'sensor_ping_ok',
+            'status' => PluginSiemEvent::STATUS_NEW,
+            'significance' => PluginSiemEvent::INFORMATION,
+            'date' => $_SESSION['glpi_currenttime'],
+            'content' => json_encode($event_content),
+         ];
+      }
    }
 
    private static function tryPing($hosts, $count = 5)
@@ -111,28 +129,31 @@ class PluginSiemSensorPing extends PluginSiemSensor
       foreach ($hosts as $service_id => $host) {
          $result = [];
          $process = new Process(['/bin/ping', "-c $count", $host]);
-         $process->run();
+         $process->start();
          $sub_processes[$service_id] = $process;
       }
       // Wait for pings to finish
       $done = true;
       do {
-         foreach ($sub_processes as $process) {
-            if ($process->isRunning()) {
-               $done = false;
-               break;
-            }
+         foreach ($sub_processes as $subprocess) {
+            $subprocess->wait();
          }
       } while (!$done);
       // Parse results
       foreach ($sub_processes as $service_id => $process) {
          $exitcode = $process->getExitCode();
          if (0 !== $exitcode) {
-            $result = [
-               '_sensor_fault' => true,
-               'exit_code' => $exitcode,
-               'error_msg' => $process->getErrorOutput(),
-            ];
+            if (1 === $exitcode) {
+               $result = [
+                  'exit_code' => $exitcode,
+                  'error_msg' => "No response in $count tries",
+               ];
+            } else {
+               $result = [
+                  'exit_code' => $exitcode,
+                  'error_msg' => $process->getErrorOutput(),
+               ];
+            }
             $results[$service_id] = $result;
             continue;
          }
@@ -144,14 +165,14 @@ class PluginSiemSensorPing extends PluginSiemSensor
             } else {
                throw new RuntimeException('Malformed sensor output');
             }
-            if (preg_match('/(rtt)(.*?)(=)(.*?)(ms)/', $outcome, $match) == 1) {
+            if ($result['percent_loss'] !== '100' && preg_match('/(rtt)(.*?)(=)(.*?)(ms)/', $outcome, $match) === 1) {
                $values = explode('/', trim($match[4]));
                $result['min'] = $values[0];
                $result['avg'] = $values[1];
                $result['max'] = $values[2];
                $result['mdev'] = $values[3];
                $results[$service_id] = $result;
-            } else {
+            } else if ($result['percent_loss'] !== '100') {
                throw new RuntimeException('Malformed sensor output');
             }
          } catch (RuntimeException $e) {

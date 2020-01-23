@@ -22,7 +22,7 @@
 
 $AJAX_INCLUDE = 1;
 include('../../../inc/includes.php');
-header("Content-Type: text/html; charset=UTF-8");
+header('Content-Type: text/html; charset=UTF-8');
 Html::header_nocache();
 Session::checkLoginUser();
 
@@ -42,7 +42,7 @@ if (!$host->getFromDB($_REQUEST['hosts_id'])) {
 if (isset($_REQUEST['_schedule_downtime'])) {
 
 } else if (isset($_REQUEST['_add_service'])) {
-   if (!isset($_REQUEST['hosts_id']) || !isset($_REQUEST['servicetemplates_id'])) {
+   if (!isset($_REQUEST['hosts_id'], $_REQUEST['servicetemplates_id'])) {
       http_response_code(400);
       return;
    }
