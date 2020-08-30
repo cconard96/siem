@@ -255,7 +255,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
       echo '<tr><td>' .__('Notification interval', 'siem'). '</td><td>';
       echo Html::input('notificationinterval', [
          'type' => 'number',
-         'min'    => 1,
+         'min'    => 0,
          'max'    => MONTH_TIMESTAMP,
          'value'  => isset($this->fields['notificationinterval']) && !empty($this->fields['notificationinterval']) ?
             $this->fields['notificationinterval'] : 0

@@ -518,7 +518,7 @@ class PluginSiemEvent extends CommonDBTM
                $props = $props_t;
             }
          } else {
-            Glpi\Event::translateEventProperties($props);
+            //Glpi\Event::translateEventProperties($props);
          }
       }
       if ($p['format'] === 'array') {

@@ -185,7 +185,7 @@ function plugin_siem_install()
          'value' => '-1'
       ]);
    }
-   CronTask::register('PluginSIEMEvent', 'pollevents', 60, ['state' => CronTask::STATE_WAITING]);
+   CronTask::register('PluginSiemEvent', 'pollevents', 60, ['state' => CronTask::STATE_WAITING]);
    return true;
 }
 
@@ -264,11 +264,11 @@ function plugin_siem_translateEventProperties($props) {
    return $props;
 }
 
-function plugin_siem_getAddSearchOptions($itemtype)
-{
-   $opt = [];
-   if (method_exists($itemtype, 'getAddSearchOptions')) {
-      $opt = call_user_func([$itemtype, 'getAddSearchOptions']);
-   }
-   return $opt;
-}
+//function plugin_siem_getAddSearchOptions($itemtype)
+//{
+//   $opt = [];
+//   if (method_exists($itemtype, 'getAddSearchOptions')) {
+//      $opt = call_user_func([$itemtype, 'getAddSearchOptions']);
+//   }
+//   return $opt;
+//}
