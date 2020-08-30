@@ -646,4 +646,53 @@ class PluginSiemService extends CommonDBTM
 
       return true;
    }
+
+   public function checkNow()
+   {
+      global $DB;
+
+      $event = new PluginSiemEvent();
+      $service_table = self::getTable();
+      $to_poll = $DB->request([
+         'SELECT' => ['plugins_id', 'sensor'],
+         'FROM' => $service_table,
+         'LEFT JOIN' => [
+            PluginSiemServiceTemplate::getTable() => [
+               'FKEY' => [
+                  $service_table => 'plugin_siem_servicetemplates_id',
+                  PluginSiemServiceTemplate::getTable() => 'id',
+               ]
+            ]
+         ],
+         'WHERE' => [
+            $service_table.'.id' => $this->getID(),
+            'is_active' => 1
+         ]
+      ]);
+      if (!count($to_poll)) {
+         return false;
+      }
+      $poll_data = $to_poll->next();
+      $plugin = new Plugin();
+      $plugin->getFromDB($poll_data['plugins_id']);
+      $results = Plugin::doOneHook($plugin->fields['directory'], 'poll_sensor', ['sensor' => $poll_data['sensor'], 'service_ids' => [$this->getID()]]);
+      $eventdatas = [];
+      $eventdatas[$plugin->fields['directory']][$poll_data['sensor']] = $results;
+
+      // Create event from the results
+      foreach ($eventdatas as $logger => $sensors) {
+         foreach ($sensors as $sensor => $results) {
+            if ($results !== null && is_array($results)) {
+               foreach ($results as $service_id => $result) {
+                  if ($result !== null && is_array($result)) {
+                     $input = $result;
+                     $input['plugin_siem_services_id'] = $service_id;
+                     $event->add($input);
+                  }
+               }
+            }
+         }
+      }
+      return true;
+   }
 }

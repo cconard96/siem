@@ -68,7 +68,7 @@
             $.each(card.rows, function(i, row) {
                content += "<tr>";
                $.each(row, function(i2, cell) {
-                  content += "<td class='"+(cell.class || '')+"'>" + cell.value + "</td>";
+                  content += "<td class='"+(cell['class'] || '')+"'>" + cell.value + "</td>";
                });
                content += "</tr>";
             });
@@ -77,7 +77,7 @@
             content += "<table class='w-100'>";
             $.each(card.headers, function(i, header) {
                var cell = card.rows[i];
-               content += "<tr class='"+(cell.class || '')+"'>";
+               content += "<tr class='"+(cell['class'] || '')+"'>";
                content += "<th class=''text-center>"+header+"</th>";
                content += "<td class='text-left'>"+cell.value+"</td>";
                content += "</tr>";
@@ -143,6 +143,17 @@
             }
          });
       };
+
+      this.hostCheckNow = function(hosts_id) {
+         $.ajax({
+            type: "POST",
+            url: self.ajax_root + 'siemhost.php',
+            data: {
+               _check_now: true,
+               hosts_id: hosts_id
+            }
+         });
+      }
 
       function serviceCheckNow(services_id) {
 

@@ -221,6 +221,11 @@ class PluginSiemHost extends CommonDBTM
       return $service;
    }
 
+   public function checkNow()
+   {
+      return $this->getAvailabilityService()->checkNow();
+   }
+
    public function getHostInfoDisplay()
    {
       global $DB;
@@ -243,7 +248,7 @@ class PluginSiemHost extends CommonDBTM
       $toolbar_buttons = [
          [
             'label' => __('Check now'),
-            'action' => "hostCheckNow({$this->getID()})",
+            'action' => "window.pluginSiem.hostCheckNow({$this->getID()})",
          ],
          [
             'label' => __('Schedule downtime'),

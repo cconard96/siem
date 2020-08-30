@@ -41,6 +41,8 @@ if (!$host->getFromDB($_REQUEST['hosts_id'])) {
 }
 if (isset($_REQUEST['_schedule_downtime'])) {
 
+} else if (isset($_REQUEST['_check_now'])) {
+   $host->checkNow();
 } else if (isset($_REQUEST['_add_service'])) {
    if (!isset($_REQUEST['hosts_id'], $_REQUEST['servicetemplates_id'])) {
       http_response_code(400);
