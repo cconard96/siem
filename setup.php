@@ -37,9 +37,9 @@ function plugin_init_siem()
    if (Session::haveRight('plugin_siem_host', READ)) {
       $PLUGIN_HOOKS['menu_toadd']['siem'] = ['management' => [
          'PluginSiemMenu',
-         'PluginSiemHost',
-         'PluginSiemService',
-         'PluginSiemServiceTemplate'
+         //'PluginSiemHost',
+         //'PluginSiemService',
+         //'PluginSiemServiceTemplate'
       ]];
    }
    $PLUGIN_HOOKS['siem_sensors']['siem'] = [

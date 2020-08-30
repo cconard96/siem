@@ -26,8 +26,32 @@
  */
 class PluginSiemMenu extends CommonGLPI
 {
+
+   /**
+    * Get name of this type by language of the user connected
+    *
+    * @param integer $nb number of elements
+    * @return string name of this type
+    */
+   public static function getTypeName($nb = 0) {
+      return __('SIEM plugin', 'siem');
+   }
+
    public static function getMenuName()
    {
-      return __('SIEM plugin', 'siem');
+      return self::getTypeName(0);
+   }
+
+   public static function getIcon() {
+      return 'fas fa-shield-alt';
+   }
+
+   /**
+    * Check if can view item
+    *
+    * @return boolean
+    */
+   public static function canView() {
+      return PluginSiemHost::canView() || PluginSiemService::canView() || PluginSiemServiceTemplate::canView();
    }
 }
