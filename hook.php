@@ -64,7 +64,7 @@ function plugin_siem_install()
    }
    if (!$DB->tableExists('glpi_plugin_siem_hosts')) {
       $query = "CREATE TABLE `glpi_plugin_siem_hosts` (
-      `id` int(11) NOT NULL,
+      `id` int(11) NOT NULL AUTO_INCREMENT,
       `itemtype` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
       `items_id` int(11) NOT NULL,
       `plugin_siem_services_id_availability` int(11) DEFAULT NULL,
