@@ -27,6 +27,9 @@
       $(document).ready(function() {
          if ($(self.dashboard).length > 0) {
             self.refreshDashboard();
+            setInterval(function() {
+               self.refreshDashboard();
+            }, 30000);
          }
       });
 

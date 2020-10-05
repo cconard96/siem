@@ -20,6 +20,8 @@
  */
 
 
+use Symfony\Component\EventDispatcher\EventDispatcher;
+
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
 }
@@ -33,7 +35,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
 
    public static function getTypeName($nb = 0)
    {
-      return __('Acknowledgement', 'Acknowledgements', $nb);
+      return _n('Acknowledgement', 'Acknowledgements', $nb);
    }
 
    /**

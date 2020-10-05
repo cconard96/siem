@@ -35,10 +35,23 @@ class PluginSiemServiceTemplate extends CommonDBTM
       return _n('Service template', 'Service templates', $nb);
    }
 
+   public static function getIcon()
+   {
+      return 'fas fa-layer-group';
+   }
+
+   public static function getMenuContent()
+   {
+      $menu = parent::getMenuContent();
+      $menu['links']['search'] = self::getSearchURL(false);
+      if (self::canCreate()) {
+         $menu['links']['add'] = self::getFormURL(false);
+      }
+      return $menu;
+   }
+
    public static function getAdditionalMenuLinks()
    {
-      global $CFG_GLPI;
-
       $links = [];
       $links['add'] = self::getFormURL(false);
       if (count($links)) {
@@ -149,7 +162,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
             && $options['withtemplate'] ? '*' : '')).
          '</td>';
       echo '<td>';
-      $objectName = autoName($this->fields['name'], 'name', false, self::getType(), $this->fields['entities_id']);
+      $objectName = autoName($this->fields['name'], 'name', false, self::getType(), $this->fields['entities_id'] ?? -1);
       Html::autocompletionTextField($this, 'name', ['value' => $objectName]);
       echo '</td>';
       echo '<td>' .__('Comments'). '</td>';
@@ -165,8 +178,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
          'name'      => 'plugins_id',
          'rand'      => $rand,
          'on_change' => "window.pluginSiem.updateSensorDropdown('#dropdown_plugins_id$rand', '#dropdown_sensor$rand')",
-         'value'  => isset($this->fields['plugins_id']) && !empty($this->fields['plugins_id']) ?
-            $this->fields['plugins_id'] : 0
+         'value'  => $this->fields['plugins_id'] ?? 0
       ]);
       echo '</td></tr>';
 
@@ -175,7 +187,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
       Dropdown::showFromArray('sensor', [], [
          'rand'      => $rand,
          'disabled'  => true,
-         'value'  => isset($this->fields['sensor']) ? $this->fields['sensor'] : 0
+         'value'  => $this->fields['sensor'] ?? 0
       ]);
       echo Html::scriptBlock("$(document).ready(function() {\$('#dropdown_plugins_id$rand').trigger('change')});");
       echo '</td>';
@@ -190,8 +202,7 @@ class PluginSiemServiceTemplate extends CommonDBTM
          6 => _x('priority', 'Major'),
       ], [
          'rand'   => $rand,
-         'value'  => isset($this->fields['priority']) && !empty($this->fields['priority']) ?
-            $this->fields['priority'] : 3
+         'value'  => $this->fields['priority'] ?? 3
       ]);
       Html::showToolTip(__('The criticality of the service', 'siem'));
       echo '</td></tr>';

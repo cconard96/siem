@@ -26,14 +26,12 @@ define('PLUGIN_SIEM_MAX_GLPI', '9.6.0');
 
 function plugin_init_siem()
 {
-   global $PLUGIN_HOOKS;
+   global $PLUGIN_HOOKS, $CFG_GLPI;
    $PLUGIN_HOOKS['csrf_compliant']['siem'] = true;
    $PLUGIN_HOOKS['add_css']['siem'] = 'css/siem.css';
    $PLUGIN_HOOKS['add_javascript']['siem'] = 'js/siem.js';
    Plugin::registerClass('PluginSiemProfile', ['addtabon' => ['Profile']]);
-   Plugin::registerClass('PluginSiemEvent', ['addtabon' => [
-      'Computer', 'Printer', 'NetworkEquipment', 'Phone', 'User', 'Group', 'Enclosure', 'PDU'
-   ]]);
+   Plugin::registerClass('PluginSiemEvent', ['addtabon' => $CFG_GLPI["networkport_types"]]);
    if (Session::haveRight('plugin_siem_host', READ)) {
       $PLUGIN_HOOKS['menu_toadd']['siem'] = ['management' => [
          'PluginSiemEventManagement',
