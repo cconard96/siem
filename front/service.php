@@ -21,6 +21,6 @@
 
 include('../../../inc/includes.php');
 Session::checkRight(PluginSiemService::$rightname, READ);
-Html::header(PluginSiemService::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', 'pluginsiemservice');
+Html::header(PluginSiemService::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', 'PluginSiemService');
 Search::show('PluginSiemService');
 Html::footer();

@@ -21,7 +21,7 @@
 
 
 include('../../../inc/includes.php');
-Html::header('SIEM Plugin', '', 'management', 'PluginSiemMenu');
+Html::header('SIEM Plugin', '', 'management', 'PluginSiemEventManagement');
 
 PluginSiemEventManagement::showDashboard();
 

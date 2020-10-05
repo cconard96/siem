@@ -29,8 +29,32 @@ if (!defined('GLPI_ROOT')) {
  * Contains functions for managing/viewing the dashboard and other top-level functions.
  * @since 1.0.0
  */
-class PluginSiemEventManagement
+class PluginSiemEventManagement extends CommonGLPI
 {
+
+   public static function getTypeName($nb = 0)
+   {
+      return __('Event Dashboard');
+   }
+
+   public static function getMenuName()
+   {
+      return self::getTypeName(0);
+   }
+
+   public static function getIcon() {
+      return 'fas fa-shield-alt';
+   }
+
+   /**
+    * Check if can view item
+    *
+    * @return boolean
+    */
+   public static function canView() {
+      return PluginSiemHost::canView() || PluginSiemService::canView();
+   }
+
    public static function getDashboardCards()
    {
       global $DB;

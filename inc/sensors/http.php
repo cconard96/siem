@@ -20,7 +20,7 @@
  */
 
 
-class PluginSiemSensorHttp_OK extends PluginSiemSensor
+class PluginSiemSensorHttp extends PluginSiemSensor
 {
 
    protected static function poll($service_ids = [])

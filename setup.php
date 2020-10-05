@@ -36,10 +36,11 @@ function plugin_init_siem()
    ]]);
    if (Session::haveRight('plugin_siem_host', READ)) {
       $PLUGIN_HOOKS['menu_toadd']['siem'] = ['management' => [
-         'PluginSiemMenu',
-         //'PluginSiemHost',
-         //'PluginSiemService',
-         //'PluginSiemServiceTemplate'
+         'PluginSiemEventManagement',
+         'PluginSiemService',
+         'PluginSiemServiceTemplate',
+//         'PluginSiemAcknowledgement',
+//         'PluginSiemScheduleddowntime',
       ]];
    }
    $PLUGIN_HOOKS['siem_sensors']['siem'] = [
@@ -47,7 +48,7 @@ function plugin_init_siem()
          'name'         => __('Ping'),
          'check_mode'   => PluginSiemService::CHECK_MODE_ACTIVE,
       ],
-      'http_ok' => [
+      'http' => [
          'name'         => __('HTTP OK'),
          'check_mode'   => PluginSiemService::CHECK_MODE_ACTIVE,
       ]
