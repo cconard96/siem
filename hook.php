@@ -19,9 +19,9 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
-include(dirname(__FILE__) . '/inc/sensors/sensor.class.php');
-include(dirname(__FILE__) . '/inc/sensors/ping.php');
-include(dirname(__FILE__) . '/inc/sensors/http_ok.php');
+include(__DIR__ . '/inc/sensors/sensor.class.php');
+include(__DIR__ . '/inc/sensors/ping.php');
+include(__DIR__ . '/inc/sensors/http.php');
 
 function plugin_siem_install()
 {

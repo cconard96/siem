@@ -228,60 +228,47 @@ class PluginSiemHost extends CommonDBTM
 
    public function getHostInfoDisplay()
    {
-      global $DB;
+      global $DB, $CFG_GLPI;
 
-      $host_info_bg = $this->getBackgroundColorClass();
-      $status = $this->getCurrentStatusName();
+      $twig_vars = [
+         'host_info_bg'    => $this->getBackgroundColorClass(),
+         'toolbar_buttons' => [
+            [
+               'label' => __('Check now'),
+               'action' => "window.pluginSiem.hostCheckNow({$this->getID()})",
+            ],
+            [
+               'label' => __('Schedule downtime'),
+               'action' => "hostScheduleDowntime({$this->getID()})",
+            ],
+            [
+               'label' => sprintf(__('Add %s'), PluginSiemService::getTypeName(1)),
+               'action' => "window.pluginSiem.addHostService({$this->getID()})",
+            ]
+         ],
+         'status'       => $this->getCurrentStatusName(),
+         'host_stats'   => []
+      ];
+
       if ($this->getAvailabilityService()) {
          $status_since_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusChange());
          $last_check_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusCheck());
-         $host_stats = [
-            __('Last status change') => ($status_since_diff === null ? __('No change') : $status_since_diff),
-            __('Last check') => ($last_check_diff === null ? __('Not checked') : $last_check_diff),
+         $twig_vars['host_stats'] = [
+            __('Last status change') => ($status_since_diff ?? __('No change')),
+            __('Last check') => ($last_check_diff ?? __('Not checked')),
             __('Flapping') => $this->isFlapping() ? __('Yes') : __('No')
          ];
       } else {
-         $host_stats = [
+         $twig_vars['host_stats'] = [
             __('Host availability not monitored') => __('Set the availability service to monitor the host')
          ];
       }
-      $toolbar_buttons = [
-         [
-            'label' => __('Check now'),
-            'action' => "window.pluginSiem.hostCheckNow({$this->getID()})",
-         ],
-         [
-            'label' => __('Schedule downtime'),
-            'action' => "hostScheduleDowntime({$this->getID()})",
-         ],
-         [
-            'label' => sprintf(__('Add %s'), PluginSiemService::getTypeName(1)),
-            'action' => "window.pluginSiem.addHostService({$this->getID()})",
-         ]
-      ];
-      if (in_array($this->getStatus(), [self::STATUS_DOWN, self::STATUS_UNREACHABLE])) {
-         $toolbar_buttons[] = [
+      if (in_array($this->getStatus(), [self::STATUS_DOWN, self::STATUS_UNREACHABLE], true)) {
+         $twig_vars['toolbar_buttons'] = [
             'label' => sprintf(__('Acknowledge %s'), self::getTypeName(1)),
             'action' => "acknowledge({$this->getID()})",
          ];
       }
-      $btn_classes = 'btn btn-primary mx-1';
-      $toolbar = "<div id='host-actions-toolbar'><div class='btn-toolbar'>";
-      foreach ($toolbar_buttons as $button) {
-         $toolbar .= "<button type='button' class='{$btn_classes}' onclick='{$button['action']}'>{$button['label']}</button>";
-      }
-      $toolbar .= '</div></div>';
-      $out = $toolbar;
-      $out .= "<div id='host-info-box'>";
-      $out .= "<div id='host-info' class='w-25 inline-block {$host_info_bg}'>";
-      $out .= "<table class='text-center w-100'><thead><tr>";
-      $out .= "<th colspan='2'><h3>{$status}</h3></th>";
-      $out .= '</tr></thead><tbody>';
-      foreach ($host_stats as $label => $value) {
-         $out .= "<tr><td><p style='font-size: 1.5em; margin: 0px'>{$label}</p><p style='font-size: 1.25em; margin: 0px'>{$value}</p></td></tr>";
-      }
-      $out .= '</tbody></table></div>';
-      $out .= "<div id='host-service-info' class='inline-block w-75'>";
       if ($this->getAvailabilityService()) {
          $host_service = $this->getAvailabilityService();
          $calendar_name = __('Unspecified');
@@ -297,11 +284,9 @@ class PluginSiemHost extends CommonDBTM
          }
          $service_name = $host_service->fields['name'];
          $check_mode = PluginSiemService::getCheckModeName($host_service->fields['check_mode']);
-         $check_interval = $host_service->fields['check_interval'] !== null ?
-            $host_service->fields['check_interval'] : __('Unspecified');
-         $notif_interval = $host_service->fields['notificationinterval'] !== null ?
-            $host_service->fields['notificationinterval'] : __('Unspecified');
-         $service_stats = [
+         $check_interval = $host_service->fields['check_interval'] ?? __('Unspecified');
+         $notif_interval = $host_service->fields['notificationinterval'] ?? __('Unspecified');
+         $twig_vars['service_stats'] = [
             [
                __('Name') => $service_name,
                __('Check mode') => $check_mode,
@@ -315,34 +300,29 @@ class PluginSiemHost extends CommonDBTM
                __('Flap detection') => $host_service->fields['use_flap_detection'] ? __('Yes') : __('No')
             ]
          ];
-         $out .= '<h3>' . __('Availability service info') . '</h3>';
-         $out .= "<table class='text-center w-100'><tbody>";
-         foreach ($service_stats as $statrow) {
-            $out .= '<tr>';
-            foreach ($statrow as $label => $value) {
-               $out .= "<td><p style='font-size: 1.5em; margin: 0px'>{$label}</p><p style='font-size: 1.25em; margin: 0px'>{$value}</p></td>";
-            }
-            $out .= '</tr>';
-         }
-         $out .= '</tbody></table>';
-         $out .= '</div>';
-
       } else {
          $form_url = self::getFormURL(true);
-         $out .= "<form method='POST' action='$form_url'>";
-         $out .= Html::hidden('id', ['value' => $this->fields['id']]);
-         $out .= '<fieldset>';
-         $out .= '<legend>' . __('Service') . '</legend>';
-         $out .= PluginSiemService::getDropdownForHost($this->getID());
-         $out .= Html::submit(__('Set availability service'), [
+         $add_form = "<form method='POST' action='$form_url'>";
+         $add_form .= Html::hidden('id', ['value' => $this->fields['id']]);
+         $add_form .= '<fieldset>';
+         $add_form .= '<legend>' . __('Service') . '</legend>';
+         $add_form .= PluginSiemService::getDropdownForHost($this->getID());
+         $add_form .= Html::submit(__('Set availability service'), [
             'name' => 'set_host_service',
             'id' => '#btn-set-hostservice'
          ]);
-         $out .= '</fieldset>';
-         $out .= Html::closeForm(false);
+         $add_form .= '</fieldset>';
+         $add_form .= Html::closeForm(false);
+         $twig_vars['add_availablity_service_form'] = $add_form;
       }
-      $out .= '</div>';
-      return $out;
+      $loader = new \Twig\Loader\FilesystemLoader(Plugin::getPhpDir('siem') . '/templates');
+      $options = array(
+         'strict_variables' => false,
+         'debug' => false,
+         'cache'=> false
+      );
+      $twig = new \Twig\Environment($loader, $options);
+      return $twig->render('hostinfo.html.twig', $twig_vars);
    }
 
    /**

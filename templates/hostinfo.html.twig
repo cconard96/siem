@@ -1,0 +1,71 @@
+{#
+*  -------------------------------------------------------------------------
+*  SIEM plugin for GLPI
+*  Copyright (C) 2019 by Curtis Conard
+*  https://github.com/cconard96/siem
+*  -------------------------------------------------------------------------
+*  LICENSE
+*  This file is part of SIEM plugin for GLPI.
+*  SIEM plugin for GLPI is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*  SIEM plugin for GLPI is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*  You should have received a copy of the GNU General Public License
+*  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
+#}
+<div id='host-actions-toolbar'>
+    <div class='btn-toolbar'>
+        {% for button in toolbar_buttons %}
+            <button type='button' class='btn btn-primary mx-1' onclick='{{ button.action|e }}'>{{ button.label|e }}</button>
+        {% endfor %}
+    </div>
+</div>
+<div id='host-info-box'>
+    <div id='host-info' class='w-25 inline-block {{ host_info_bg }}'>
+        <table class='text-center w-100'>
+            <thead>
+                <tr>
+                    <th colspan='2'>
+                        <h3>{{ status }}</h3>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for label,value in host_stats %}
+                    <tr>
+                        <td>
+                            <p style='font-size: 1.5em; margin: 0px'>{{ label }}</p>
+                            <p style='font-size: 1.25em; margin: 0px'>{{ value }}</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id='host-service-info' class='inline-block w-75'>
+        {% if service_stats is defined and service_stats|length > 0 %}
+            {# TODO Needs translation filter #}
+            <h3>Availability service info</h3>
+            <table class='text-center w-100'>
+                <tbody>
+                    {% for statrow in service_stats %}
+                        <tr>
+                            {% for label,value in statrow %}
+                                <td>
+                                    <p style='font-size: 1.5em; margin: 0px'>{{ label }}</p>
+                                    <p style='font-size: 1.25em; margin: 0px'>{{ value }}</p>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elseif add_availability_service_form is defined %}
+            add_availability_service_form|raw
+        {% endif %}
+    </div>
+</div>
