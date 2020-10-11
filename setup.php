@@ -89,6 +89,10 @@ function plugin_siem_check_prerequisites()
          return false;
       }
    }
+   if (!is_readable(__DIR__ . '/vendor/autoload.php') || !is_file(__DIR__ . '/vendor/autoload.php')) {
+      echo "Run composer install --no-dev in the plugin directory<br>";
+      return false;
+   }
    return true;
 }
 
