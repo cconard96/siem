@@ -26,6 +26,9 @@ define('PLUGIN_SIEM_MAX_GLPI', '9.6.0');
 
 function plugin_init_siem()
 {
+   if (!Plugin::isPluginActive('siem')) {
+      return false;
+   }
    require_once 'vendor/autoload.php';
    global $PLUGIN_HOOKS, $CFG_GLPI;
    $PLUGIN_HOOKS['csrf_compliant']['siem'] = true;
