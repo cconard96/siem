@@ -170,26 +170,28 @@ class PluginSiemEventManagement extends CommonGLPI
          $status_counts[$data['status']] = $data['cpt'];
       }
 
-      return [
+      $statuses = [PluginSiemService::STATUS_OK, PluginSiemService::STATUS_WARNING, PluginSiemService::STATUS_CRITICAL, PluginSiemService::STATUS_UNKNOWN];
+      $card = [
          'label'  => __('Service Status'),
-         'data'   => [
-            [
-               'label'  => PluginSiemService::getStatusName(PluginSiemService::STATUS_OK),
-               'number' => $status_counts[PluginSiemService::STATUS_OK] ?? 0
-            ],
-            [
-               'label'  => PluginSiemService::getStatusName(PluginSiemService::STATUS_WARNING),
-               'number' => $status_counts[PluginSiemService::STATUS_WARNING] ?? 0
-            ],
-            [
-               'label'  => PluginSiemService::getStatusName(PluginSiemService::STATUS_CRITICAL),
-               'number' => $status_counts[PluginSiemService::STATUS_CRITICAL] ?? 0
-            ],
-            [
-               'label'  => PluginSiemService::getStatusName(PluginSiemService::STATUS_UNKNOWN),
-               'number' => $status_counts[PluginSiemService::STATUS_UNKNOWN] ?? 0
-            ]
-         ]
+         'data'   => []
       ];
+
+      foreach ($statuses as $status) {
+         $card['data'][] = [
+            'label'  => PluginSiemService::getStatusName($status),
+            'number' => $status_counts[$status] ?? 0,
+            'url'    => PluginSiemService::getSearchURL() . '?' . Toolbox::append_params([
+               'criteria'  => [
+                  [
+                     'field'        => 5,
+                     'searchtype'   => 'equals',
+                     'value'        => $status
+                  ]
+               ],
+               'reset'     => 'reset'
+            ])
+         ];
+      }
+      return $card;
    }
 }
