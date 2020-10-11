@@ -25,12 +25,12 @@
     </div>
 </div>
 <div id='host-info-box'>
-    <div id='host-info' class='w-25 inline-block {{ host_info_bg }}'>
+    <div id='host-info' class='w-25 inline-block {{ host_info_bg|e('html_attr') }}'>
         <table class='text-center w-100'>
             <thead>
                 <tr>
                     <th colspan='2'>
-                        <h3>{{ status }}</h3>
+                        <h3>{{ status|e }}</h3>
                     </th>
                 </tr>
             </thead>
@@ -38,8 +38,8 @@
                 {% for label,value in host_stats %}
                     <tr>
                         <td>
-                            <p style='font-size: 1.5em; margin: 0px'>{{ label }}</p>
-                            <p style='font-size: 1.25em; margin: 0px'>{{ value }}</p>
+                            <p style='font-size: 1.5em; margin: 0'>{{ label|e }}</p>
+                            <p style='font-size: 1.25em; margin: 0'>{{ value|e }}</p>
                         </td>
                     </tr>
                 {% endfor %}
@@ -56,8 +56,8 @@
                         <tr>
                             {% for label,value in statrow %}
                                 <td>
-                                    <p style='font-size: 1.5em; margin: 0px'>{{ label }}</p>
-                                    <p style='font-size: 1.25em; margin: 0px'>{{ value }}</p>
+                                    <p style='font-size: 1.5em; margin: 0'>{{ label|e }}</p>
+                                    <p style='font-size: 1.25em; margin: 0'>{{ value|e }}</p>
                                 </td>
                             {% endfor %}
                         </tr>

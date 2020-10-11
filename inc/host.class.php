@@ -315,14 +315,7 @@ class PluginSiemHost extends CommonDBTM
          $add_form .= Html::closeForm(false);
          $twig_vars['add_availablity_service_form'] = $add_form;
       }
-      $loader = new \Twig\Loader\FilesystemLoader(Plugin::getPhpDir('siem') . '/templates');
-      $options = array(
-         'strict_variables' => false,
-         'debug' => false,
-         'cache'=> false
-      );
-      $twig = new \Twig\Environment($loader, $options);
-      return $twig->render('hostinfo.html.twig', $twig_vars);
+      return PluginSiemToolbox::getTwig()->render('elements/host_info.html.twig', $twig_vars);
    }
 
    /**
