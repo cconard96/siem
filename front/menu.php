@@ -24,9 +24,7 @@ include('../../../inc/includes.php');
 Html::header('SIEM Plugin', '', 'management', 'PluginSiemMenu');
 global $CFG_GLPI;
 $links = [];
-if (Session::haveRight(PluginSiemHost::$rightname, READ) || Session::haveRight(PluginSiemService::$rightname, READ)) {
-   $links[] = Html::link(__('Dashboard', 'siem'), PluginSiemEventManagement::getDashboardURL());
-}
+
 if (Session::haveRight(PluginSiemService::$rightname, READ)) {
    $links[] = Html::link(PluginSiemService::getTypeName(2), PluginSiemService::getSearchURL(true));
 }

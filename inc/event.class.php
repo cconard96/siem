@@ -118,26 +118,6 @@ class PluginSiemEvent extends CommonDBTM
       return true;
    }
 
-   public static function getForbiddenActionsForMenu()
-   {
-      return ['add'];
-   }
-
-   public static function getAdditionalMenuContent()
-   {
-      $menu['plugin_siem_event']['title'] = __('Event Management');
-      $menu['plugin_siem_event']['page'] = PluginSiemEventManagement::getDashboardURL();
-      $menu['plugin_siem_event']['options']['PluginSiemHost']['title'] = PluginSiemHost::getTypeName(2);
-      $menu['plugin_siem_event']['options']['PluginSiemHost']['page'] = PluginSiemHost::getSearchURL(false);
-      $menu['plugin_siem_event']['options']['PluginSiemHost']['links']['search'] = PluginSiemHost::getSearchURL(false);
-      $menu['plugin_siem_event']['options']['PluginSiemHost']['links']['add'] = PluginSiemHost::getFormURL(false);
-      $menu['plugin_siem_event']['options']['PluginSiemService']['title'] = PluginSiemService::getTypeName(2);
-      $menu['plugin_siem_event']['options']['PluginSiemService']['page'] = PluginSiemService::getSearchURL(false);
-      $menu['plugin_siem_event']['options']['PluginSiemService']['links']['search'] = PluginSiemService::getSearchURL(false);
-      $menu['plugin_siem_event']['options']['PluginSiemService']['links']['add'] = PluginSiemService::getFormURL(false);
-      return $menu;
-   }
-
    public function prepareInputForAdd($input)
    {
       $input = parent::prepareInputForAdd($input);
