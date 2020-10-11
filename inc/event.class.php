@@ -782,21 +782,12 @@ class PluginSiemEvent extends CommonDBTM
          'start' => $start,
          'limit' => $_SESSION['glpilist_limit']
       ]);
-      $historical = Html::printAjaxPager('', $start, count($events), '', false);
-      $historical .= "<table class='tab_cadre_fixehov'><thead>";
-      $historical .= "<tr><th colspan='5'>Historical</th></tr><tr><th></th>";
-      $historical .= '<th>' . __('Name') . '</th>';
-      $historical .= '<th>' . __('Significance') . '</th>';
-      $historical .= '<th>' . __('Date') . '</th>';
-      $historical .= '<th>' . __('Status') . '</th>';
-      $historical .= '</tr></thead><tbody>';
+
       $temp_service = new PluginSiemService();
-      foreach ($events as $event) {
-         $style = '';
-         $icon = 'fas fa-info-circle';
-         //$active = in_array($event['status'], self::getActiveStatusArray());
+      foreach ($events as &$event) {
          $temp_service->getFromDB($event['plugin_siem_services_id']);
-         $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
+
+         $icon = 'fas fa-info-circle';
          $event_class = 'tab_bg_2 ';
          if ($event['significance'] === PluginSiemEvent::WARNING) {
             $event_class .= 'bg-warning ';
@@ -805,23 +796,21 @@ class PluginSiemEvent extends CommonDBTM
             $event_class .= 'bg-danger ';
             $icon = 'fas fa-exclamation-circle';
          }
-         $historical .= "<tr id='siemevent_{$event['id']}' class='$event_class' $style onclick='window.pluginSiem.toggleEventDetails(this);'>";
-         $historical .= "<td class='center'><i class='{$icon} fa-lg' title='" .
-            PluginSiemEvent::getSignificanceName($event['significance']) . "'/></td>";
-         $historical .= "<td>{$localized_name}</td>";
-         $historical .= "<td>" . self::getSignificanceName($event['significance']) . "</td>";
-         $historical .= "<td>{$event['date']}</td>";
-         $historical .= "<td>" . self::getStatusName($event['status']) . "</td>";
-         $historical .= "</tr>";
-         $historical .= "<tr id='siemevent_{$event['id']}_content' class='tab_bg_2' $style hidden='hidden'>";
-         $historical .= "<td colspan='6'><p>";
-         $historical .= self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
+         // Replace some event properties with the translated and formatted versions
+         $event['name'] = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
+         $event['css_class'] = $event_class;
+         $event['icon'] = $icon;
+         $event['status'] = self::getStatusName($event['status']);
+         $event['significance'] = self::getSignificanceName($event['significance']);
+         $event['content'] = self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
             'format' => 'pretty'
          ]);
-         $historical .= "</p></td></tr>\n";
       }
-      $historical .= '</tbody></table>';
-      $historical .= Html::printAjaxPager('', $start, count($events), '', false);
+
+      $historical = PluginSiemToolbox::getTwig()->render('elements/events_historical.html.twig', [
+         'ajax_pages'   => Html::printAjaxPager('', $start, count($events), '', false),
+         'events'       => $events
+      ]);
       $out .= $historical;
       echo $out;
    }

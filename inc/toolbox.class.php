@@ -1,4 +1,8 @@
 <?php
+
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
 /**
  *  -------------------------------------------------------------------------
  *  SIEM plugin for GLPI
@@ -59,5 +63,21 @@ class PluginSiemToolbox
          $text_arr[] = sprintf('%d s', $diff->s);
       }
       return implode(' ', $text_arr);
+   }
+
+   public static function getTwig(): Environment
+   {
+      static $twig = null;
+
+      if ($twig === null) {
+         $loader = new FilesystemLoader(Plugin::getPhpDir('siem') . '/templates');
+         $options = array(
+            'strict_variables' => false,
+            'debug' => false,
+            'cache' => false
+         );
+         $twig = new Environment($loader, $options);
+      }
+      return $twig;
    }
 }

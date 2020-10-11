@@ -406,32 +406,24 @@ class PluginSiemService extends CommonDBTM
    {
       global $DB;
       $services = $host->getServices();
-      $out = '<form>';
-      $out .= "<table class='tab_cadre_fixe'><thead><tr><th colspan='4'>Services</th></tr>";
-      $out .= '<tr><th>' . __('Status') . '</th>';
-      $out .= '<th>' . __('Name') . '</th>';
-      $out .= '<th>' . __('Last status change') . '</th>';
-      $out .= '<th>' . __('Latest event') . '</th></tr></thead><tbody>';
-      foreach ($services as $service_id => $service) {
+      foreach ($services as $service_id => &$service) {
          $status = self::getStatusName($service['status']);
-         $status_badges = [];
-         $status_badge = 'badge badge-secondary';
+         $service['badges'] = [];
          switch ($service['status']) {
             case self::STATUS_OK:
-               $status_badges[] = ['class' => 'badge badge-success', 'label' => $status];
+               $service['badges'][] = ['class' => 'badge badge-success', 'label' => $status];
                break;
             case self::STATUS_CRITICAL:
-               $status_badges[] = ['class' => 'badge badge-danger', 'label' => $status];
+               $service['badges'][] = ['class' => 'badge badge-danger', 'label' => $status];
                break;
             case self::STATUS_WARNING:
-               $status_badges[] = ['class' => 'badge badge-warning', 'label' => $status];
+               $service['badges'][] = ['class' => 'badge badge-warning', 'label' => $status];
                break;
          }
          if ($service['is_flapping']) {
-            $status_badges[] = ['class' => 'badge badge-warning', 'label' => __('Flapping')];
+            $service['badges'][] = ['class' => 'badge badge-warning', 'label' => __('Flapping')];
          }
-         $status_since = $service['status_since'];
-         $status_since_diff = PluginSiemToolbox::getHumanReadableTimeDiff($status_since);
+         $service['status_since_diff'] = PluginSiemToolbox::getHumanReadableTimeDiff($service['status_since']);
          $eventiterator = $DB->request([
             'SELECT' => ['name'],
             'FROM' => PluginSiemEvent::getTable(),
@@ -442,23 +434,16 @@ class PluginSiemService extends CommonDBTM
             'LIMIT' => 1
          ]);
          $eventdata = $eventiterator->count() ? $eventiterator->next() : null;
-         $out .= "<tr id='service_{$service_id}' class='center'><td>";
-         foreach ($status_badges as $status_badge) {
-            $out .= "<span class='{$status_badge['class']}' style='font-size: 1.0em;'>{$status_badge['label']}</span>";
-         }
-         $servicelink = Html::link($service['name'], self::getFormURLWithID($service_id));
-         $out .= "</td><td>{$servicelink}</td>";
-         $out .= "<td title='{$status_since}'>{$status_since_diff}</td>";
+         $service['link'] = self::getFormURLWithID($service_id);
          if ($eventdata !== null) {
-            $latest_event = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
-            $out .= "<td>{$latest_event}</td>";
+            $service['latest_event_name'] = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
          } else {
-            $out .= '<td></td>';
+            $service['latest_event_name'] = null;
          }
-         $out .= '</tr>';
       }
-      $out .= Html::closeForm(false);
-      return $out;
+      return PluginSiemToolbox::getTwig()->render('elements/host_service_list.html.twig', [
+         'services'  => $services
+      ]);
    }
 
    protected function getFormFields()

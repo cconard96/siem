@@ -1,0 +1,46 @@
+{#
+*  -------------------------------------------------------------------------
+*  SIEM plugin for GLPI
+*  Copyright (C) 2019 by Curtis Conard
+*  https://github.com/cconard96/siem
+*  -------------------------------------------------------------------------
+*  LICENSE
+*  This file is part of SIEM plugin for GLPI.
+*  SIEM plugin for GLPI is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*  SIEM plugin for GLPI is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*  You should have received a copy of the GNU General Public License
+*  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
+#}
+
+<table class="tab_cadre_fixehov">
+    <thead>
+        {# TODO Need translation filter #}
+        <tr><th colspan="4" class="center">Services</th></tr>
+        <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Last status change</th>
+            <th>Latest event</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+            <tr id="service_{{ service.id|e('html_attr') }}">
+                <td>
+                    {% for badge in service.badges %}
+                        <span class="{{ badge.class|e('html_attr') }}" style="font-size: 1em">{{ badge.label|e }}</span>
+                    {% endfor %}
+                </td>
+                <td><a href="{{ service.link|e('html_attr') }}">{{ service.name|e }}</a></td>
+                <td title="{{ service.status_since|e('html_attr') }}">{{ service.status_since_diff|e }}</td>
+                <td>{{ service.latest_event_name|e }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
