@@ -18,6 +18,7 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* global CFG_GLPI */
 (function() {
    window.SIEMPlugin = function() {
       var self = this;
@@ -25,85 +26,8 @@
       this.dashboard = '#siem-dashboard';
 
       $(document).ready(function() {
-         if ($(self.dashboard).length > 0) {
-            self.refreshDashboard();
-            setInterval(function() {
-               self.refreshDashboard();
-            }, 30000);
-         }
+
       });
-
-      var buildDashboardDeck = function(cards) {
-         $(self.dashboard).empty();
-         var content = "<div class='container-fluid content'>";
-         content += "<h2 class='text-center'>Event Monitoring Dashboard</h2>";
-         content += "<p class='text-center'>"+new Date()+"</p>";
-         content += "<div class='siem-decks'>";
-         $.each(cards, function(r_index, row) {
-            content += "<div class='siem-deck card-deck'>";
-            $.each(row, function(c_index, card) {
-               var card_classes = ['siem-card', 'card', 'text-center', 'card-'+card.type];
-               if (card.extra_card_classes !== undefined) {
-                  card_classes.concat(card.extra_card_classes);
-               }
-               content += "<div class='"+card_classes.join(' ')+"'>";
-               content += "<div class='card-header'><p class=''>"+card.title+"</p></div>";
-               content += "<div class='card-body'>";
-               content += buildCardBody(card);
-               content += "</div></div>";
-            });
-            content += "</div>";
-         });
-         content += "</div></div>";
-         $(content).appendTo($(self.dashboard));
-      };
-
-      var buildCardBody = function(card) {
-         var content = '';
-         if (card.type === 'counter') {
-            return "<p>"+card.value+"</p>";
-         } else if (card.type === 'table') {
-            content += "<table class='w-100'><thead>";
-            $.each(card.headers, function(i, header) {
-               content += "<th>"+header+"</th>";
-            });
-            content += "</thead><tbody>";
-            $.each(card.rows, function(i, row) {
-               content += "<tr>";
-               $.each(row, function(i2, cell) {
-                  content += "<td class='"+(cell['class'] || '')+"'>" + cell.value + "</td>";
-               });
-               content += "</tr>";
-            });
-            content += "</tbody></table>";
-         } else if (card.type === 'table-v') {
-            content += "<table class='w-100'>";
-            $.each(card.headers, function(i, header) {
-               var cell = card.rows[i];
-               content += "<tr class='"+(cell['class'] || '')+"'>";
-               content += "<th class=''text-center>"+header+"</th>";
-               content += "<td class='text-left'>"+cell.value+"</td>";
-               content += "</tr>";
-            });
-            content += "</table>";
-         } else {
-            return "<p>"+card.value+"</p>";
-         }
-         return content;
-      };
-
-      self.refreshDashboard = function() {
-         var form = $(self.dashboard+' .siem-toolbar');
-         var get_data = form.serialize();
-         $.ajax({
-            type: "GET",
-            url: self.ajax_root + 'siemdashboard.php',
-            data: get_data,
-            success: function (cards) {
-               buildDashboardDeck(cards);
-            }
-         });
-      };
 
       this.toggleEventDetails = function(row) {
          var id = $(row).attr('id');
@@ -219,7 +143,7 @@
          });
       }
    };
-   // Always initialize this JS object to prevent needing inline JS to intialize it.
+   // Always initialize this JS object to prevent needing inline JS to initialize it.
    // We will intelligently guess at which functions need to be called based on the elements on the page after it loads.
    // For example, if a #siem-dashboard element is present, we initialize and refresh the dashboard view.
     window.pluginSiem = new SIEMPlugin();

@@ -17,63 +17,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
-#siem-dashboard {
-  margin: auto;
-}
-#siem-dashboard .siem-decks {
-  background-color: white;
-}
-#siem-dashboard .card-deck {
-  width: 100%;
-  margin-bottom: 1rem;
-  display: flex;
-}
-#siem-dashboard .card-deck .siem-card .card-header {
-  background-color: #e2e1de;
-  font-weight: bold;
-}
-#siem-dashboard .card-deck .card .card-body {
-  padding: unset;
-  padding-top: 0.5rem;
-}
-#siem-dashboard .card-deck .card.card-counter .card-body {
-  font-size: 2rem;
-}
-#siem-dashboard .siem-card {
-  margin-right: 0.5rem;
-  background-color: #ffffff;
-  box-shadow: 0 1px 1px #7f7979;
-  border-radius: 3px;
-}
-#siem-dashboard .siem-card h3 {
-  text-align: center;
-}
-#siem-dashboard .siem-card .card-content {
-  width: 100%;
-}
-#siem-dashboard .siem-card .card-content > p {
-  font-size: 3em;
-  text-align: center;
-}
-
-.siem-dashboard-toolbar {
-  margin-bottom: 15px !important;
-  padding: 5px !important;
-  overflow: auto;
-}
-.siem-dashboard-toolbar .siem-dashboard-options {
-  float: right;
-}
-.siem-dashboard-toolbar .siem-dashboard-options label {
-  margin-right: 1em;
-}
-.siem-dashboard-toolbar .siem-dashboard-options .select2 {
-  width: 10em !important;
-}
-.siem-dashboard-toolbar .siem-dashboard-options span a {
-  margin-left: 5px;
-}
-
 .event_filter {
   margin-bottom: 1em;
 }

@@ -35,7 +35,6 @@ function plugin_init_siem()
    Plugin::registerClass('PluginSiemEvent', ['addtabon' => $CFG_GLPI["networkport_types"]]);
    if (Session::haveRight('plugin_siem_host', READ)) {
       $PLUGIN_HOOKS['menu_toadd']['siem'] = ['management' => [
-         'PluginSiemEventManagement',
          'PluginSiemService',
          'PluginSiemServiceTemplate',
 //         'PluginSiemAcknowledgement',
@@ -52,6 +51,7 @@ function plugin_init_siem()
          'check_mode'   => PluginSiemService::CHECK_MODE_ACTIVE,
       ]
    ];
+   $PLUGIN_HOOKS['dashboard_cards']['siem'] = [PluginSiemEventManagement::class, 'getDashboardCards'];
 }
 
 function plugin_version_siem()
