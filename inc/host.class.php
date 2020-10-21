@@ -313,7 +313,7 @@ class PluginSiemHost extends CommonDBTM
          ]);
          $add_form .= '</fieldset>';
          $add_form .= Html::closeForm(false);
-         $twig_vars['add_availablity_service_form'] = $add_form;
+         $twig_vars['add_availability_service_form'] = $add_form;
       }
       return PluginSiemToolbox::getTwig()->render('elements/host_info.html.twig', $twig_vars);
    }
