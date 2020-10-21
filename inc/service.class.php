@@ -626,6 +626,9 @@ class PluginSiemService extends CommonDBTM
       echo '<tr><td>' .PluginSiemServiceTemplate::getTypeName(1). '</td><td>';
       echo Html::link($this->fields['name'], PluginSiemServiceTemplate::getFormURLWithID($this->fields['plugin_siem_servicetemplates_id']));
       echo '</td></tr>';
+      echo '</table>';
+      echo PluginSiemEvent::getListForHostOrService($ID, true);
+      echo '<table class="tab_cadre_fixe">';
 
       $this->showFormButtons($options);
 

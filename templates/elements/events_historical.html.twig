@@ -34,23 +34,28 @@
         </tr>
     </thead>
     <tbody>
-        {% for event in events %}
-            <tr id='siemevent_{{ event.id|e ('html_attr')}}' class='{{ event.css_class|e('html_attr') }}' onclick='window.pluginSiem.toggleEventDetails(this);'>
-                <td class="center">
-                    <i class="{{ event.icon|e('html_attr') }} fa-lg" title="{{ event.significance|e('html_attr') }}"></i>
-                </td>
-                <td>{{ event.name|e }}</td>
-                <td>{{ event.significance|e }}</td>
-                <td>{{ event.date|e }}</td>
-                <td>{{ event.status|e }}</td>
-            </tr>
-            <tr id="siemevent_{{ event.id|e('html_attr') }}_content" class="tab_bg_2" hidden="hidden">
-                <td colspan="6">
-                    {# TODO Try to remove raw filter here #}
-                    <p>{{ event.content|raw }}</p>
-                </td>
-            </tr>
-        {% endfor %}
+        {% if events|length == 0 %}
+            {#  TODO Need translation filter #}
+            <tr><td colspan="5">No events yet</td></tr>
+        {% else %}
+            {% for event in events %}
+                <tr id='siemevent_{{ event.id|e ('html_attr')}}' class='{{ event.css_class|e('html_attr') }}' onclick='window.pluginSiem.toggleEventDetails(this);'>
+                    <td class="center">
+                        <i class="{{ event.icon|e('html_attr') }} fa-lg" title="{{ event.significance|e('html_attr') }}"></i>
+                    </td>
+                    <td>{{ event.name|e }}</td>
+                    <td>{{ event.significance|e }}</td>
+                    <td>{{ event.date|e }}</td>
+                    <td>{{ event.status|e }}</td>
+                </tr>
+                <tr id="siemevent_{{ event.id|e('html_attr') }}_content" class="tab_bg_2" hidden="hidden">
+                    <td colspan="6">
+                        {# TODO Try to remove raw filter here #}
+                        <p>{{ event.content|raw }}</p>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
     </tbody>
 </table>
 

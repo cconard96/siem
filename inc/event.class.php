@@ -724,18 +724,11 @@ class PluginSiemEvent extends CommonDBTM
 
    public static function showEventManagementTab(CommonDBTM $item)
    {
-      global $DB, $PLUGIN_HOOKS;
-      if (isset($_GET['start'])) {
-         $start = (int)$_GET['start'];
-      } else {
-         $start = 0;
-      }
       $eventhost = new PluginSiemHost();
       $eventservice = new PluginSiemService();
       $matchinghosts = $eventhost->find(['items_id' => $item->getID(), 'itemtype' => $item::getType()], [], 1);
       $has_host = (count($matchinghosts) === 1);
-      $matchingservices = [];
-      $has_services = false;
+
       if (!$has_host) {
          $has_services = false;
       } else {
@@ -758,8 +751,19 @@ class PluginSiemEvent extends CommonDBTM
       }
       $out = $eventhost->getHostInfoDisplay();
       $out .= PluginSiemService::getFormForHost($eventhost);
-      $events = self::getEventsForHostOrService($eventhost->getID(), false, [
-         'start' => $start,
+      $out .= self::getListForHostOrService($eventhost->getID(), false);
+      echo $out;
+   }
+
+   public static function getListForHostOrService($items_id, $is_service = true, $params = [])
+   {
+      $p = [
+         'start' => 0
+      ];
+      $p = array_replace($p, $params);
+
+      $events = self::getEventsForHostOrService($items_id, $is_service, [
+         'start' => $p['start'],
          'limit' => $_SESSION['glpilist_limit']
       ]);
 
@@ -769,10 +773,10 @@ class PluginSiemEvent extends CommonDBTM
 
          $icon = 'fas fa-info-circle';
          $event_class = 'tab_bg_2 ';
-         if ($event['significance'] === PluginSiemEvent::WARNING) {
+         if ($event['significance'] === self::WARNING) {
             $event_class .= 'bg-warning ';
             $icon = 'fas fa-exclamation-triangle';
-         } else if ($event['significance'] === PluginSiemEvent::EXCEPTION) {
+         } else if ($event['significance'] === self::EXCEPTION) {
             $event_class .= 'bg-danger ';
             $icon = 'fas fa-exclamation-circle';
          }
@@ -787,69 +791,10 @@ class PluginSiemEvent extends CommonDBTM
          ]);
       }
 
-      $historical = PluginSiemToolbox::getTwig()->render('elements/events_historical.html.twig', [
-         'ajax_pages'   => Html::printAjaxPager('', $start, count($events), '', false),
+      return PluginSiemToolbox::getTwig()->render('elements/events_historical.html.twig', [
+         'ajax_pages'   => Html::printAjaxPager('', $p['start'], count($events), '', false),
          'events'       => $events
       ]);
-      $out .= $historical;
-      echo $out;
-   }
-
-   public static function getListForHostOrService($items_id, $is_service = true, $params = [])
-   {
-      $p = [
-         'start' => 0
-      ];
-      $p = array_replace($p, $params);
-
-      $events = self::getEventsForHostOrService($$items_id, $is_service, [
-         'start' => $p['start'],
-         'limit' => $_SESSION['glpilist_limit']
-      ]);
-      $out = Html::printAjaxPager('', $p['start'], count($events), '', false);
-      $out .= "<table class='tab_cadre_fixehov'><thead>";
-      $out .= "<tr><th colspan='5'>Historical</th></tr><tr><th></th>";
-      $out .= '<th>' . __('Name') . '</th>';
-      $out .= '<th>' . __('Significance') . '</th>';
-      $out .= '<th>' . __('Date') . '</th>';
-      $out .= '<th>' . __('Status') . '</th>';
-      $out .= '</tr></thead><tbody>';
-      $temp_service = new PluginSiemService();
-      foreach ($events as $event) {
-         $style = '';
-         $icon = 'fas fa-info-circle';
-         $active = in_array($event['status'], self::getActiveStatusArray());
-         $temp_service->getFromDB($event['plugin_siem_services_id']);
-         $localized_name = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
-         if ($event['significance'] === self::WARNING) {
-            if ($active) {
-               $style = "style='background-color: {$_SESSION['glpieventwarning_color']}'";
-            }
-            $icon = 'fas fa-exclamation-triangle';
-         } else if ($event['significance'] === self::EXCEPTION) {
-            if ($active) {
-               $style = "style='background-color: {$_SESSION['glpieventexception_color']}'";
-            }
-            $icon = 'fas fa-exclamation-circle';
-         }
-         $out .= "<tr id='siemevent_{$event['id']}' class='tab_bg_2' $style onclick='window.pluginSiem.toggleEventDetails(this);'>";
-         $out .= "<td class='center'><i class='{$icon} fa-lg' title='" .
-            self::getSignificanceName($event['significance']) . "'/></td>";
-         $out .= "<td>{$localized_name}</td>";
-         $out .= '<td>' . self::getSignificanceName($event['significance']) . '</td>';
-         $out .= "<td>{$event['date']}</td>";
-         $out .= '<td>' . self::getStatusName($event['status']) . '</td>';
-         $out .= '</tr>';
-         $out .= "<tr id='siemevent_{$event['id']}_content' class='tab_bg_2' $style hidden='hidden'>";
-         $out .= "<td colspan='6'><p>";
-         $out .= self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
-            'format' => 'pretty'
-         ]);
-         $out .= "</p></td></tr>\n";
-      }
-      $out .= '</tbody></table>';
-      $out .= Html::printAjaxPager('', $p['start'], count($events), '', false);
-      return $out;
    }
 
    public static function getReportList()
