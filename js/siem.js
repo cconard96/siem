@@ -78,6 +78,9 @@
             data: {
                _check_now: true,
                hosts_id: hosts_id
+            },
+            success: function() {
+               window.location.reload();
             }
          });
       }
@@ -131,6 +134,9 @@
                               _add_service: true,
                               hosts_id: hosts_id,
                               servicetemplates_id: templates_id
+                           },
+                           success: function() {
+                              window.location.reload();
                            },
                            complete: function() {
                               parentDialog.dialog('close');
