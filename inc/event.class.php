@@ -209,70 +209,6 @@ class PluginSiemEvent extends CommonDBTM
       return Dropdown::showFromArray($p['name'], $values, $p);
    }
 
-   /**
-    * Gets the name of an event status from the int value
-    *
-    * @param int $status The event status
-    *
-    * @return string The event status name
-    * @since 1.0.0
-    *
-    */
-   public static function getStatusName($status)
-   {
-      switch ($status) {
-         case 0:
-            return __('New');
-         case 1:
-            return __('Acknowledged');
-         case 2:
-            return __('Remediating');
-         case 3:
-            return __('Monitoring');
-         case 4:
-            return __('Resolved');
-         case 5:
-            return __('Expired');
-         default:
-            return __('Unknown');
-      }
-   }
-
-   /**
-    * Displays or gets a dropdown menu of event statuses.
-    * The default functionality is to display the dropdown.
-    *
-    * @param array $options Dropdown options
-    *
-    * @return void|string
-    * @since 1.0.0
-    *
-    * @see Dropdown::showFromArray()
-    */
-   public static function dropdownStatus(array $options = [])
-   {
-      global $CFG_GLPI;
-      $p = [
-         'name' => 'status',
-         'value' => 0,
-         'showtype' => 'normal',
-         'display' => true,
-      ];
-      if (is_array($options) && count($options)) {
-         foreach ($options as $key => $val) {
-            $p[$key] = $val;
-         }
-      }
-      $values = [];
-      $values[0] = self::getStatusName(0);
-      $values[1] = self::getStatusName(1);
-      $values[2] = self::getStatusName(2);
-      $values[3] = self::getStatusName(3);
-      $values[4] = self::getStatusName(4);
-      $values[5] = self::getStatusName(5);
-      return Dropdown::showFromArray($p['name'], $values, $p);
-   }
-
    public static function getEventsForHostOrService($items_id, $is_service = true, $params = [])
    {
       global $DB;
@@ -636,13 +572,6 @@ class PluginSiemEvent extends CommonDBTM
          'massiveaction' => false
       ];
       $tab[] = [
-         'id' => '31',
-         'table' => $this->getTable(),
-         'field' => 'status',
-         'name' => __('Status'),
-         'datatype' => 'specific',
-      ];
-      $tab[] = [
          'id' => '80',
          'table' => 'glpi_entities',
          'field' => 'completename',
@@ -730,7 +659,6 @@ class PluginSiemEvent extends CommonDBTM
          $event['name'] = self::getLocalizedEventName($event['name'], $temp_service->fields['plugins_id']);
          $event['css_class'] = $event_class;
          $event['icon'] = $icon;
-         $event['status'] = self::getStatusName($event['status']);
          $event['significance'] = self::getSignificanceName($event['significance']);
          $event['content'] = self::getEventProperties($event['content'], $temp_service->fields['plugins_id'], [
             'format' => 'pretty'
@@ -848,6 +776,7 @@ class PluginSiemEvent extends CommonDBTM
 
    public static function getActiveAlerts()
    {
+      // TODO Needs reimplemented. Events shouldn't have a status on their own!
       global $DB;
       $eventtable = self::getTable();
       $servicetable = PluginSiemService::getTable();
@@ -867,9 +796,6 @@ class PluginSiemEvent extends CommonDBTM
             ]
          ],
          'WHERE' => [
-            'NOT' => [
-               'glpi_plugin_siem_services.status' => [0, 2]
-            ]
          ]
       ]);
       $alerts = [];

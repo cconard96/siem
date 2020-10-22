@@ -30,13 +30,12 @@
             <th>Name</th>
             <th>Significance</th>
             <th>Date</th>
-            <th>Status</th>
         </tr>
     </thead>
     <tbody>
         {% if events|length == 0 %}
             {#  TODO Need translation filter #}
-            <tr><td colspan="5">No events yet</td></tr>
+            <tr><td colspan="4">No events yet</td></tr>
         {% else %}
             {% for event in events %}
                 <tr id='siemevent_{{ event.id|e ('html_attr')}}' class='{{ event.css_class|e('html_attr') }}' onclick='window.pluginSiem.toggleEventDetails(this);'>
@@ -46,10 +45,9 @@
                     <td>{{ event.name|e }}</td>
                     <td>{{ event.significance|e }}</td>
                     <td>{{ event.date|e }}</td>
-                    <td>{{ event.status|e }}</td>
                 </tr>
                 <tr id="siemevent_{{ event.id|e('html_attr') }}_content" class="tab_bg_2" hidden="hidden">
-                    <td colspan="6">
+                    <td colspan="4">
                         {# TODO Try to remove raw filter here #}
                         <p>{{ event.content|raw }}</p>
                     </td>
