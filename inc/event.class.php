@@ -45,47 +45,6 @@ class PluginSiemEvent extends CommonDBTM
     */
    const EXCEPTION = 2;
 
-   /**
-    * An event that was logged but not acted on. For informational alerts, this is the only valid status.
-    */
-   const STATUS_NEW = 0;
-
-   /**
-    * An event that has been acknowledged by a technician.
-    * Duplicate alerts should be dropped for a period of time.
-    * Valid only for events on volatile services.
-    */
-   const STATUS_ACKNOWLEDGED = 1;
-
-   /**
-    * An event that is currently being remediated by a technician or automatically.
-    * Similar to acknowledged events, duplicate events are dropped.
-    * Valid only for events on volatile services.
-    */
-   const STATUS_REMEDIATING = 2;
-
-   /**
-    * An event that may be resolved. The event will be considered resolved after a time.
-    * If a duplicate event is logged, it is linked and this event is downgraded to acknowledged.
-    * Valid only for events on volatile services.
-    */
-   const STATUS_MONITORING = 3;
-
-   /**
-    * An event that has been determined to be resolved either manually or automatically after a time period.
-    * If a duplicate alert comes in, it is treated as a new event and not linked.
-    * Valid only for events on volatile services.
-    */
-   const STATUS_RESOLVED = 4;
-
-   /**
-    * An event that went so long without being resolved that another event has replaced it through correlation rules or a timeout period.
-    * This event will be linked to the replacement event if one exists.
-    * If there is no replacement (timeout), then new events will not be linked.
-    * Valid only for events on volatile services.
-    */
-   const STATUS_EXPIRED = 5;
-
    public static function getTypeName($nb = 0)
    {
       return _n('Event', 'Events', $nb);
@@ -312,19 +271,6 @@ class PluginSiemEvent extends CommonDBTM
       $values[4] = self::getStatusName(4);
       $values[5] = self::getStatusName(5);
       return Dropdown::showFromArray($p['name'], $values, $p);
-   }
-
-   /**
-    * Get an array of statuses that indicate the alert is still active.
-    *    By default, this includes New, Acknowledged, and Remediating.
-    *
-    * @return array Array of status integers
-    * @since 1.0.0
-    *
-    */
-   public static function getActiveStatusArray()
-   {
-      return [self::STATUS_NEW, self::STATUS_ACKNOWLEDGED, self::STATUS_REMEDIATING, self::STATUS_MONITORING];
    }
 
    public static function getEventsForHostOrService($items_id, $is_service = true, $params = [])

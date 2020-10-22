@@ -33,7 +33,6 @@ function plugin_siem_install()
       $query = "CREATE TABLE `glpi_plugin_siem_events` (
          `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
          `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-         `status` tinyint(4) NOT NULL DEFAULT '0',
          `date` datetime DEFAULT NULL,
          `content` longtext COLLATE utf8_unicode_ci,
          `date_creation` datetime DEFAULT NULL,
@@ -43,7 +42,6 @@ function plugin_siem_install()
          `plugin_siem_services_id` int(11) NOT NULL,
          PRIMARY KEY (`id`),
          KEY `name` (`name`),
-         KEY `status` (`status`),
          KEY `date` (`date`),
          KEY `date_creation` (`date_creation`),
          KEY `significance` (`significance`),
@@ -184,6 +182,11 @@ function plugin_siem_install()
          'name' => 'request_type',
          'value' => '-1'
       ]);
+   }
+
+   if ($DB->fieldExists('glpi_plugin_siem_events', 'status')) {
+      $migration->dropField('glpi_plugin_siem_events', 'status');
+      $migration->dropKey('glpi_plugin_siem_events', 'status');
    }
    CronTask::register('PluginSiemEvent', 'pollevents', 60, ['state' => CronTask::STATE_WAITING]);
    return true;

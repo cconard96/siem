@@ -87,7 +87,6 @@ class PluginSiemSensorPing extends PluginSiemSensor
       } else if (!isset($ping_result['_sensor_fault'])) {
          return [
             'name' => 'sensor_ping_notok',
-            'status' => PluginSiemEvent::STATUS_NEW,
             'significance' => PluginSiemEvent::EXCEPTION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($ping_result),
@@ -96,7 +95,6 @@ class PluginSiemSensorPing extends PluginSiemSensor
          //Sensor parse error
          return [
             'name' => 'sensor_ping_error',
-            'status' => PluginSiemEvent::STATUS_NEW,
             'significance' => PluginSiemEvent::EXCEPTION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),
@@ -106,7 +104,6 @@ class PluginSiemSensorPing extends PluginSiemSensor
       if ($event_content['percent_loss'] > 0) {
          return [
             'name' => 'sensor_ping_warn',
-            'status' => PluginSiemEvent::STATUS_NEW,
             'significance' => PluginSiemEvent::WARNING,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),
@@ -114,7 +111,6 @@ class PluginSiemSensorPing extends PluginSiemSensor
       } else {
          return [
             'name' => 'sensor_ping_ok',
-            'status' => PluginSiemEvent::STATUS_NEW,
             'significance' => PluginSiemEvent::INFORMATION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),

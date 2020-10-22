@@ -52,7 +52,6 @@ class PluginSiemSensorHttp extends PluginSiemSensor
             curl_close($ch);
             $results[$service_id] = [
                'name' => 'sensor_http_ok_error',
-               'status' => PluginSiemEvent::STATUS_NEW,
                'significance' => PluginSiemEvent::EXCEPTION,
                'date' => $_SESSION['glpi_currenttime'],
                'content' => json_encode([
@@ -69,7 +68,6 @@ class PluginSiemSensorHttp extends PluginSiemSensor
             if ($httpcode === 200) {
                $results[$service_id] = [
                   'name' => 'sensor_http_ok_ok',
-                  'status' => PluginSiemEvent::STATUS_NEW,
                   'significance' => PluginSiemEvent::INFORMATION,
                   'date' => $_SESSION['glpi_currenttime'],
                   'content' => json_encode([
@@ -80,7 +78,6 @@ class PluginSiemSensorHttp extends PluginSiemSensor
             } else {
                $results[$service_id] = [
                   'name' => 'sensor_http_ok_error',
-                  'status' => PluginSiemEvent::STATUS_NEW,
                   'significance' => PluginSiemEvent::WARNING,
                   'date' => $_SESSION['glpi_currenttime'],
                   'content' => json_encode([
