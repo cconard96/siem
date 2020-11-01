@@ -31,15 +31,6 @@ class PluginSiemHost extends CommonDBTM
 
    static $rightname = 'plugin_siem_host';
 
-   /** Host is up. */
-   const STATUS_UP = 0;
-   /** Host should be reachable, but is down. Service alerts are suppressed. */
-   const STATUS_DOWN = 1;
-   /** Host availability is not being monitored. */
-   const STATUS_UNKNOWN = 2;
-   /** Host is not reachable because an upstream device is down. */
-   const STATUS_UNREACHABLE = 3;
-
    public static function getTypeName($nb = 0)
    {
       return _n('Host', 'Hosts', $nb, 'siem');
@@ -77,19 +68,6 @@ class PluginSiemHost extends CommonDBTM
             break;
       }
       return true;
-   }
-
-   public static function getStatusName($status)
-   {
-      switch ($status) {
-         case PluginSiemService::STATUS_OK:
-         case PluginSiemService::STATUS_WARNING:
-            return __('Up');
-         case PluginSiemService::STATUS_CRITICAL:
-            return __('Down');
-         default:
-            return __('Unknown');
-      }
    }
 
    public static function getFormURLWithID($id = 0, $full = true)
@@ -186,20 +164,6 @@ class PluginSiemHost extends CommonDBTM
       return $tab;
    }
 
-   public function getBackgroundColorClass()
-   {
-      switch ($this->getStatus()) {
-         case self::STATUS_DOWN:
-         case self::STATUS_UNREACHABLE:
-            return 'bg-danger';
-         case self::STATUS_UP:
-            return 'bg-success';
-         case self::STATUS_UNKNOWN:
-            return 'bg-warning';
-      }
-      return '';
-   }
-
    /**
     * Loads the host's availability service and then caches and returns it.
     * @return PluginSiemService The loaded availability service or null if it could not be loaded.
@@ -231,7 +195,7 @@ class PluginSiemHost extends CommonDBTM
       global $DB, $CFG_GLPI;
 
       $twig_vars = [
-         'host_info_bg'    => $this->getBackgroundColorClass(),
+         'host_info_bg'    => PluginSiemService::getBackgroundColorClass($this->getStatus()),
          'toolbar_buttons' => [
             [
                'label' => __('Check now'),
@@ -263,7 +227,7 @@ class PluginSiemHost extends CommonDBTM
             __('Host availability not monitored') => __('Set the availability service to monitor the host')
          ];
       }
-      if (in_array($this->getStatus(), [self::STATUS_DOWN, self::STATUS_UNREACHABLE], true)) {
+      if (in_array($this->getStatus(), [PluginSiemService::STATUS_CRITICAL, PluginSiemService::STATUS_WARNING], true)) {
          $twig_vars['toolbar_buttons'] = [
             'label' => sprintf(__('Acknowledge %s'), self::getTypeName(1)),
             'action' => "acknowledge({$this->getID()})",

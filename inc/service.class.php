@@ -109,6 +109,20 @@ class PluginSiemService extends CommonDBTM
       }
    }
 
+   public static function getBackgroundColorClass(int $status): string
+   {
+      switch ($status) {
+         case self::STATUS_CRITICAL:
+            return 'bg-danger';
+         case self::STATUS_OK:
+            return 'bg-success';
+         case self::STATUS_WARNING:
+         case self::STATUS_UNKNOWN:
+            return 'bg-warning';
+      }
+      return '';
+   }
+
    public function getServiceInfoDisplay()
    {
       $status = self::getStatusName($this->fields['status']);

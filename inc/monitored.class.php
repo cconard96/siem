@@ -63,7 +63,7 @@ trait PluginSiemMonitored
    public function getStatus()
    {
       $status = $this->getMonitoredField('status');
-      return $status !== null ? $status : PluginSiemHost::STATUS_UNKNOWN;
+      return $status ?? PluginSiemService::STATUS_UNKNOWN;
    }
 
    public function isHardStatus()
@@ -90,12 +90,12 @@ trait PluginSiemMonitored
    {
       if (static::getType() === 'PluginSiemHost') {
          if ($this->fields['is_reachable']) {
-            return PluginSiemHost::getStatusName($this->getStatus());
+            return PluginSiemService::getStatusName($this->getStatus());
          } else {
             return __('Unreachable');
          }
       } else {
-         return PluginSiemHost::getStatusName($this->getStatus());
+         return PluginSiemService::getStatusName($this->getStatus());
       }
    }
 
