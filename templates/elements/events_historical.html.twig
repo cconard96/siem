@@ -22,20 +22,17 @@
 
 <table class='tab_cadre_fixehov'>
     <thead>
-        {# TODO Need translation filter #}
-        <tr><th colspan='5' class="center">Historical</th></tr>
+        <tr><th colspan='5' class="center">{{ __('Historical', 'glpi') }}</th></tr>
         <tr>
             <th></th>
-            {# TODO Need translation filter #}
-            <th>Name</th>
-            <th>Significance</th>
-            <th>Date</th>
+            <th>{{ __('Name', 'glpi') }}</th>
+            <th>{{ __('Significance') }}</th>
+            <th>{{ __('Date', 'glpi') }}</th>
         </tr>
     </thead>
     <tbody>
         {% if events|length == 0 %}
-            {#  TODO Need translation filter #}
-            <tr><td colspan="4">No events yet</td></tr>
+            <tr><td colspan="4">{{ __('No events yet', 'siem') }}</td></tr>
         {% else %}
             {% for event in events %}
                 <tr id='siemevent_{{ event.id|e ('html_attr')}}' class='{{ event.css_class|e('html_attr') }}' onclick='window.pluginSiem.toggleEventDetails(this);'>

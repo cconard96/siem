@@ -48,8 +48,7 @@
     </div>
     <div id='host-service-info' class='inline-block w-75'>
         {% if service_stats is defined and service_stats|length > 0 %}
-            {# TODO Needs translation filter #}
-            <h3>Availability service info</h3>
+            <h3>{{ __("Availability service info") }}</h3>
             <table class='text-center w-100'>
                 <tbody>
                     {% for statrow in service_stats %}
