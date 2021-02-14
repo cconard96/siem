@@ -26,12 +26,12 @@ define('PLUGIN_SIEM_MAX_GLPI', '9.6.0');
 
 function plugin_init_siem()
 {
+   global $PLUGIN_HOOKS, $CFG_GLPI;
+   $PLUGIN_HOOKS['csrf_compliant']['siem'] = true;
    if (!Plugin::isPluginActive('siem')) {
       return false;
    }
    require_once 'vendor/autoload.php';
-   global $PLUGIN_HOOKS, $CFG_GLPI;
-   $PLUGIN_HOOKS['csrf_compliant']['siem'] = true;
    $PLUGIN_HOOKS['add_css']['siem'] = 'css/siem.css';
    $PLUGIN_HOOKS['add_javascript']['siem'] = 'js/siem.js';
    Plugin::registerClass('PluginSiemProfile', ['addtabon' => ['Profile']]);
