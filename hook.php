@@ -214,9 +214,9 @@ function plugin_siem_poll_sensor(array $params)
    }
    switch ($params['sensor']) {
       case 'ping':
-         return PluginSiemSensorPing::invokePoll($params['service_ids']);
+         return PluginSiemSensorPing::poll($params['service_ids']);
       case 'http_ok':
-         return PluginSiemSensorHttp::invokePoll($params['service_ids']);
+         return PluginSiemSensorHttp::poll($params['service_ids']);
    }
 }
 

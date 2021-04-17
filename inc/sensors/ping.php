@@ -26,7 +26,7 @@ use Symfony\Component\Process\Process;
 class PluginSiemSensorPing extends PluginSiemSensor
 {
 
-   protected static function poll($service_ids = [])
+   public static function poll($service_ids = [])
    {
       $defparams = [
          'name_first' => true,

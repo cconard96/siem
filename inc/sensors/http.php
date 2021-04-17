@@ -23,7 +23,7 @@
 class PluginSiemSensorHttp extends PluginSiemSensor
 {
 
-   protected static function poll($service_ids = [])
+   public static function poll($service_ids = [])
    {
       foreach ($service_ids as $service_id) {
          $service = new PluginSiemService();

@@ -34,13 +34,5 @@ class PluginSiemSensor
       return $preferred;
    }
 
-   protected static function poll($services_ids = [])
-   {
-
-   }
-
-   final public static function invokePoll($service_ids = [])
-   {
-      return static::poll($service_ids);
-   }
+   abstract public static function poll($services_ids = []);
 }
