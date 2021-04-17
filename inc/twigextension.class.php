@@ -23,7 +23,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-class PluginSiemTwigextension extends AbstractExtension {
+class PluginSiemTwigExtension extends AbstractExtension {
 
    public function initRuntime(\Twig\Environment $environment)
    {
