@@ -7,10 +7,5 @@
         "symfony/framework-bundle": "^5.1",
         "symfony/http-kernel": "^5.1",
         "symfony/yaml": "^5.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "GlpiPlugin\\Siem\\": "src/"
-        }
     }
 }
