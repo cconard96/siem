@@ -19,25 +19,25 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 use Glpi\Event;
+use GlpiPlugin\SIEM\Host;
 
 include('../../../inc/includes.php');
-$host = new PluginSiemHost();
+$host = new Host();
 if (isset($_POST['add'])) {
    $host->check(-1, CREATE, $_POST);
    $newID = $host->add($_POST, false);
-   Event::log($newID, 'PluginSiemHost', 3, 'tools', 'add');
+   Event::log($newID, Host::class, 3, 'tools', 'add');
    Html::back();
 } else if (isset($_POST['purge'])) {
    $host->check($_POST['id'], PURGE);
    $host->delete($_POST, 1);
-   Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'purge');
+   Event::log($_POST['id'], Host::class, 3, 'tools', 'purge');
    Html::back();
 } else if (isset($_POST['update'])) {
    $host->check($_POST['id'], UPDATE);
    $host->update($_POST);
-   Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'update');
+   Event::log($_POST['id'], Host::class, 3, 'tools', 'update');
    Html::back();
 } else if (isset($_POST['set_host_service']) && isset($_POST['plugin_siem_services_id'])) {
    $host->check($_POST['id'], UPDATE);
@@ -45,7 +45,7 @@ if (isset($_POST['add'])) {
       'id' => $_POST['id'],
       'plugin_siem_services_id_availability' => $_POST['plugin_siem_services_id']
    ]);
-   Event::log($_POST['id'], 'PluginSiemHost', 3, 'tools', 'update');
+   Event::log($_POST['id'], Host::class, 3, 'tools', 'update');
    Html::back();
 }
 Html::back();

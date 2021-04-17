@@ -19,10 +19,13 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use Plugin;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
-class PluginSiemToolbox
+class Toolbox
 {
 
    /**
@@ -75,7 +78,7 @@ class PluginSiemToolbox
             'cache' => false
          );
          $twig = new Environment($loader, $options);
-         $twig->addExtension(new PluginSiemTwigExtension());
+         $twig->addExtension(new Twigextension());
       }
       return $twig;
    }

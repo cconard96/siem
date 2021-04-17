@@ -19,12 +19,15 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonGLPI;
 
 /**
  * PluginSIEMMenu class. This class adds a menu which contains links to pages related to this plugin.
  * See /front/menu.php file for the menu content.
  */
-class PluginSiemMenu extends CommonGLPI
+class Menu extends CommonGLPI
 {
 
    /**
@@ -52,6 +55,6 @@ class PluginSiemMenu extends CommonGLPI
     * @return boolean
     */
    public static function canView() {
-      return PluginSiemHost::canView() || PluginSiemService::canView() || PluginSiemServiceTemplate::canView();
+      return Host::canView() || Service::canView() || ServiceTemplate::canView();
    }
 }

@@ -19,6 +19,10 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonDBRelation;
+use CommonDBTM;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
@@ -30,11 +34,11 @@ if (!defined('GLPI_ROOT')) {
  * Relation between SIEMEvents and ITILObjects
  * @since 1.0.0
  **/
-class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
+class Itil_ScheduledDowntime extends CommonDBRelation
 {
 
    // From CommonDBRelation
-   static public $itemtype_1 = 'ScheduledDowntime';
+   static public $itemtype_1 = ScheduledDowntime::class;
    static public $items_id_1 = 'scheduleddowntimes_id';
    static public $itemtype_2 = 'itemtype';
    static public $items_id_2 = 'items_id';
@@ -49,7 +53,7 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
 
    public function canCreateItem()
    {
-      $downtime = new PluginSiemScheduledDowntime();
+      $downtime = new ScheduledDowntime();
       if ($downtime->canUpdateItem()) {
          return true;
       }
@@ -58,7 +62,7 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
 
    public function post_addItem()
    {
-      $downtime = new PluginSiemScheduledDowntime();
+      $downtime = new ScheduledDowntime();
       $input = [
          'id' => $this->fields[self::$items_id_1],
          'date_mod' => $_SESSION['glpi_currenttime'],
@@ -69,7 +73,7 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
 
    public function post_purgeItem()
    {
-      $downtime = new PluginSiemScheduledDowntime();
+      $downtime = new ScheduledDowntime();
       $input = [
          'id' => $this->fields[self::$items_id_1],
          'date_mod' => $_SESSION['glpi_currenttime'],
@@ -81,7 +85,7 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
    public function prepareInputForAdd($input)
    {
       // Avoid duplicate entry
-      if (countElementsInTable($this->getTable(), [self::$items_id_1 => $input[self::$items_id_1],
+      if (countElementsInTable(self::getTable(), [self::$items_id_1 => $input[self::$items_id_1],
             self::$itemtype_2 => $input[self::$itemtype_2],
             self::$items_id_2 => $input[self::$items_id_2]]) > 0) {
          return false;
@@ -97,6 +101,6 @@ class PluginSIEMItil_ScheduledDowntime extends CommonDBRelation
     */
    static function showForItil(CommonDBTM $item, $withtemplate = 0)
    {
-      PluginSiemScheduledDowntime::showListForItil(false, $item);
+      ScheduledDowntime::showListForItil(false, $item);
    }
 }

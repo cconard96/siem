@@ -19,6 +19,12 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonGLPI;
+use Html;
+use Profile as GlpiProfile;
+use Session;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
@@ -28,7 +34,7 @@ if (!defined('GLPI_ROOT')) {
  * PluginSIEMProfile class. Adds plugin related rights tab to Profiles.
  * @since 1.0.0
  */
-class PluginSiemProfile extends Profile
+class Profile extends GlpiProfile
 {
    static $rightname = "config";
 
@@ -63,24 +69,23 @@ class PluginSiemProfile extends Profile
          return false;
       }
       echo "<div class='spaced'>";
-      $profile = new Profile();
+      $profile = new self();
       $profile->getFromDB($profiles_id);
       if ($openform && ($canedit = Session::haveRightsOr(self::$rightname, [CREATE, UPDATE, PURGE]))) {
          echo "<form method='post' action='" . $profile->getFormURL() . "'>";
       }
-      $rights = [['itemtype' => 'PluginSiemHost',
-         'label' => PluginSiemHost::getTypeName(Session::getPluralNumber()),
+      $rights = [['itemtype' => Host::class,
+         'label' => Host::getTypeName(Session::getPluralNumber()),
          'field' => 'plugin_siem_host'],
          ['itemtype' => 'PluginSiemService',
-            'label' => PluginSiemService::getTypeName(Session::getPluralNumber()),
+            'label' => Service::getTypeName(Session::getPluralNumber()),
             'field' => 'plugin_siem_service'],
          ['itemtype' => 'PluginSiemServiceTemplate',
-            'label' => PluginSiemServiceTemplate::getTypeName(Session::getPluralNumber()),
+            'label' => ServiceTemplate::getTypeName(Session::getPluralNumber()),
             'field' => 'plugin_siem_servicetemplate']];
       $matrix_options['title'] = __('SIEM Plugin', 'siem');
       $profile->displayRightsChoiceMatrix($rights, $matrix_options);
-      if ($canedit
-         && $closeform) {
+      if ($canedit && $closeform) {
          echo "<div class='center'>";
          echo Html::hidden('id', ['value' => $profiles_id]);
          echo Html::submit(_sx('button', 'Save'), ['name' => 'update']);

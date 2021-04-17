@@ -19,9 +19,9 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM\Sensor;
 
-class PluginSiemSensor
-{
+abstract class Sensor {
 
    /**
     * Gets an array of IPs or hostnames in order of preference when contacting the host.
@@ -34,5 +34,5 @@ class PluginSiemSensor
       return $preferred;
    }
 
-   abstract public static function poll($services_ids = []);
+   abstract public static function poll($service_ids = []);
 }

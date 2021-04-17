@@ -19,7 +19,6 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 if (strpos($_SERVER['PHP_SELF'], 'dropdownSIEMSensors.php')) {
    $AJAX_INCLUDE = 1;
    include('../../../inc/includes.php');

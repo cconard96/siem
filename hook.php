@@ -1,4 +1,10 @@
 <?php
+
+use GlpiPlugin\SIEM\DBUtil;
+use GlpiPlugin\SIEM\Event;
+use GlpiPlugin\SIEM\Sensor\HTTP;
+use GlpiPlugin\SIEM\Sensor\Ping;
+
 /**
  *  -------------------------------------------------------------------------
  *  SIEM plugin for GLPI
@@ -18,10 +24,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
-
-include(__DIR__ . '/inc/sensors/sensor.class.php');
-include(__DIR__ . '/inc/sensors/ping.php');
-include(__DIR__ . '/inc/sensors/http.php');
 
 function plugin_siem_install()
 {
@@ -188,20 +190,20 @@ function plugin_siem_install()
       $migration->dropField('glpi_plugin_siem_events', 'status');
       $migration->dropKey('glpi_plugin_siem_events', 'status');
    }
-   CronTask::register('PluginSiemEvent', 'pollevents', 60, ['state' => CronTask::STATE_WAITING]);
+   CronTask::register(Event::class, 'pollevents', 60, ['state' => CronTask::STATE_WAITING]);
    return true;
 }
 
 function plugin_siem_uninstall()
 {
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_events');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_itils_events');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_hosts');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_services');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_servicetemplates');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_itils_scheduleddowntimes');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_scheduleddowntimes');
-   PluginSIEMDBUtil::dropTableOrDie('glpi_plugin_siem_acknowledgements');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_events');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_itils_events');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_hosts');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_services');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_servicetemplates');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_itils_scheduleddowntimes');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_scheduleddowntimes');
+   DBUtil::dropTableOrDie('glpi_plugin_siem_acknowledgements');
    Config::deleteConfigurationValues('plugin:siem');
    CronTask::unregister('siem');
    return true;
@@ -214,9 +216,9 @@ function plugin_siem_poll_sensor(array $params)
    }
    switch ($params['sensor']) {
       case 'ping':
-         return PluginSiemSensorPing::poll($params['service_ids']);
+         return Ping::poll($params['service_ids']);
       case 'http_ok':
-         return PluginSiemSensorHttp::poll($params['service_ids']);
+         return HTTP::poll($params['service_ids']);
    }
 }
 

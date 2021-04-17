@@ -19,13 +19,17 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use NotificationEvent;
+use Rule;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
 }
 
 
-class PluginSIEMRuleEvent extends Rule
+class RuleEvent extends Rule
 {
 
    // From Rule
@@ -68,7 +72,7 @@ class PluginSIEMRuleEvent extends Rule
    public function executeActions($output, $params, array $input = [])
    {
       if (count($this->actions)) {
-         $siemevent = new PluginSiemEvent();
+         $siemevent = new Event();
          if (!$siemevent->getFromDB($output['id'])) {
             return $output;
          }
@@ -113,7 +117,7 @@ class PluginSIEMRuleEvent extends Rule
          return $criterias;
       }
 
-      $eventtable = PluginSiemEvent::getTable();
+      $eventtable = Event::getTable();
 
       $criterias['name']['table'] = $eventtable;
       $criterias['name']['field'] = 'name';

@@ -19,15 +19,22 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use Calendar;
+use CommonDBTM;
+use CommonGLPI;
+use Html;
+
 /**
  * PluginSIEMHost class.
  * This represents a host that is able to be monitored through one or more PluginSIEMServices.
  *
  * @since 1.0.0
  */
-class PluginSiemHost extends CommonDBTM
+class Host extends CommonDBTM
 {
-   use PluginSiemMonitored;
+   use Monitored;
 
    static $rightname = 'plugin_siem_host';
 
@@ -40,7 +47,7 @@ class PluginSiemHost extends CommonDBTM
    {
       $ong = [];
       $this->addDefaultFormTab($ong)
-         ->addStandardTab('PluginSiemService', $ong, $options);
+         ->addStandardTab(Service::class, $ong, $options);
       return $ong;
    }
 
@@ -49,7 +56,7 @@ class PluginSiemHost extends CommonDBTM
       if (!$withtemplate) {
          $nb = 0;
          switch ($item->getType()) {
-            case 'PluginSiemHost' :
+            case __CLASS__ :
                return self::getTypeName();
             default:
                return self::createTabEntry('Event Management');
@@ -61,7 +68,7 @@ class PluginSiemHost extends CommonDBTM
    public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       switch ($item->getType()) {
-         case 'PluginSiemHost' :
+         case __CLASS__ :
             return self::showForm($item);
          default:
             self::showForm($item);
@@ -81,9 +88,10 @@ class PluginSiemHost extends CommonDBTM
          'FROM'   => self::getTable(),
          'WHERE'  => ['id' => $id]
       ]);
+      $event_class = Event::class;
       if ($iterator->count()) {
          $item = $iterator->next();
-         return $item['itemtype']::getFormURLWithID($item['items_id'], $full) . '&forcetab=PluginSiemEvent$1';
+         return $item['itemtype']::getFormURLWithID($item['items_id'], $full) . "&forcetab={$event_class}$1";
       }
       return '#';
    }
@@ -109,6 +117,8 @@ class PluginSiemHost extends CommonDBTM
 
    public function rawSearchOptions()
    {
+      $service_table = Service::getTable();
+
       $tab = [];
       $tab[] = [
          'id' => 'common',
@@ -138,7 +148,7 @@ class PluginSiemHost extends CommonDBTM
       ];
       $tab[] = [
          'id' => '7',
-         'table' => 'glpi_plugin_siem_services',
+         'table' => $service_table,
          'field' => 'name',
          'linkfield' => 'plugin_siem_services_id_availability',
          'name' => __('Availability service'),
@@ -166,7 +176,7 @@ class PluginSiemHost extends CommonDBTM
 
    /**
     * Loads the host's availability service and then caches and returns it.
-    * @return PluginSiemService The loaded availability service or null if it could not be loaded.
+    * @return Service The loaded availability service or null if it could not be loaded.
     * @since 1.0.0
     */
    public function getAvailabilityService()
@@ -177,7 +187,7 @@ class PluginSiemHost extends CommonDBTM
       // Load and cache availability service in case of multiple calls per page
       static $service = null;
       if ($service === null) {
-         $service = new PluginSiemService();
+         $service = new Service();
          if (!$service->getFromDB($this->fields['plugin_siem_services_id_availability'])) {
             return null;
          }
@@ -195,7 +205,7 @@ class PluginSiemHost extends CommonDBTM
       global $DB, $CFG_GLPI;
 
       $twig_vars = [
-         'host_info_bg'    => PluginSiemService::getBackgroundColorClass($this->getStatus()),
+         'host_info_bg'    => Service::getBackgroundColorClass($this->getStatus()),
          'toolbar_buttons' => [
             [
                'label' => __('Check now'),
@@ -206,7 +216,7 @@ class PluginSiemHost extends CommonDBTM
                'action' => "hostScheduleDowntime({$this->getID()})",
             ],
             [
-               'label' => sprintf(__('Add %s'), PluginSiemService::getTypeName(1)),
+               'label' => sprintf(__('Add %s'), Service::getTypeName(1)),
                'action' => "window.pluginSiem.addHostService({$this->getID()})",
             ]
          ],
@@ -215,8 +225,8 @@ class PluginSiemHost extends CommonDBTM
       ];
 
       if ($this->getAvailabilityService()) {
-         $status_since_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusChange());
-         $last_check_diff = PluginSiemToolbox::getHumanReadableTimeDiff($this->getLastStatusCheck());
+         $status_since_diff = Toolbox::getHumanReadableTimeDiff($this->getLastStatusChange());
+         $last_check_diff = Toolbox::getHumanReadableTimeDiff($this->getLastStatusCheck());
          $twig_vars['host_stats'] = [
             __('Last status change') => ($status_since_diff ?? __('No change')),
             __('Last check') => ($last_check_diff ?? __('Not checked')),
@@ -227,7 +237,7 @@ class PluginSiemHost extends CommonDBTM
             __('Host availability not monitored') => __('Set the availability service to monitor the host')
          ];
       }
-      if (in_array($this->getStatus(), [PluginSiemService::STATUS_CRITICAL, PluginSiemService::STATUS_WARNING], true)) {
+      if (in_array($this->getStatus(), [Service::STATUS_CRITICAL, Service::STATUS_WARNING], true)) {
          $twig_vars['toolbar_buttons'] = [
             'label' => sprintf(__('Acknowledge %s'), self::getTypeName(1)),
             'action' => "acknowledge({$this->getID()})",
@@ -247,7 +257,7 @@ class PluginSiemHost extends CommonDBTM
             }
          }
          $service_name = $host_service->fields['name'];
-         $check_mode = PluginSiemService::getCheckModeName($host_service->fields['check_mode']);
+         $check_mode = Service::getCheckModeName($host_service->fields['check_mode']);
          $check_interval = $host_service->fields['check_interval'] ?? __('Unspecified');
          $notif_interval = $host_service->fields['notificationinterval'] ?? __('Unspecified');
          $twig_vars['service_stats'] = [
@@ -270,7 +280,7 @@ class PluginSiemHost extends CommonDBTM
          $add_form .= Html::hidden('id', ['value' => $this->fields['id']]);
          $add_form .= '<fieldset>';
          $add_form .= '<legend>' . __('Service') . '</legend>';
-         $add_form .= PluginSiemService::getDropdownForHost($this->getID());
+         $add_form .= Service::getDropdownForHost($this->getID());
          $add_form .= Html::submit(__('Set availability service'), [
             'name' => 'set_host_service',
             'id' => '#btn-set-hostservice'
@@ -279,7 +289,7 @@ class PluginSiemHost extends CommonDBTM
          $add_form .= Html::closeForm(false);
          $twig_vars['add_availability_service_form'] = $add_form;
       }
-      return PluginSiemToolbox::getTwig()->render('elements/host_info.html.twig', $twig_vars);
+      return Toolbox::getTwig()->render('elements/host_info.html.twig', $twig_vars);
    }
 
    /**
@@ -308,7 +318,7 @@ class PluginSiemHost extends CommonDBTM
             ],
             'plugin_siem_services_id_availability' => [
                'label' => __('Availability service'),
-               'type' => 'PluginSiemService'
+               'type' => Service::class
             ],
             'is_reachable' => [
                'label' => __('Reachable'),
@@ -333,26 +343,28 @@ class PluginSiemHost extends CommonDBTM
       global $DB;
       static $services = null;
       if ($services === null) {
-         $servicetable = PluginSiemService::getTable();
-         $templatetable = PluginSiemServiceTemplate::getTable();
+         $service_table = Service::getTable();
+         $template_table = ServiceTemplate::getTable();
+         $template_fk = ServiceTemplate::getForeignKeyField();
+
          $iterator = $DB->request([
             'SELECT' => [
-               $servicetable.'.*',
-               $templatetable.'.name',
-               $templatetable.'.plugins_id',
-               $templatetable.'.sensor'
+               $service_table.'.*',
+               $template_table.'.name',
+               $template_table.'.plugins_id',
+               $template_table.'.sensor'
             ],
-            'FROM' => $servicetable,
+            'FROM' => $service_table,
             'LEFT JOIN' => [
-               $templatetable => [
+               $template_table => [
                   'FKEY' => [
-                     $servicetable => 'plugin_siem_servicetemplates_id',
-                     $templatetable => 'id'
+                     $service_table => $template_fk,
+                     $template_table => 'id'
                   ]
                ]
             ],
             'WHERE' => [
-               'plugin_siem_hosts_id' => $this->getID()
+               self::getForeignKeyField() => $this->getID()
             ]
          ]);
          $services = [];
@@ -371,11 +383,11 @@ class PluginSiemHost extends CommonDBTM
    public function setAvailabilityService($services_id)
    {
       global $DB;
-      $service = new PluginSiemService();
+      $service = new Service();
       $match = $service->find([
          'id'  => $services_id
       ]);
-      if (count($match) && reset($match)['plugin_siem_hosts_id'] === $this->getID()) {
+      if (count($match) && reset($match)[self::getForeignKeyField()] === $this->getID()) {
          $DB->update(self::getTable(), ['plugin_siem_services_id_availability' => $services_id], ['id' => $this->getID()]);
          return true;
       }

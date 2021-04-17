@@ -19,13 +19,13 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 use Glpi\Event;
+use GlpiPlugin\SIEM\Service;
 
 include('../../../inc/includes.php');
-Html::header(PluginSiemService::getTypeName(), $_SERVER['PHP_SELF'], 'management', 'PluginSiemService');
+Html::header(Service::getTypeName(), $_SERVER['PHP_SELF'], 'management', Service::class);
 
-$service = new PluginSiemService();
+$service = new Service();
 if (!isset($_GET['id'])) {
    $_GET['id'] = -1;
 }

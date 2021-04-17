@@ -19,16 +19,21 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use DBmysql;
+use RuntimeException;
 
 /**
  * DB utilities for SIEM plugin.
  * Contains several methods not yet available in the core for interacting with the DB and tables.
  */
-class PluginSIEMDBUtil
+class DBUtil
 {
 
    public static function dropTable($table)
    {
+      /** @global DBmysql $DB */
       global $DB;
       return $DB->query('DROP TABLE' . $DB::quoteName($table));
    }

@@ -19,7 +19,8 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\RuleEventFilterCollection;
 
 include('../../../inc/includes.php');
-$rulecollection = new PluginSIEMRuleEventFilterCollection($_SESSION['glpiactive_entity']);
+$rulecollection = new RuleEventFilterCollection($_SESSION['glpiactive_entity']);
 include(GLPI_ROOT . '/front/rule.common.php');

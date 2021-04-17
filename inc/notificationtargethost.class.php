@@ -19,6 +19,9 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use NotificationTarget;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
@@ -29,7 +32,7 @@ if (!defined('GLPI_ROOT')) {
  * PluginSIEMNotificationTargetHost Class
  * @since 1.0.0
  **/
-class PluginSIEMNotificationTargetHost extends NotificationTarget
+class NotificationTargetHost extends NotificationTarget
 {
 
 
@@ -51,7 +54,7 @@ class PluginSIEMNotificationTargetHost extends NotificationTarget
    {
 
       $events = $this->getAllEvents();
-      $host = new PluginSiemHost();
+      $host = new Host();
       $host->getFromDB($options['id']);
       $service = $host->getAvailabilityService();
 

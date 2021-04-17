@@ -19,6 +19,12 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonDBTM;
+use Dropdown;
+use Html;
+use Plugin;
 
 /**
  * PluginSIEMService class.
@@ -26,9 +32,9 @@
  *
  * @since 1.0.0
  */
-class PluginSiemService extends CommonDBTM
+class Service extends CommonDBTM
 {
-   use PluginSiemMonitored;
+   use Monitored;
 
    public static $rightname = 'plugin_siem_service';
 
@@ -66,8 +72,8 @@ class PluginSiemService extends CommonDBTM
    public function post_getFromDB()
    {
       // Merge fields with the template
-      $template = new PluginSiemServiceTemplate();
-      $template->getFromDB($this->fields['plugin_siem_servicetemplates_id']);
+      $template = new ServiceTemplate();
+      $template->getFromDB($this->fields[ServiceTemplate::getForeignKeyField()]);
       foreach ($template->fields as $field => $value) {
          if ($field !== 'id') {
             $this->fields[$field] = $value;
@@ -77,7 +83,7 @@ class PluginSiemService extends CommonDBTM
 
    public function isHostless()
    {
-      return $this->fields['plugin_siem_hosts_id'] < 0;
+      return $this->fields[Host::getForeignKeyField()] < 0;
    }
 
    public static function getStatusName($status)
@@ -126,10 +132,10 @@ class PluginSiemService extends CommonDBTM
    public function getServiceInfoDisplay()
    {
       $status = self::getStatusName($this->fields['status']);
-      $status_since_diff = PluginSIEMToolbox::getHumanReadableTimeDiff($this->fields['status_since']);
-      $last_check_diff = PluginSIEMToolbox::getHumanReadableTimeDiff($this->fields['last_check']);
+      $status_since_diff = Toolbox::getHumanReadableTimeDiff($this->fields['status_since']);
+      $last_check_diff = Toolbox::getHumanReadableTimeDiff($this->fields['last_check']);
       $service_stats = [
-         PluginSiemHost::getTypeName(1) => $this->getHostName(),
+         Host::getTypeName(1) => $this->getHostName(),
          __('Last status change') => ($status_since_diff === null ? __('No change') : $status_since_diff),
          __('Last check') => ($last_check_diff === null ? __('Not checked') : $last_check_diff),
          __('Flapping') => $this->isFlapping() ? __('Yes') : __('No')
@@ -222,15 +228,17 @@ class PluginSiemService extends CommonDBTM
    /**
     * Called every time an PluginSIEMEvent is added so that the related service state can be updated.
     *
-    * @param PluginSiemEvent $event The event that was added
+    * @param Event $event The event that was added
     * @return bool True if the service was updated successfully
     * @since 1.0.0
     */
-   public static function onEventAdd(PluginSiemEvent $event)
+   public static function onEventAdd(Event $event)
    {
       $service = new self();
-      if ($event->fields['plugin_siem_services_id'] >= 0 &&
-         $service->getFromDB($event->fields['plugin_siem_services_id'])) {
+      $service_fk = self::getForeignKeyField();
+
+      if ($event->fields[$service_fk] >= 0 &&
+         $service->getFromDB($event->fields[$service_fk])) {
          $last_status = $service->fields['status'];
          $was_flapping = $service->isFlapping();
          $significance = $event->fields['significance'];
@@ -242,7 +250,7 @@ class PluginSiemService extends CommonDBTM
                'last_check' => $_SESSION['glpi_currenttime']
             ];
             // Stateful service checks
-            if ($significance === PluginSiemEvent::EXCEPTION && $last_status === self::STATUS_OK) {
+            if ($significance === Event::EXCEPTION && $last_status === self::STATUS_OK) {
                if (!$in_downtime) {
                   // Transition to problem state
                   $to_update['_problem'] = true;
@@ -250,7 +258,7 @@ class PluginSiemService extends CommonDBTM
                      $to_update['is_hard_status'] = false;
                   }
                }
-            } else if ($significance === PluginSiemEvent::EXCEPTION && $last_status !== self::STATUS_OK) {
+            } else if ($significance === Event::EXCEPTION && $last_status !== self::STATUS_OK) {
                if (!$in_downtime) {
                   if (!$service->isHardStatus()) {
                      $to_update['current_check'] = $service->fields['current_check'] + 1;
@@ -259,13 +267,13 @@ class PluginSiemService extends CommonDBTM
                      }
                   }
                }
-            } else if ($significance === PluginSiemEvent::INFORMATION && $last_status !== self::STATUS_OK) {
+            } else if ($significance === Event::INFORMATION && $last_status !== self::STATUS_OK) {
                // Transition to recovery state
                $to_update['_recovery'] = true;
                // Recoveries should cancel all non-fixed, active downtimes
                if ($in_downtime) {
-                  $downtime = new PluginSiemScheduledDowntime();
-                  $downtimes = PluginSiemScheduledDowntime::getForHostOrService($service->getID());
+                  $downtime = new ScheduledDowntime();
+                  $downtimes = ScheduledDowntime::getForHostOrService($service->getID());
                   while ($data = $downtimes->next()) {
                      if ($data['is_fixed'] === 0) {
                         $downtime->update([
@@ -350,7 +358,7 @@ class PluginSiemService extends CommonDBTM
 
    public function post_updateItem($history = 1)
    {
-      $host = new PluginSiemHost();
+      $host = new Host();
       $is_hostservice = false;
       if ($host = $this->getHost()) {
          if ($host->fields['plugin_siem_services_id_availability'] === $this->getID()) {
@@ -416,7 +424,7 @@ class PluginSiemService extends CommonDBTM
       }
    }
 
-   public static function getFormForHost(PluginSiemHost $host)
+   public static function getFormForHost(Host $host)
    {
       global $DB;
       $services = $host->getServices();
@@ -437,12 +445,12 @@ class PluginSiemService extends CommonDBTM
          if ($service['is_flapping']) {
             $service['badges'][] = ['class' => 'badge badge-warning', 'label' => __('Flapping')];
          }
-         $service['status_since_diff'] = PluginSiemToolbox::getHumanReadableTimeDiff($service['status_since']);
+         $service['status_since_diff'] = Toolbox::getHumanReadableTimeDiff($service['status_since']);
          $eventiterator = $DB->request([
             'SELECT' => ['name'],
-            'FROM' => PluginSiemEvent::getTable(),
+            'FROM' => Event::getTable(),
             'WHERE' => [
-               'plugin_siem_services_id' => $service_id
+               self::getForeignKeyField() => $service_id
             ],
             'ORDERBY' => ['date DESC'],
             'LIMIT' => 1
@@ -450,12 +458,12 @@ class PluginSiemService extends CommonDBTM
          $eventdata = $eventiterator->count() ? $eventiterator->next() : null;
          $service['link'] = self::getFormURLWithID($service_id);
          if ($eventdata !== null) {
-            $service['latest_event_name'] = PluginSiemEvent::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
+            $service['latest_event_name'] = Event::getLocalizedEventName($eventdata['name'], $service['plugins_id']);
          } else {
             $service['latest_event_name'] = null;
          }
       }
-      return PluginSiemToolbox::getTwig()->render('elements/host_service_list.html.twig', [
+      return Toolbox::getTwig()->render('elements/host_service_list.html.twig', [
          'services'  => $services
       ]);
    }
@@ -464,11 +472,11 @@ class PluginSiemService extends CommonDBTM
    {
       $fields = [
             'plugin_siem_hosts_id' => [
-               'label' => PluginSiemHost::getTypeName(1),
+               'label' => Host::getTypeName(1),
                'type' => 'PluginSiemHost'
             ],
             'plugin_siem_servicetemplates_id' => [
-               'label' => PluginSiemServiceTemplate::getTypeName(1),
+               'label' => ServiceTemplate::getTypeName(1),
                'type' => 'PluginSiemServiceTemplate'
             ],
             'last_check' => [
@@ -519,9 +527,9 @@ class PluginSiemService extends CommonDBTM
 //      ];
       $tab[] = [
          'id' => '3',
-         'table' => PluginSiemServiceTemplate::getTable(),
+         'table' => ServiceTemplate::getTable(),
          'field' => 'name',
-         'linkfield' => 'plugin_siem_servicetemplates_id',
+         'linkfield' => ServiceTemplate::getForeignKeyField(),
          'name' => __('Service template'),
          'datatype' => 'itemlink'
       ];
@@ -607,10 +615,10 @@ class PluginSiemService extends CommonDBTM
 
       $values = [];
       $service_table = self::getTable();
-      $template_table = PluginSiemServiceTemplate::getTable();
+      $template_table = ServiceTemplate::getTable();
       $iterator = $DB->request([
          'SELECT'    => [
-            'glpi_plugin_siem_services.id',
+            "{$service_table}.id",
             'name'
          ],
          'FROM'      => $service_table,
@@ -618,18 +626,18 @@ class PluginSiemService extends CommonDBTM
             $template_table => [
                'FKEY'   => [
                   $template_table   => 'id',
-                  $service_table    => 'plugin_siem_servicetemplates_id'
+                  $service_table    => ServiceTemplate::getForeignKeyField()
                ]
             ]
          ],
          'WHERE'     => [
-            'plugin_siem_hosts_id'  => $hosts_id
+            Host::getForeignKeyField()  => $hosts_id
          ]
       ]);
       while ($data = $iterator->next()) {
          $values[$data['id']] = $data['name'];
       }
-      return Dropdown::showFromArray('plugin_siem_services_id', $values, ['display' => false]);
+      return Dropdown::showFromArray(self::getForeignKeyField(), $values, ['display' => false]);
    }
 
    public function showForm($ID, $options = []) {
@@ -637,11 +645,11 @@ class PluginSiemService extends CommonDBTM
       $this->initForm($ID, $options);
       $this->showFormHeader($options);
 
-      echo '<tr><td>' .PluginSiemServiceTemplate::getTypeName(1). '</td><td>';
-      echo Html::link($this->fields['name'], PluginSiemServiceTemplate::getFormURLWithID($this->fields['plugin_siem_servicetemplates_id']));
+      echo '<tr><td>' .ServiceTemplate::getTypeName(1). '</td><td>';
+      echo Html::link($this->fields['name'], ServiceTemplate::getFormURLWithID($this->fields[ServiceTemplate::getForeignKeyField()]));
       echo '</td></tr>';
       echo '</table>';
-      echo PluginSiemEvent::getListForHostOrService($ID, true);
+      echo Event::getListForHostOrService($ID, true);
       echo '<table class="tab_cadre_fixe">';
 
       $this->showFormButtons($options);
@@ -653,16 +661,16 @@ class PluginSiemService extends CommonDBTM
    {
       global $DB;
 
-      $event = new PluginSiemEvent();
+      $event = new Event();
       $service_table = self::getTable();
       $to_poll = $DB->request([
          'SELECT' => ['plugins_id', 'sensor'],
          'FROM' => $service_table,
          'LEFT JOIN' => [
-            PluginSiemServiceTemplate::getTable() => [
+            ServiceTemplate::getTable() => [
                'FKEY' => [
-                  $service_table => 'plugin_siem_servicetemplates_id',
-                  PluginSiemServiceTemplate::getTable() => 'id',
+                  $service_table => ServiceTemplate::getForeignKeyField(),
+                  ServiceTemplate::getTable() => 'id',
                ]
             ]
          ],
@@ -681,6 +689,7 @@ class PluginSiemService extends CommonDBTM
       $eventdatas = [];
       $eventdatas[$plugin->fields['directory']][$poll_data['sensor']] = $results;
 
+      $service_fk = self::getForeignKeyField();
       // Create event from the results
       foreach ($eventdatas as $logger => $sensors) {
          foreach ($sensors as $sensor => $results) {
@@ -688,7 +697,7 @@ class PluginSiemService extends CommonDBTM
                foreach ($results as $service_id => $result) {
                   if ($result !== null && is_array($result)) {
                      $input = $result;
-                     $input['plugin_siem_services_id'] = $service_id;
+                     $input[$service_fk] = $service_id;
                      $event->add($input);
                   }
                }

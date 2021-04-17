@@ -19,13 +19,20 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonDBTM;
+use CommonITILObject;
+use Dropdown;
+use Html;
+use Plugin;
 
 /**
  * SIEMServiceTemplate class.
  *
  * @since 1.0.0
  */
-class PluginSiemServiceTemplate extends CommonDBTM
+class ServiceTemplate extends CommonDBTM
 {
    public static $rightname = 'plugin_siem_servicetemplate';
 
@@ -106,9 +113,9 @@ class PluginSiemServiceTemplate extends CommonDBTM
                'label' => __('Enable flapping detection'),
                'type' => 'select',
                'values' => [
-                  PluginSiemService::CHECK_MODE_ACTIVE => __('Active'),
-                  PluginSiemService::CHECK_MODE_PASSIVE => __('Passive'),
-                  PluginSiemService::CHECK_MODE_HYBRID => __('Hybrid'),
+                  Service::CHECK_MODE_ACTIVE => __('Active'),
+                  Service::CHECK_MODE_PASSIVE => __('Passive'),
+                  Service::CHECK_MODE_HYBRID => __('Hybrid'),
                ],
                'itemtype_name' => null,
                'itemtype' => null
@@ -292,8 +299,8 @@ class PluginSiemServiceTemplate extends CommonDBTM
     */
    public function showServices()
    {
-      $siemservice = new PluginSiemService();
-      $siemhost = new PluginSiemHost();
+      $siemservice = new Service();
+      $siemhost = new Host();
       $services = $siemservice->find(['plugin_siem_servicetemplates_id' => $this->getID()]);
 
       echo '<table><tr>';
@@ -314,8 +321,8 @@ class PluginSiemServiceTemplate extends CommonDBTM
             $assetinfo = $host->getItemInfo();
             echo '<tr>';
             echo '<td>'.Html::link($assetinfo['name'], $host['itemtype']::getFormURLWithID($host['items_id'])). '</td>';
-            echo '<td>'.PluginSiemToolbox::getHumanReadableTimeDiff($service['last_check']). '</td>';
-            echo '<td>'.PluginSiemService::getStatusName($service['status']). '</td>';
+            echo '<td>'.Toolbox::getHumanReadableTimeDiff($service['last_check']). '</td>';
+            echo '<td>'.Service::getStatusName($service['status']). '</td>';
             echo '<td>' . ($service['is_hard'] ? __('True') : __('False')) . '</td>';
             echo '<td>' . ($service['is_flapping'] ? __('True') : __('False')) . '</td>';
             echo '<td>' . ($service['is_acknowledged'] ? __('True') : __('False')) . '</td>';

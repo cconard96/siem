@@ -19,6 +19,10 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonGLPI;
+use Session;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
@@ -29,7 +33,7 @@ if (!defined('GLPI_ROOT')) {
  * Contains functions for managing/viewing the dashboard and other top-level functions.
  * @since 1.0.0
  */
-class PluginSiemEventManagement extends CommonGLPI
+class EventManagement extends CommonGLPI
 {
 
    public static function getTypeName($nb = 0)
@@ -52,7 +56,7 @@ class PluginSiemEventManagement extends CommonGLPI
     * @return boolean
     */
    public static function canView() {
-      return PluginSiemHost::canView() || PluginSiemService::canView();
+      return Host::canView() || Service::canView();
    }
 
    public static function getDashboardCards(): array
@@ -62,22 +66,22 @@ class PluginSiemEventManagement extends CommonGLPI
       $cards['plugin_siem_monitored_summary'] = [
          'widgettype'  => ['summaryNumbers', 'multipleNumber'],
          'label'       => __('Monitored Count'),
-         'provider'    => 'PluginSiemEventManagement::cardMonitoredCountProvider'
+         'provider'    => __CLASS__ .'::cardMonitoredCountProvider'
       ];
       $cards['plugin_siem_host_count'] = [
          'widgettype'  => ['bigNumber'],
          'label'       => __('Monitored Host Count'),
-         'provider'    => 'PluginSiemEventManagement::cardHostCountProvider'
+         'provider'    => __CLASS__ .'::cardHostCountProvider'
       ];
       $cards['plugin_siem_service_count'] = [
          'widgettype'  => ['bigNumber'],
          'label'       => __('Monitored Services Count'),
-         'provider'    => 'PluginSiemEventManagement::cardServiceCountProvider'
+         'provider'    => __CLASS__ .'cardServiceCountProvider'
       ];
       $cards['plugin_siem_service_status'] = [
          'widgettype'   => ['pie', 'donut', 'halfpie', 'halfdonut', 'summaryNumbers', 'multipleNumber', 'bar', 'hbar'],
          'label'        => __('Service Status'),
-         'provider'     => 'PluginSiemEventManagement::cardServiceStatusProvider'
+         'provider'     => __CLASS__ .'::cardServiceStatusProvider'
       ];
 
       return $cards;
@@ -91,25 +95,25 @@ class PluginSiemEventManagement extends CommonGLPI
          'SELECT'   => [
             'COUNT' => 'id as cpt'
          ],
-         'FROM'  => PluginSiemHost::getTable(),
+         'FROM'  => Host::getTable(),
       ]);
       $host_count = $iterator->next()['cpt'];
       $iterator = $DB->request([
          'SELECT'   => [
             'COUNT' => 'id as cpt'
          ],
-         'FROM'  => PluginSiemService::getTable(),
+         'FROM'  => Service::getTable(),
       ]);
       $service_count = $iterator->next()['cpt'];
 
       return [
          'data'   => [
             [
-               'label'  => PluginSiemHost::getTypeName(Session::getPluralNumber()),
+               'label'  => Host::getTypeName(Session::getPluralNumber()),
                'number' => $host_count
             ],
             [
-               'label'  => PluginSiemService::getTypeName(Session::getPluralNumber()),
+               'label'  => Service::getTypeName(Session::getPluralNumber()),
                'number' => $service_count
             ]
          ]
@@ -120,7 +124,7 @@ class PluginSiemEventManagement extends CommonGLPI
    {
       global $DB;
 
-      $table = PluginSiemHost::getTable();
+      $table = Host::getTable();
       $iterator = $DB->request([
          'SELECT'   => [
             'COUNT' => 'id as cpt'
@@ -138,7 +142,7 @@ class PluginSiemEventManagement extends CommonGLPI
    {
       global $DB;
 
-      $table = PluginSiemService::getTable();
+      $table = Service::getTable();
       $iterator = $DB->request([
          'SELECT'   => [
             'COUNT' => 'id as cpt'
@@ -161,7 +165,7 @@ class PluginSiemEventManagement extends CommonGLPI
             'COUNT'  => 'id as cpt',
             'status'
          ],
-         'FROM'  => PluginSiemService::getTable()
+         'FROM'  => Service::getTable()
       ]);
 
       $status_counts = [];
@@ -170,7 +174,7 @@ class PluginSiemEventManagement extends CommonGLPI
          $status_counts[$data['status']] = $data['cpt'];
       }
 
-      $statuses = [PluginSiemService::STATUS_OK, PluginSiemService::STATUS_WARNING, PluginSiemService::STATUS_CRITICAL, PluginSiemService::STATUS_UNKNOWN];
+      $statuses = [Service::STATUS_OK, Service::STATUS_WARNING, Service::STATUS_CRITICAL, Service::STATUS_UNKNOWN];
       $card = [
          'label'  => __('Service Status'),
          'data'   => []
@@ -178,9 +182,9 @@ class PluginSiemEventManagement extends CommonGLPI
 
       foreach ($statuses as $status) {
          $card['data'][] = [
-            'label'  => PluginSiemService::getStatusName($status),
+            'label'  => Service::getStatusName($status),
             'number' => $status_counts[$status] ?? 0,
-            'url'    => PluginSiemService::getSearchURL() . '?' . Toolbox::append_params([
+            'url'    => Service::getSearchURL() . '?' . Toolbox::append_params([
                'criteria'  => [
                   [
                      'field'        => 5,

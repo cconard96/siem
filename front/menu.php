@@ -19,21 +19,23 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\Service;
+use GlpiPlugin\SIEM\ServiceTemplate;
 
 include('../../../inc/includes.php');
 Html::header('SIEM Plugin', '', 'management', 'PluginSiemMenu');
 global $CFG_GLPI;
 $links = [];
 
-if (Session::haveRight(PluginSiemService::$rightname, READ)) {
-   $links[] = Html::link(PluginSiemService::getTypeName(2), PluginSiemService::getSearchURL(true));
+if (Session::haveRight(Service::$rightname, READ)) {
+   $links[] = Html::link(Service::getTypeName(2), Service::getSearchURL(true));
 }
-if (Session::haveRight(PluginSiemServiceTemplate::$rightname, READ)) {
-   $links[] = Html::link(PluginSiemServiceTemplate::getTypeName(2), PluginSiemServiceTemplate::getSearchURL(true));
+if (Session::haveRight(ServiceTemplate::$rightname, READ)) {
+   $links[] = Html::link(ServiceTemplate::getTypeName(2), ServiceTemplate::getSearchURL(true));
 }
-if (Session::haveRight('config', UPDATE)) {
-   $links[] = Html::link(__('Configure plugin', 'siem'), Config::getFormURL() . "?forcetab=PluginSIEMConfig$1");
-}
+//if (Session::haveRight('config', UPDATE)) {
+//   $links[] = Html::link(__('Configure plugin', 'siem'), Config::getFormURL() . "?forcetab=PluginSIEMConfig$1");
+//}
 if (count($links)) {
    echo "<div class='center'><table class='tab_cadre'>";
    echo '<thead><th>' . __('SIEM plugin', 'siem') . '</th></thead>';

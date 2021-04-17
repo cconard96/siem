@@ -1,7 +1,4 @@
 <?php
-
-use Symfony\Component\Process\Process;
-
 /**
  *  -------------------------------------------------------------------------
  *  SIEM plugin for GLPI
@@ -22,8 +19,16 @@ use Symfony\Component\Process\Process;
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM\Sensor;
 
-class PluginSiemSensorPing extends PluginSiemSensor
+use CommonDBTM;
+use GlpiPlugin\SIEM\Event;
+use GlpiPlugin\SIEM\Host;
+use GlpiPlugin\SIEM\Service;
+use RuntimeException;
+use Symfony\Component\Process\Process;
+
+class Ping extends Sensor
 {
 
    public static function poll($service_ids = [])
@@ -33,7 +38,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
       ];
       $hosts = [];
       foreach ($service_ids as $services_id) {
-         $service = new PluginSiemService();
+         $service = new Service();
          if (!$service->getFromDB($services_id)) {
             return false;
          }
@@ -44,7 +49,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
          }
          $sensor_params = array_replace($defparams, $sensor_params);
          $hosts_id = $service->fields['plugin_siem_hosts_id'];
-         $host = new PluginSiemHost();
+         $host = new Host();
          if (!$host->getFromDB($hosts_id)) {
             return [];
          }
@@ -76,7 +81,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
 
    private static function getPingEventData($services_id, $ping_result)
    {
-      $event = new PluginSiemEvent();
+      $event = new Event();
       $event_content = [];
       if (isset($ping_result['percent_loss'], $ping_result['min']) && isset($ping_result['avg']) && isset($ping_result['max']) && isset($ping_result['mdev'])) {
          $event_content['percent_loss'] = $ping_result['percent_loss'];
@@ -87,7 +92,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
       } else if (!isset($ping_result['_sensor_fault'])) {
          return [
             'name' => 'sensor_ping_notok',
-            'significance' => PluginSiemEvent::EXCEPTION,
+            'significance' => Event::EXCEPTION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($ping_result),
          ];
@@ -95,7 +100,7 @@ class PluginSiemSensorPing extends PluginSiemSensor
          //Sensor parse error
          return [
             'name' => 'sensor_ping_error',
-            'significance' => PluginSiemEvent::EXCEPTION,
+            'significance' => Event::EXCEPTION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),
             '_sensor_fault' => true
@@ -104,14 +109,14 @@ class PluginSiemSensorPing extends PluginSiemSensor
       if ($event_content['percent_loss'] > 0) {
          return [
             'name' => 'sensor_ping_warn',
-            'significance' => PluginSiemEvent::WARNING,
+            'significance' => Event::WARNING,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),
          ];
       } else {
          return [
             'name' => 'sensor_ping_ok',
-            'significance' => PluginSiemEvent::INFORMATION,
+            'significance' => Event::INFORMATION,
             'date' => $_SESSION['glpi_currenttime'],
             'content' => json_encode($event_content),
          ];

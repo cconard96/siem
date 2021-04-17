@@ -19,6 +19,19 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonDBTM;
+use CommonGLPI;
+use CommonITILActor;
+use CommonITILObject;
+use CronTask;
+use DBmysqlIterator;
+use Dropdown;
+use Html;
+use mysqli_result;
+use Plugin;
+use Toolbox;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
@@ -28,7 +41,7 @@ if (!defined('GLPI_ROOT')) {
  * PluginSIEMEvent class
  * @since 1.0.0
  */
-class PluginSiemEvent extends CommonDBTM
+class Event extends CommonDBTM
 {
    /**
     * An event that doesn't require any response
@@ -55,7 +68,7 @@ class PluginSiemEvent extends CommonDBTM
       if (!$withtemplate) {
          $nb = 0;
          switch ($item->getType()) {
-            case 'PluginSIEMEvent' :
+            case self::class :
                return '';
             default:
                return self::createTabEntry('Event Management');
@@ -67,7 +80,7 @@ class PluginSiemEvent extends CommonDBTM
    public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       switch ($item->getType()) {
-         case 'PluginSIEMEvent' :
+         case self::class :
             self::showForSIEMEvent($item);
             break;
          default:
@@ -81,7 +94,8 @@ class PluginSiemEvent extends CommonDBTM
    {
       $input = parent::prepareInputForAdd($input);
       // All events must be associated to a service or have a service id of -1 for internal
-      if (!isset($input['plugin_siem_services_id']) && $input['plugin_siem_services_id'] !== -1) {
+      $service_fk = Service::getForeignKeyField();
+      if (!isset($input[$service_fk]) && $input[$service_fk] !== -1) {
          return false;
       }
       if (isset($input['_sensor_fault'])) {
@@ -140,7 +154,7 @@ class PluginSiemEvent extends CommonDBTM
 //            'id' => $this->getID()
 //         ] + $input);
       // Update the related service
-      PluginSiemService::onEventAdd($this);
+      Service::onEventAdd($this);
 
       parent::post_addItem();
    }
@@ -149,7 +163,7 @@ class PluginSiemEvent extends CommonDBTM
    {
       $this->deleteChildrenAndRelationsFromDb(
          [
-            PluginSIEMItil_Event::class
+            Itil_Event::class
          ]
       );
       parent::cleanDBonPurge();
@@ -218,19 +232,21 @@ class PluginSiemEvent extends CommonDBTM
       ];
       $p = array_replace($p, $params);
       $events = [];
-      $servicetable = PluginSiemService::getTable();
-      $hosttable = PluginSiemHost::getTable();
-      $eventtable = self::getTable();
+      $service_table = Service::getTable();
+      $service_fk = Service::getForeignKeyField();
+      $host_table = Host::getTable();
+      $host_fk = Host::getForeignKeyField();
+      $event_table = self::getTable();
       $criteria = [
          'SELECT' => [
-            'glpi_plugin_siem_events.*',
+            "{$event_table}.*",
          ],
-         'FROM' => $eventtable,
+         'FROM' => $event_table,
          'LEFT JOIN' => [
-            $servicetable => [
+            $service_table => [
                'FKEY' => [
-                  $servicetable => 'id',
-                  $eventtable => 'plugin_siem_services_id'
+                  $service_table => 'id',
+                  $event_table => $service_fk
                ]
             ]
          ],
@@ -244,17 +260,17 @@ class PluginSiemEvent extends CommonDBTM
       }
       if ($is_service) {
          $criteria['WHERE'] = [
-            'plugin_siem_services_id' => $items_id
+            $service_fk => $items_id
          ];
       } else {
-         $criteria['SELECT'][] = 'glpi_plugin_siem_services.plugin_siem_hosts_id';
+         $criteria['SELECT'][] = "{$service_table}.{$host_fk}";
          $criteria['WHERE'] = [
-            'plugin_siem_hosts_id' => $items_id
+            $host_fk => $items_id
          ];
-         $criteria['LEFT JOIN'][$hosttable] = [
+         $criteria['LEFT JOIN'][$host_table] = [
             'FKEY' => [
-               $hosttable => 'id',
-               $servicetable => 'plugin_siem_hosts_id'
+               $host_table => 'id',
+               $service_table => $host_fk
             ]
          ];
       }
@@ -402,18 +418,20 @@ class PluginSiemEvent extends CommonDBTM
 
    public static function getVisibilityCriteria()
    {
-      $servicetable = PluginSiemService::getTable();
-      $service_templatetable = PluginSiemServiceTemplate::getTable();
-      $eventtable = self::getTable();
+      $service_table = Service::getTable();
+      $service_fk = Service::getForeignKeyField();
+      $servicetemplate_table = ServiceTemplate::getTable();
+      $servicetemplate_fk = ServiceTemplate::getForeignKeyField();
+      $event_table = self::getTable();
       return [
          'LEFT JOIN' => [
-            $servicetable => [
-               $servicetable => 'id',
-               $eventtable => 'plugin_siem_services_id'
+            $service_table => [
+               $service_table => 'id',
+               $event_table => $service_fk
             ],
-            $service_templatetable => [
-               $service_templatetable => 'id',
-               $servicetable => 'plugin_siem_servicetemplates_id'
+            $servicetemplate_table => [
+               $servicetemplate_table => 'id',
+               $service_table => $servicetemplate_fk
             ]
          ]
       ];
@@ -430,7 +448,7 @@ class PluginSiemEvent extends CommonDBTM
    public function createTracking($tracking_type)
    {
       global $DB;
-      if (is_subclass_of($tracking_type, 'CommonITILObject')) {
+      if (is_subclass_of($tracking_type, CommonITILObject::class)) {
          $tracking = new $tracking_type();
          $content = self::getEventProperties($this->fields['content'], $this->fields['plugins_id'], [
             'format' => 'plain'
@@ -454,7 +472,7 @@ class PluginSiemEvent extends CommonDBTM
             // TODO Replace Item_SIEMEvent with host or service?
             $iterator = $DB->request([
                   'SELECT' => ['itemtype', 'items_id'],
-                  'FROM' => PluginSiemHost::getTable(),
+                  'FROM' => Host::getTable(),
                   'WHERE' => [
                      'plugin_siem_events_id_availability' => $this->getID()
                   ]
@@ -498,7 +516,7 @@ class PluginSiemEvent extends CommonDBTM
                   ]);
                }
             }
-            $itil_siemevent = new PluginSIEMItil_SIEMEvent();
+            $itil_siemevent = new Itil_Event();
             $itil_siemevent->add([
                'itemtype' => $tracking_type,
                'items_id' => $tracking_id,
@@ -599,8 +617,8 @@ class PluginSiemEvent extends CommonDBTM
 
    public static function showEventManagementTab(CommonDBTM $item)
    {
-      $eventhost = new PluginSiemHost();
-      $eventservice = new PluginSiemService();
+      $eventhost = new Host();
+      $eventservice = new Service();
       $matchinghosts = $eventhost->find(['items_id' => $item->getID(), 'itemtype' => $item::getType()], [], 1);
       $has_host = (count($matchinghosts) === 1);
 
@@ -609,12 +627,12 @@ class PluginSiemEvent extends CommonDBTM
       } else {
          $matchinghost = reset($matchinghosts);
          $eventhost->getFromDB($matchinghost['id']);
-         $matchingservices = $eventservice->find(['plugin_siem_hosts_id' => $eventhost->getID()]);
+         $matchingservices = $eventservice->find([Host::getForeignKeyField() => $eventhost->getID()]);
          $has_services = (count($matchingservices) > 0);
       }
       if (!$has_host && !$has_services) {
          echo "<div class='alert alert-warning'>" . __('This host is not monitored by any plugin') . '</div>';
-         Html::showSimpleForm(PluginSiemHost::getFormURL(),
+         Html::showSimpleForm(Host::getFormURL(),
             'add', __('Enable monitoring'),
             ['itemtype' => $item->getType(),
                'items_id' => $item->getID()]);
@@ -625,7 +643,7 @@ class PluginSiemEvent extends CommonDBTM
          echo "<div class='alert alert-warning'>" . __('No host availability service set') . '</div>';
       }
       $out = $eventhost->getHostInfoDisplay();
-      $out .= PluginSiemService::getFormForHost($eventhost);
+      $out .= Service::getFormForHost($eventhost);
       $out .= self::getListForHostOrService($eventhost->getID(), false);
       echo $out;
    }
@@ -642,9 +660,9 @@ class PluginSiemEvent extends CommonDBTM
          'limit' => $_SESSION['glpilist_limit']
       ]);
 
-      $temp_service = new PluginSiemService();
+      $temp_service = new Service();
       foreach ($events as &$event) {
-         $temp_service->getFromDB($event['plugin_siem_services_id']);
+         $temp_service->getFromDB($event[Service::getForeignKeyField()]);
 
          $icon = 'fas fa-info-circle';
          $event_class = 'tab_bg_2 ';
@@ -665,7 +683,7 @@ class PluginSiemEvent extends CommonDBTM
          ]);
       }
 
-      return PluginSiemToolbox::getTwig()->render('elements/events_historical.html.twig', [
+      return GlpiPlugin\SIEM\Toolbox::getTwig()->render('elements/events_historical.html.twig', [
          'ajax_pages'   => Html::printAjaxPager('', $p['start'], count($events), '', false),
          'events'       => $events
       ]);
@@ -706,14 +724,15 @@ class PluginSiemEvent extends CommonDBTM
    {
       global $DB;
       $event = new self();
+      $service_table = Service::getTable();
       $to_poll = $DB->request([
-         'SELECT' => ['glpi_plugin_siem_services.id', 'plugins_id', 'sensor'],
-         'FROM' => PluginSiemService::getTable(),
+         'SELECT' => ["{$service_table}.id", 'plugins_id', 'sensor'],
+         'FROM' => $service_table,
          'LEFT JOIN' => [
-            PluginSiemServiceTemplate::getTable() => [
+            ServiceTemplate::getTable() => [
                'FKEY' => [
-                  PluginSiemService::getTable() => 'plugin_siem_servicetemplates_id',
-                  PluginSiemServiceTemplate::getTable() => 'id',
+                  $service_table => ServiceTemplate::getForeignKeyField(),
+                  ServiceTemplate::getTable() => 'id',
                ]
             ]
          ],
@@ -722,7 +741,7 @@ class PluginSiemEvent extends CommonDBTM
                'last_check'   => null,
                new QueryExpression('DATE_ADD(last_check, INTERVAL check_interval MINUTE) <= NOW()'),
             ],
-            'check_mode' => [PluginSiemService::CHECK_MODE_ACTIVE, PluginSiemService::CHECK_MODE_HYBRID],
+            'check_mode' => [Service::CHECK_MODE_ACTIVE, Service::CHECK_MODE_HYBRID],
             'is_active' => 1,
             new QueryExpression('plugins_id IS NOT NULL'),
             new QueryExpression('sensor IS NOT NULL'),
@@ -743,6 +762,9 @@ class PluginSiemEvent extends CommonDBTM
             $eventdatas[$plugin->fields['directory']][$sensor] = $results;
          }
       }
+
+      $service_fk = Service::getForeignKeyField();
+
       // Array of service ids that had some data from the sensors
       $reported = [];
       // Create event from the results
@@ -752,7 +774,7 @@ class PluginSiemEvent extends CommonDBTM
                foreach ($results as $service_id => $result) {
                   if ($result !== null && is_array($result)) {
                      $input = $result;
-                     $input['plugin_siem_services_id'] = $service_id;
+                     $input[$service_fk] = $service_id;
                      $event->add($input);
                      $reported[] = $service_id;
                   }
@@ -766,7 +788,7 @@ class PluginSiemEvent extends CommonDBTM
          // This will create a sensor fault event
          $event->add([
             '_sensor_fault' => true,
-            'plugin_siem_services_id' => $service_id,
+            $service_fk => $service_id,
             'date' => $_SESSION['glpi_currenttime']
          ]);
       }
@@ -778,20 +800,22 @@ class PluginSiemEvent extends CommonDBTM
    {
       // TODO Needs reimplemented. Events shouldn't have a status on their own!
       global $DB;
-      $eventtable = self::getTable();
-      $servicetable = PluginSiemService::getTable();
+      $event_table = self::getTable();
+      $service_table = Service::getTable();
+      $service_fk = Service::getForeignKeyField();
+
       $iterator = $DB->request([
          'SELECT' => [
-            'glpi_plugin_siem_events.*',
-            'glpi_plugin_siem_services.name AS service_name',
-            'glpi_plugin_siem_services.is_stateless AS service_stateless'
+            "{$event_table}.*",
+            "{$service_table}.name AS service_name",
+            "{$service_table}.is_stateless AS service_stateless"
          ],
-         'FROM' => $eventtable,
+         'FROM' => $event_table,
          'LEFT JOIN' => [
-            $servicetable => [
+            $service_table => [
                'FKEY' => [
-                  $servicetable => 'id',
-                  $eventtable => 'plugin_siem_services_id'
+                  $service_table => 'id',
+                  $event_table => $service_fk
                ]
             ]
          ],

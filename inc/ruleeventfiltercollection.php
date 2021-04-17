@@ -19,12 +19,16 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use RuleCollection;
+use Session;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
 }
 
-class PluginSIEMRuleEventFilterCollection extends RuleCollection
+class RuleEventFilterCollection extends RuleCollection
 {
 
    // From RuleCollection
@@ -44,7 +48,7 @@ class PluginSIEMRuleEventFilterCollection extends RuleCollection
 
    public static function canView()
    {
-      return Session::haveRightsOr(self::$rightname, [READ, PluginSIEMRuleEventFilter::PARENT]);
+      return Session::haveRightsOr(self::$rightname, [READ, RuleEventFilter::PARENT]);
    }
 
    public function canList()
@@ -59,7 +63,7 @@ class PluginSIEMRuleEventFilterCollection extends RuleCollection
 
    public function showInheritedTab()
    {
-      return (Session::haveRight(self::$rightname, PluginSIEMRuleEventFilter::PARENT) && ($this->entity));
+      return (Session::haveRight(self::$rightname, RuleEventFilter::PARENT) && ($this->entity));
    }
 
    public function showChildrensTab()

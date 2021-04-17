@@ -19,6 +19,7 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
@@ -28,11 +29,11 @@ if (!defined('GLPI_ROOT')) {
  * Trait for shared functions between Event Management hosts and services.
  * @since 1.0.0
  **/
-trait PluginSiemMonitored
+trait Monitored
 {
    private function getMonitoredField($field)
    {
-      if (static::getType() === 'PluginSiemHost') {
+      if (static::getType() === Host::class) {
          $service = $this->getAvailabilityService();
          if ($service) {
             return $service->fields[$field];
@@ -63,7 +64,7 @@ trait PluginSiemMonitored
    public function getStatus()
    {
       $status = $this->getMonitoredField('status');
-      return $status ?? PluginSiemService::STATUS_UNKNOWN;
+      return $status ?? Service::STATUS_UNKNOWN;
    }
 
    public function isHardStatus()
@@ -88,14 +89,14 @@ trait PluginSiemMonitored
     */
    public function getCurrentStatusName()
    {
-      if (static::getType() === 'PluginSiemHost') {
+      if (static::getType() === Host::class) {
          if ($this->fields['is_reachable']) {
-            return PluginSiemService::getStatusName($this->getStatus());
+            return Service::getStatusName($this->getStatus());
          } else {
             return __('Unreachable');
          }
       } else {
-         return PluginSiemService::getStatusName($this->getStatus());
+         return Service::getStatusName($this->getStatus());
       }
    }
 
@@ -107,12 +108,12 @@ trait PluginSiemMonitored
    {
       static $is_scheduleddown = null;
       if ($is_scheduleddown === null) {
-         $iterator = PluginSiemScheduledDowntime::getForHostOrService($this->getID(), static::class == 'PluginSiemService');
+         $iterator = ScheduledDowntime::getForHostOrService($this->getID(), static::class === Service::class);
          while ($data = $iterator->next()) {
             if ($data['is_fixed']) {
                $is_scheduleddown = true;
             } else {
-               $downtime = new PluginSiemScheduledDowntime();
+               $downtime = new ScheduledDowntime();
                $is_scheduleddown = true;
             }
             $is_scheduleddown = true;
@@ -127,11 +128,11 @@ trait PluginSiemMonitored
    {
       static $host = null;
       if ($host === null) {
-         if (static::getType() === 'PluginSiemHost') {
+         if (static::getType() === Host::class) {
             return $this;
          } else {
-            $host = new PluginSiemHost();
-            $host->getFromDB($this->fields['plugin_siem_hosts_id']);
+            $host = new Host();
+            $host->getFromDB($this->fields[Host::getForeignKeyField()]);
          }
       }
       return $host;
@@ -145,7 +146,7 @@ trait PluginSiemMonitored
    {
       global $DB;
 
-      if (static::class === 'PluginSiemHost') {
+      if (static::class === Host::class) {
          $hosttype = $this->fields['itemtype'];
          $iterator = $DB->request([
             'SELECT' => ['name'],
@@ -167,33 +168,36 @@ trait PluginSiemMonitored
    public function getEvents($where = [], $start = 0, $limit = -1)
    {
       global $DB;
-      $eventtable = PluginSiemEvent::getTable();
-      $servicetable = PluginSiemService::getTable();
+      $event_table = Event::getTable();
+      $service_table = Service::getTable();
+      $service_fk = Service::getForeignKeyField();
+      $host_fk = Host::getForeignKeyField();
+
       $criteria = [
-         'FROM' => PluginSiemEvent::getTable(),
+         'FROM' => Event::getTable(),
          'LEFT JOIN' => [
-            $servicetable => [
+            $service_table => [
                'FKEY' => [
-                  $eventtable => 'plugin_siem_services_id',
-                  $servicetable => 'id'
+                  $event_table => $service_fk,
+                  $service_table => 'id'
                ]
             ]
          ]
       ];
-      if (static::getType() === 'SIEMHost') {
-         $hosttable = PluginSiemHost::getTable();
+      if (static::getType() === Host::class) {
+         $hosttable = Host::getTable();
          $criteria['LEFT JOIN'][$hosttable] = [
             'FKEY' => [
-               $servicetable => 'plugin_siem_hosts_id',
+               $service_table => $host_fk,
                $hosttable => 'id'
             ]
          ];
          $criteria['WHERE'] = [
-            'plugin_siem_hosts_id' => $this->getID()
+            $host_fk => $this->getID()
          ];
       } else {
          $criteria['WHERE'] = [
-            'plugin_siem_services_id' => $this->getID()
+            $service_fk => $this->getID()
          ];
       }
       $iterator = $DB->request($criteria);

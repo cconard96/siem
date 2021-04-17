@@ -19,6 +19,10 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\Event;
+use GlpiPlugin\SIEM\EventManagement;
+use GlpiPlugin\SIEM\Service;
+use GlpiPlugin\SIEM\ServiceTemplate;
 
 define('PLUGIN_SIEM_VERSION', '1.0.0');
 define('PLUGIN_SIEM_MIN_GLPI', '9.5.0');
@@ -34,12 +38,12 @@ function plugin_init_siem()
    require_once 'vendor/autoload.php';
    $PLUGIN_HOOKS['add_css']['siem'] = 'css/siem.css';
    $PLUGIN_HOOKS['add_javascript']['siem'] = 'js/siem.js';
-   Plugin::registerClass('PluginSiemProfile', ['addtabon' => ['Profile']]);
-   Plugin::registerClass('PluginSiemEvent', ['addtabon' => $CFG_GLPI["networkport_types"]]);
+   Plugin::registerClass(\GlpiPlugin\SIEM\Profile::class, ['addtabon' => ['Profile']]);
+   Plugin::registerClass(Event::class, ['addtabon' => $CFG_GLPI["networkport_types"]]);
    if (Session::haveRight('plugin_siem_host', READ)) {
       $PLUGIN_HOOKS['menu_toadd']['siem'] = ['management' => [
-         'PluginSiemService',
-         'PluginSiemServiceTemplate',
+         Service::class,
+         ServiceTemplate::class,
 //         'PluginSiemAcknowledgement',
 //         'PluginSiemScheduleddowntime',
       ]];
@@ -47,14 +51,14 @@ function plugin_init_siem()
    $PLUGIN_HOOKS['siem_sensors']['siem'] = [
       'ping' => [
          'name'         => __('Ping'),
-         'check_mode'   => PluginSiemService::CHECK_MODE_ACTIVE,
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
       ],
       'http' => [
          'name'         => __('HTTP OK'),
-         'check_mode'   => PluginSiemService::CHECK_MODE_ACTIVE,
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
       ]
    ];
-   $PLUGIN_HOOKS['dashboard_cards']['siem'] = [PluginSiemEventManagement::class, 'getDashboardCards'];
+   $PLUGIN_HOOKS['dashboard_cards']['siem'] = [EventManagement::class, 'getDashboardCards'];
 }
 
 function plugin_version_siem()

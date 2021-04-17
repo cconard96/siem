@@ -19,13 +19,16 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use Rule;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
 }
 
 
-class PluginSIEMRuleEventFilter extends Rule
+class RuleEventFilter extends Rule
 {
 
    // From Rule
@@ -96,7 +99,7 @@ class PluginSIEMRuleEventFilter extends Rule
          return $criterias;
       }
 
-      $eventtable = PluginSiemEvent::getTable();
+      $eventtable = Event::getTable();
 
       $criterias['name']['table'] = $eventtable;
       $criterias['name']['field'] = 'name';

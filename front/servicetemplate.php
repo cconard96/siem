@@ -19,8 +19,10 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\ServiceTemplate;
+
 include('../../../inc/includes.php');
-Session::checkRight(PluginSiemServiceTemplate::$rightname, READ);
-Html::header(PluginSiemServiceTemplate::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', 'PluginSiemServiceTemplate');
-Search::show('PluginSiemServiceTemplate');
+Session::checkRight(ServiceTemplate::$rightname, READ);
+Html::header(ServiceTemplate::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', ServiceTemplate::class);
+Search::show(ServiceTemplate::class);
 Html::footer();

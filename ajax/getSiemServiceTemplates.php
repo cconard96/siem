@@ -19,6 +19,7 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\ServiceTemplate;
 
 $AJAX_INCLUDE = 1;
 include('../../../inc/includes.php');
@@ -27,7 +28,7 @@ Html::header_nocache();
 
 global $PLUGIN_HOOKS;
 
-$template = new PluginSiemServiceTemplate();
+$template = new ServiceTemplate();
 $templates = $template->find();
 $results = [];
 foreach ($templates as $result) {

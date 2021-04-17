@@ -19,18 +19,24 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
 
+use CommonDBTM;
+use NotificationEvent;
+use QueryExpression;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use User;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access this file directly");
 }
 
 /**
- * PluginSIEMAcknowledgement class
+ * Acknowledgement class
  * @since 1.0.0
  **/
-class PluginSiemAcknowledgement extends CommonDBTM
+class Acknowledgement extends CommonDBTM
 {
 
    public static function getTypeName($nb = 0)
@@ -40,7 +46,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
 
    /**
     *
-    * @param PluginSiemMonitored $itemtype
+    * @param Monitored $itemtype
     * @param int $items_id
     * @param string $comment
     * @param array $params
@@ -56,12 +62,12 @@ class PluginSiemAcknowledgement extends CommonDBTM
       ];
       $p = array_replace($p, $params);
 
-      if (!($itemtype == 'PluginSiemService') && !($itemtype == 'PluginSiemHost')) {
-         // Only SIEMService and SIEMHost are able to be acknowledged
+      if (!($itemtype === Service::class) && !($itemtype === Host::class)) {
+         // Only Hosts and Services are able to be acknowledged
          return false;
       }
 
-      /** @var PluginSiemMonitored|CommonDBTM $item */
+      /** @var Monitored|CommonDBTM $item */
       $item = new $itemtype();
       if ($item->isScheduledDown() || !$item->isAlertStatus()) {
          // Cannot acknowledge an item during scheduled downtime
@@ -117,7 +123,7 @@ class PluginSiemAcknowledgement extends CommonDBTM
       global $DB, $CFG_GLPI;
 
       $acktable = self::getTable();
-      $hosttable = PluginSiemHost::getTable();
+      $hosttable = Host::getTable();
 
       $criteria = [
          'SELECT' => [
@@ -193,17 +199,17 @@ class PluginSiemAcknowledgement extends CommonDBTM
          $actively_acknowledged[$data['itemtype']][] = $data['items_id'];
       }
 
-      if (isset($actively_acknowledged['PluginSiemHost'])) {
+      if (isset($actively_acknowledged[Host::class])) {
          // If the host is acknowledged, all services on it are also considered to be acknowledged
          $iterator = $DB->request([
             'SELECT' => ['id'],
-            'FROM' => PluginSiemService::getTable(),
+            'FROM' => Service::getTable(),
             'WHERE' => [
-               'plugin_siem_hosts_id' => $actively_acknowledged['PluginSiemHost']
+               Host::getForeignKeyField() => $actively_acknowledged[Host::class]
             ]
          ]);
          while ($data = $iterator->next()) {
-            $actively_acknowledged['PluginSiemService'][] = $data['id'];
+            $actively_acknowledged[Service::class][] = $data['id'];
          }
       }
       return $actively_acknowledged;
@@ -219,9 +225,9 @@ class PluginSiemAcknowledgement extends CommonDBTM
 
       $dispatcher = $CONTAINER->get(EventDispatcher::class);
 
-      if ($item->getType() === 'PluginSiemService') {
+      if ($item->getType() === Service::class) {
          $dispatcher->dispatch(SIEMServiceEvent::SERVICE_ACKNOWLEDGE, new SIEMServiceEvent($this, $item));
-      } else if ($item->getType() === 'PluginSiemHost') {
+      } else if ($item->getType() === Host::class) {
          $dispatcher->dispatch(SIEMHostEvent::HOST_ACKNOWLEDGE, new SIEMHostEvent($this, $item));
       }
    }

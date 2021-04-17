@@ -19,6 +19,8 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\Host;
+use GlpiPlugin\SIEM\Service;
 
 $AJAX_INCLUDE = 1;
 include('../../../inc/includes.php');
@@ -35,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if (!isset($_REQUEST['hosts_id'])) {
    return false;
 }
-$host = new PluginSiemHost();
+$host = new Host();
 if (!$host->getFromDB($_REQUEST['hosts_id'])) {
    return false;
 }
@@ -48,7 +50,7 @@ if (isset($_REQUEST['_schedule_downtime'])) {
       http_response_code(400);
       return;
    }
-   $service = new PluginSiemService();
+   $service = new Service();
    $match = $service->find([
       'plugin_siem_hosts_id' => $_REQUEST['hosts_id'],
       'plugin_siem_servicetemplates_id' => $_POST['servicetemplates_id']

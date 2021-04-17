@@ -19,6 +19,15 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use Change;
+use CommonDBRelation;
+use CommonDBTM;
+use CommonGLPI;
+use Problem;
+use Session;
+use Ticket;
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
@@ -30,11 +39,11 @@ if (!defined('GLPI_ROOT')) {
  * Relation between PluginSIEMEvents and ITILObjects
  * @since 1.0.0
  **/
-class PluginSIEMItil_Event extends CommonDBRelation
+class Itil_Event extends CommonDBRelation
 {
 
    // From CommonDBRelation
-   static public $itemtype_1 = 'PluginSIEMEvent';
+   static public $itemtype_1 = Event::class;
    static public $items_id_1 = 'plugin_siem_events_id';
    static public $itemtype_2 = 'itemtype';
    static public $items_id_2 = 'items_id';
@@ -49,7 +58,7 @@ class PluginSIEMItil_Event extends CommonDBRelation
 
    public function canCreateItem()
    {
-      $event = new PluginSiemEvent();
+      $event = new Event();
       if ($event->canUpdateItem()) {
          return true;
       }
@@ -59,7 +68,8 @@ class PluginSIEMItil_Event extends CommonDBRelation
    public function prepareInputForAdd($input)
    {
       // Avoid duplicate entry
-      if (countElementsInTable($this->getTable(), ['plugin_siem_events_id' => $input['plugin_siem_events_id'],
+      $event_fk = Event::getForeignKeyField();
+      if (countElementsInTable(self::getTable(), [$event_fk => $input[$event_fk],
             'itemtype' => $input['itemtype'],
             'items_id' => $input['items_id']]) > 0) {
          return false;
@@ -72,9 +82,9 @@ class PluginSIEMItil_Event extends CommonDBRelation
       if (!$withtemplate) {
          $nb = 0;
          switch ($item->getType()) {
-            case Change::class :
-            case Problem::class :
-            case Ticket::class :
+            case Change::class:
+            case Problem::class:
+            case Ticket::class:
                if ($_SESSION['glpishow_count_on_tabs']) {
                   $nb = countElementsInTable(
                      self::getTable(),
@@ -84,11 +94,11 @@ class PluginSIEMItil_Event extends CommonDBRelation
                      ]
                   );
                }
-               return self::createTabEntry(PluginSiemEvent::getTypeName(Session::getPluralNumber()), $nb);
+               return self::createTabEntry(Event::getTypeName(Session::getPluralNumber()), $nb);
                break;
-            case 'PluginSIEMEvent' :
+            case Event::class:
                if ($_SESSION['glpishow_count_on_tabs']) {
-                  $nb = countElementsInTable(self::getTable(), ['plugin_siem_events_id' => $item->getID()]);
+                  $nb = countElementsInTable(self::getTable(), [Event::getForeignKeyField() => $item->getID()]);
                }
                return self::createTabEntry(_n('Itil item', 'Itil items', Session::getPluralNumber()), $nb);
          }
@@ -99,7 +109,7 @@ class PluginSIEMItil_Event extends CommonDBRelation
    public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
    {
       switch ($item->getType()) {
-         case 'PluginSIEMEvent' :
+         case Event::class :
             self::showForSIEMEvent($item);
             break;
          default:
@@ -117,6 +127,6 @@ class PluginSIEMItil_Event extends CommonDBRelation
     */
    public static function showForItil(CommonDBTM $item, $withtemplate = 0)
    {
-      PluginSiemEvent::showListForItil(false, $item);
+      Event::showListForItil(false, $item);
    }
 }

@@ -19,6 +19,10 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
+use CommonDBTM;
+use QueryExpression;
 
 /**
  * ScheduledDowntime class.
@@ -26,7 +30,7 @@
  *
  * @since 1.0.0
  */
-class PluginSiemScheduledDowntime extends CommonDBTM
+class ScheduledDowntime extends CommonDBTM
 {
 
    /**
@@ -51,7 +55,7 @@ class PluginSiemScheduledDowntime extends CommonDBTM
       $p = array_replace($p, $params);
 
       $downtimetable = self::getTable();
-      $monitoredtable = $is_service ? PluginSiemService::getTable() : PluginSiemHost::getTable();
+      $monitoredtable = $is_service ? Service::getTable() : Host::getTable();
 
       $where = [
          "$downtimetable.items_id_target" => $items_id,
@@ -96,21 +100,21 @@ class PluginSiemScheduledDowntime extends CommonDBTM
 
       $actively_down = [];
       while ($data = $iterator->next()) {
-         $type = $data['is_service'] ? 'SIEMService' : 'SIEMHost';
+         $type = $data['is_service'] ? Service::class : Host::class;
          $actively_down[$type][] = $data['items_id'];
       }
 
-      if (isset($actively_down['SIEMHost'])) {
+      if (isset($actively_down[Host::class])) {
          // If the host is scheduled down, all services on it are also considered to be scheduled down
          $iterator = $DB->request([
             'SELECT' => ['id'],
-            'FROM' => PluginSiemService::getTable(),
+            'FROM' => Service::getTable(),
             'WHERE' => [
-               'siemhosts_id' => $actively_down['SIEMHost']
+               Host::getForeignKeyField() => $actively_down[Host::class]
             ]
          ]);
          while ($data = $iterator->next()) {
-            $actively_down['SIEMService'][] = $data['id'];
+            $actively_down[Service::class][] = $data['id'];
          }
       }
       return $actively_down;

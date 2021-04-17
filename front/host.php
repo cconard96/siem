@@ -19,8 +19,10 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use GlpiPlugin\SIEM\Host;
+
 include('../../../inc/includes.php');
-Session::checkRight(PluginSiemHost::$rightname, READ);
-Html::header(PluginSiemHost::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', 'PluginSiemHost');
+Session::checkRight(Host::$rightname, READ);
+Html::header(Host::getTypeName(Session::getPluralNumber()), $_SERVER['PHP_SELF'], 'management', Host::class);
 Search::show('PluginSiemHost');
 Html::footer();

@@ -19,19 +19,24 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM\Sensor;
 
-class PluginSiemSensorHttp extends PluginSiemSensor
-{
+use CommonDBTM;
+use GlpiPlugin\SIEM\Event;
+use GlpiPlugin\SIEM\Host;
+use GlpiPlugin\SIEM\Service;
+
+class HTTP extends Sensor {
 
    public static function poll($service_ids = [])
    {
       foreach ($service_ids as $service_id) {
-         $service = new PluginSiemService();
+         $service = new Service();
          if (!$service->getFromDB($service_id)) {
             return false;
          }
          $hosts_id = $service->fields['plugin_siem_hosts_id'];
-         $host = new PluginSiemHost();
+         $host = new Host();
          if (!$host->getFromDB($hosts_id)) {
             return [];
          }
@@ -52,7 +57,7 @@ class PluginSiemSensorHttp extends PluginSiemSensor
             curl_close($ch);
             $results[$service_id] = [
                'name' => 'sensor_http_ok_error',
-               'significance' => PluginSiemEvent::EXCEPTION,
+               'significance' => Event::EXCEPTION,
                'date' => $_SESSION['glpi_currenttime'],
                'content' => json_encode([
                   'errorno'   => curl_errno($ch),
@@ -68,7 +73,7 @@ class PluginSiemSensorHttp extends PluginSiemSensor
             if ($httpcode === 200) {
                $results[$service_id] = [
                   'name' => 'sensor_http_ok_ok',
-                  'significance' => PluginSiemEvent::INFORMATION,
+                  'significance' => Event::INFORMATION,
                   'date' => $_SESSION['glpi_currenttime'],
                   'content' => json_encode([
                      'response_time'   => $totaltime,
@@ -78,7 +83,7 @@ class PluginSiemSensorHttp extends PluginSiemSensor
             } else {
                $results[$service_id] = [
                   'name' => 'sensor_http_ok_error',
-                  'significance' => PluginSiemEvent::WARNING,
+                  'significance' => Event::WARNING,
                   'date' => $_SESSION['glpi_currenttime'],
                   'content' => json_encode([
                      'http_code'       => $httpcode,

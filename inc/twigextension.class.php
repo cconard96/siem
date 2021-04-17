@@ -19,11 +19,13 @@
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace GlpiPlugin\SIEM;
+
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-class PluginSiemTwigExtension extends AbstractExtension {
+class Twigextension extends AbstractExtension {
 
    public function initRuntime(\Twig\Environment $environment)
    {
