@@ -1,0 +1,10 @@
+{
+  "name": "siem",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Curtis Conard <cconard96@gmail.com>",
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "jquery-ui-dist": "^1.12.1"
+  }
+}

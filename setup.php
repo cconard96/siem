@@ -36,8 +36,8 @@ function plugin_init_siem()
       return false;
    }
    require_once 'vendor/autoload.php';
-   $PLUGIN_HOOKS['add_css']['siem'] = 'css/siem.css';
-   $PLUGIN_HOOKS['add_javascript']['siem'] = 'js/siem.js';
+   $PLUGIN_HOOKS['add_css']['siem'] = ['node_modules/jquery-ui-dist/jquery-ui.min.css', 'css/siem.css'];
+   $PLUGIN_HOOKS['add_javascript']['siem'] = ['node_modules/jquery-ui-dist/jquery-ui.min.js', 'js/siem.js'];
    Plugin::registerClass(\GlpiPlugin\SIEM\Profile::class, ['addtabon' => ['Profile']]);
    Plugin::registerClass(Event::class, ['addtabon' => $CFG_GLPI["networkport_types"]]);
    if (Session::haveRight('plugin_siem_host', READ)) {
