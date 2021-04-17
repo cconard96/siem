@@ -31,6 +31,7 @@ use Dropdown;
 use Html;
 use mysqli_result;
 use Plugin;
+use QueryExpression;
 use Toolbox;
 
 if (!defined('GLPI_ROOT')) {
@@ -683,7 +684,7 @@ class Event extends CommonDBTM
          ]);
       }
 
-      return GlpiPlugin\SIEM\Toolbox::getTwig()->render('elements/events_historical.html.twig', [
+      return \GlpiPlugin\SIEM\Toolbox::getTwig()->render('elements/events_historical.html.twig', [
          'ajax_pages'   => Html::printAjaxPager('', $p['start'], count($events), '', false),
          'events'       => $events
       ]);
