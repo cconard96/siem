@@ -25,7 +25,7 @@ use GlpiPlugin\SIEM\Service;
 use GlpiPlugin\SIEM\ServiceTemplate;
 
 define('PLUGIN_SIEM_VERSION', '1.0.0');
-define('PLUGIN_SIEM_MIN_GLPI', '9.5.0');
+define('PLUGIN_SIEM_MIN_GLPI', '10.0.0');
 define('PLUGIN_SIEM_MAX_GLPI', '11.0.0');
 
 function plugin_init_siem()
