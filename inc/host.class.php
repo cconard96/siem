@@ -238,7 +238,7 @@ class Host extends CommonDBTM
          ];
       }
       if (in_array($this->getStatus(), [Service::STATUS_CRITICAL, Service::STATUS_WARNING], true)) {
-         $twig_vars['toolbar_buttons'] = [
+         $twig_vars['toolbar_buttons'][] = [
             'label' => sprintf(__('Acknowledge %s'), self::getTypeName(1)),
             'action' => "acknowledge({$this->getID()})",
          ];
