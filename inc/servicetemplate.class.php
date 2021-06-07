@@ -194,7 +194,8 @@ class ServiceTemplate extends CommonDBTM
       Dropdown::showFromArray('sensor', [], [
          'rand'      => $rand,
          'disabled'  => true,
-         'value'  => $this->fields['sensor'] ?? 0
+         'value'     => $this->fields['sensor'] ?? 0,
+         'on_change' => "window.pluginSiem.updateServiceParamsFields(\"#dropdown_plugins_id$rand\", \"#dropdown_sensor$rand\")",
       ]);
       echo Html::scriptBlock("$(document).ready(function() {\$('#dropdown_plugins_id$rand').trigger('change')});");
       echo '</td>';
@@ -280,6 +281,9 @@ class ServiceTemplate extends CommonDBTM
       ]);
       Html::showToolTip(__('The amount of time between alerts for this service when not in downtime or acknowledged (0 for one-time alerts).', 'siem'));
       echo '</td></tr>';
+
+      echo "<tr><th colspan='4'>".__('Service Parameters', 'siem'). '</th></tr>';
+      echo "<tr><td colspan='4' id='service-params'>".__('No parameters supported for this sensor')."</td></tr>";
 
       $this->showFormButtons($options);
 

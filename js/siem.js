@@ -71,6 +71,35 @@
          });
       };
 
+      this.updateServiceParamsFields = function(plugin_dropdown, sensor_dropdown) {
+         var selected_plugin = $(plugin_dropdown).val();
+         var selected_sensor = $(sensor_dropdown).val();
+
+         $.ajax({
+            type: "GET",
+            url: self.ajax_root + 'getSensorParameters.php',
+            data: {
+               plugins_id: selected_plugin,
+               sensor: selected_sensor
+            },
+            success: function (params) {
+               const service_params_container = $('#service-params');
+               service_params_container.empty();
+               let params_table = `<table><thead><th>Name</th><th>Value</th></thead><tbody>`
+               $.each(params, (id, param) => {
+                  params_table += `
+                     <tr><td>${param['label']}</td>
+                     <td>
+                        <input value="${param['default']}"/>
+                     </td></tr>
+                  `;
+               });
+               params_table += `</tbody></table>`;
+               service_params_container.append(params_table);
+            }
+         });
+      };
+
       this.hostCheckNow = function(hosts_id) {
          $.ajax({
             type: "POST",

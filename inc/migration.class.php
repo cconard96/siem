@@ -166,6 +166,7 @@ class Migration
          `is_acknowledged` tinyint(1) NOT NULL DEFAULT '0',
          `date_mod` timestamp NULL DEFAULT NULL,
          `date_creation` timestamp NULL DEFAULT NULL,
+         `sensor_params` text COLLATE utf8_unicode_ci DEFAULT NULL,
          PRIMARY KEY (`id`),
          KEY `plugin_siem_servicetemplates_id` (`plugin_siem_servicetemplates_id`),
          KEY `plugin_siem_hosts_id` (`plugin_siem_hosts_id`),
@@ -174,6 +175,10 @@ class Migration
          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
          $this->db->queryOrDie($query, "1.0.0 add table glpi_plugin_siem_services");
       }
+      if (!$this->db->fieldExists('glpi_plugin_siem_services', 'sensor_params')) {
+         $this->glpiMigration->addField('glpi_plugin_siem_services', 'sensor_params', 'text');
+      }
+
       if (!$this->db->tableExists('glpi_plugin_siem_servicetemplates')) {
          $query = "CREATE TABLE `glpi_plugin_siem_servicetemplates` (
          `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -193,10 +198,16 @@ class Migration
          `max_checks` tinyint(3) NOT NULL DEFAULT '1',
          `date_mod` timestamp NULL DEFAULT NULL,
          `date_creation` timestamp NULL DEFAULT NULL,
+         `sensor_params` text COLLATE utf8_unicode_ci DEFAULT NULL,
          PRIMARY KEY (`id`)
          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
          $this->db->queryOrDie($query, "1.0.0 add table glpi_plugin_siem_servicetemplates");
       }
+
+      if (!$this->db->fieldExists('glpi_plugin_siem_servicetemplates', 'sensor_params')) {
+         $this->glpiMigration->addField('glpi_plugin_siem_servicetemplates', 'sensor_params', 'text');
+      }
+
       if (!$this->db->tableExists('glpi_plugin_siem_itils_scheduleddowntimes')) {
          $query = "CREATE TABLE `glpi_plugin_siem_itils_scheduleddowntimes` (
          `id` int(11) NOT NULL AUTO_INCREMENT,

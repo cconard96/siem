@@ -24,7 +24,7 @@ use GlpiPlugin\SIEM\EventManagement;
 use GlpiPlugin\SIEM\Service;
 use GlpiPlugin\SIEM\ServiceTemplate;
 
-define('PLUGIN_SIEM_VERSION', '1.0.0');
+define('PLUGIN_SIEM_VERSION', '1.0.0-alpha-1');
 define('PLUGIN_SIEM_MIN_GLPI', '10.0.0');
 define('PLUGIN_SIEM_MAX_GLPI', '11.0.0');
 
@@ -37,7 +37,8 @@ function plugin_init_siem()
    }
    require_once 'vendor/autoload.php';
    $PLUGIN_HOOKS['add_css']['siem'] = ['node_modules/jquery-ui-dist/jquery-ui.min.css', 'css/siem.css'];
-   $PLUGIN_HOOKS['add_javascript']['siem'] = ['node_modules/jquery-ui-dist/jquery-ui.min.js', 'js/siem.js'];
+   $PLUGIN_HOOKS['add_javascript']['siem'] = ['node_modules/jquery-ui-dist/jquery-ui.min.js'];
+   $PLUGIN_HOOKS['add_javascript']['siem'][] = 'js/siem.js';
    Plugin::registerClass(\GlpiPlugin\SIEM\Profile::class, ['addtabon' => ['Profile']]);
    Plugin::registerClass(Event::class, ['addtabon' => $CFG_GLPI["networkport_types"]]);
    if (Session::haveRight('plugin_siem_host', READ)) {
@@ -56,7 +57,43 @@ function plugin_init_siem()
       'http' => [
          'name'         => __('HTTP OK'),
          'check_mode'   => Service::CHECK_MODE_ACTIVE,
-      ]
+      ],
+      'glpi_inv_volume' => [
+         'name'         => __('Volume free space (GLPI Inventory)', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_cas' => [
+         'name'         => __('GLPI CAS', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_crontask' => [
+         'name'         => __('GLPI Cron Tasks', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_db' => [
+         'name'         => __('GLPI Database', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_filesystem' => [
+         'name'         => __('GLPI File System', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_imap' => [
+         'name'         => __('GLPI IMAP', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_ldap' => [
+         'name'         => __('GLPI LDAP', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_mailcollector' => [
+         'name'         => __('GLPI Mail Collector', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
+      'glpi_plugin' => [
+         'name'         => __('GLPI Plugins', 'siem'),
+         'check_mode'   => Service::CHECK_MODE_ACTIVE,
+      ],
    ];
    $PLUGIN_HOOKS['dashboard_cards']['siem'] = [EventManagement::class, 'getDashboardCards'];
 }

@@ -1,10 +1,4 @@
 <?php
-
-use GlpiPlugin\SIEM\DBUtil;
-use GlpiPlugin\SIEM\Event;
-use GlpiPlugin\SIEM\Sensor\HTTP;
-use GlpiPlugin\SIEM\Sensor\Ping;
-
 /**
  *  -------------------------------------------------------------------------
  *  SIEM plugin for GLPI
@@ -24,6 +18,11 @@ use GlpiPlugin\SIEM\Sensor\Ping;
  *  You should have received a copy of the GNU General Public License
  *  along with SIEM plugin for GLPI. If not, see <http://www.gnu.org/licenses/>.
  */
+
+use GlpiPlugin\SIEM\DBUtil;
+use GlpiPlugin\SIEM\Event;
+use GlpiPlugin\SIEM\Sensor\HTTP;
+use GlpiPlugin\SIEM\Sensor\Ping;
 
 function plugin_siem_install()
 {
@@ -57,6 +56,19 @@ function plugin_siem_poll_sensor(array $params)
          return Ping::poll($params['service_ids']);
       case 'http_ok':
          return HTTP::poll($params['service_ids']);
+   }
+}
+
+function plugin_siem_get_sensor_params(string $sensor) {
+   $glpi_status_sensors = ['glpi_cas', 'glpi_crontask', 'glpi_db', 'glpi_filesystem', 'glpi_imap', 'glpi_ldap',
+      'glpi_mailcollector', 'glpi_plugin'];
+   if (in_array($sensor, $glpi_status_sensors)) {
+      return [
+         'glpi_path' => [
+            'label'     => __('GLPI Path', 'siem'),
+            'default'   => '/'
+         ]
+      ];
    }
 }
 
